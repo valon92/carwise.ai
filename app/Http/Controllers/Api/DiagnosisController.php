@@ -3,114 +3,265 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Diagnosis;
-use App\Models\Car;
+use App\Models\DiagnosisSession;
+use App\Models\DiagnosisMedia;
+use App\Models\DiagnosisResult;
+use App\Services\AIDiagnosisService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class DiagnosisController extends Controller
 {
-    public function index(Request $request)
+    protected $aiService;
+
+    public function __construct(AIDiagnosisService $aiService)
     {
-        $diagnoses = $request->user()->diagnoses()->with('car')->latest()->get();
-        
-        return response()->json([
-            'success' => true,
-            'diagnoses' => $diagnoses
-        ]);
+        $this->aiService = $aiService;
     }
 
-    public function store(Request $request)
+    /**
+     * Submit a new diagnosis request.
+     */
+    public function submitDiagnosis(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'car_id' => 'required|exists:cars,id',
-            'description' => 'nullable|string|max:1000',
-            'media_file' => 'required|file|mimes:jpg,jpeg,png,mp4,avi,mov,mp3,wav|max:10240', // 10MB max
+            'make' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'year' => 'required|integer|min:1990|max:' . (date('Y') + 1),
+            'mileage' => 'nullable|integer|min:0',
+            'engine_type' => 'nullable|string|max:255',
+            'engine_size' => 'nullable|string|max:255',
+            'description' => 'required|string|max:2000',
+            'symptoms' => 'nullable|array',
+            'photos' => 'nullable|array|max:5',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240' // 10MB max
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation errors',
+                'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        // Verify car belongs to user
-        $car = $request->user()->cars()->findOrFail($request->car_id);
+        try {
+            // Create diagnosis session
+            $session = DiagnosisSession::create([
+                'user_id' => auth()->id(),
+                'session_id' => DiagnosisSession::generateSessionId(),
+                'make' => $request->make,
+                'model' => $request->model,
+                'year' => $request->year,
+                'mileage' => $request->mileage,
+                'engine_type' => $request->engine_type,
+                'engine_size' => $request->engine_size,
+                'description' => $request->description,
+                'symptoms' => $request->symptoms ? json_decode($request->symptoms, true) : [],
+                'status' => 'processing'
+            ]);
 
-        // Handle file upload
-        $file = $request->file('media_file');
-        $mediaType = $this->getMediaType($file->getMimeType());
-        $fileName = time() . '_' . $file->getClientOriginalName();
-        $filePath = $file->storeAs('diagnosis_media', $fileName, 'public');
+            // Handle file uploads
+            if ($request->hasFile('photos')) {
+                foreach ($request->file('photos') as $index => $file) {
+                    $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                    $filePath = $file->storeAs('diagnosis-media', $fileName, 'public');
 
-        // Create diagnosis record
-        $diagnosis = Diagnosis::create([
-            'car_id' => $request->car_id,
-            'user_id' => $request->user()->id,
-            'media_file' => $filePath,
-            'media_type' => $mediaType,
-            'description' => $request->description,
-            'status' => 'pending',
-        ]);
+                    DiagnosisMedia::create([
+                        'diagnosis_session_id' => $session->id,
+                        'file_name' => $file->getClientOriginalName(),
+                        'file_path' => $filePath,
+                        'file_type' => 'image',
+                        'file_size' => $file->getSize(),
+                        'mime_type' => $file->getMimeType(),
+                        'metadata' => [
+                            'original_name' => $file->getClientOriginalName(),
+                            'uploaded_at' => now()->toISOString()
+                        ]
+                    ]);
+                }
+            }
 
-        // Simulate AI analysis (in real app, this would be a job/queue)
-        $this->simulateAIAnalysis($diagnosis);
+            // Process with AI (async)
+            $this->processWithAI($session);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Diagnosis submitted successfully',
-            'diagnosis' => $diagnosis->load('car')
-        ], 201);
-    }
+            return response()->json([
+                'success' => true,
+                'message' => 'Diagnosis submitted successfully',
+                'data' => [
+                    'session_id' => $session->session_id,
+                    'status' => $session->status,
+                    'estimated_processing_time' => '2-5 minutes'
+                ]
+            ], 201);
 
-    public function show(Request $request, $id)
-    {
-        $diagnosis = $request->user()->diagnoses()->with('car')->findOrFail($id);
-        
-        return response()->json([
-            'success' => true,
-            'diagnosis' => $diagnosis
-        ]);
-    }
-
-    private function getMediaType($mimeType)
-    {
-        if (str_starts_with($mimeType, 'image/')) {
-            return 'image';
-        } elseif (str_starts_with($mimeType, 'video/')) {
-            return 'video';
-        } elseif (str_starts_with($mimeType, 'audio/')) {
-            return 'audio';
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit diagnosis',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        
-        return 'unknown';
     }
 
-    private function simulateAIAnalysis($diagnosis)
+    /**
+     * Get diagnosis result by session ID.
+     */
+    public function getResult(string $sessionId): JsonResponse
     {
-        // Simulate AI analysis with mock data
-        $mockAnalysis = [
-            'problem' => 'Engine oil leak detected near the oil pan gasket',
-            'confidence' => 85,
-            'solutions' => [
-                'Check oil pan gasket for damage or wear',
-                'Replace oil pan gasket if necessary',
-                'Check oil level and top up if needed',
-                'Monitor for continued leaks after repair'
-            ],
-            'next_steps' => 'This appears to be a minor oil leak. We recommend having a mechanic inspect the oil pan gasket and replace it if necessary. The repair should be relatively inexpensive.'
-        ];
+        try {
+            $session = DiagnosisSession::where('session_id', $sessionId)
+                ->with(['result', 'media'])
+                ->first();
 
-        $diagnosis->update([
-            'ai_analysis' => $mockAnalysis,
-            'problem' => $mockAnalysis['problem'],
-            'confidence' => $mockAnalysis['confidence'],
-            'solutions' => $mockAnalysis['solutions'],
-            'next_steps' => $mockAnalysis['next_steps'],
-            'status' => 'completed',
-        ]);
+            if (!$session) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Diagnosis session not found'
+                ], 404);
+            }
+
+            if ($session->status === 'processing') {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'status' => 'processing',
+                        'message' => 'AI analysis in progress...'
+                    ]
+                ]);
+            }
+
+            if ($session->status === 'failed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Diagnosis analysis failed'
+                ], 500);
+            }
+
+            if (!$session->result) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Diagnosis result not available'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'session' => $session,
+                    'result' => $session->result,
+                    'media' => $session->media->map(function ($media) {
+                        return [
+                            'id' => $media->id,
+                            'file_name' => $media->file_name,
+                            'url' => $media->url,
+                            'type' => $media->file_type,
+                            'size' => $media->formatted_size
+                        ];
+                    })
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve diagnosis result',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get user's diagnosis history.
+     */
+    public function getHistory(Request $request): JsonResponse
+    {
+        try {
+            $user = auth()->user();
+            $perPage = $request->get('per_page', 10);
+
+            $sessions = DiagnosisSession::where('user_id', $user->id)
+                ->with(['result'])
+                ->orderBy('created_at', 'desc')
+                ->paginate($perPage);
+
+            return response()->json([
+                'success' => true,
+                'data' => $sessions
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve diagnosis history',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Process diagnosis with AI service.
+     */
+    private function processWithAI(DiagnosisSession $session): void
+    {
+        try {
+            // Prepare data for AI analysis
+            $analysisData = [
+                'vehicle_info' => [
+                    'make' => $session->make,
+                    'model' => $session->model,
+                    'year' => $session->year,
+                    'mileage' => $session->mileage,
+                    'engine_type' => $session->engine_type,
+                    'engine_size' => $session->engine_size
+                ],
+                'symptoms' => $session->symptoms,
+                'description' => $session->description,
+                'media_files' => $session->media->pluck('file_path')->toArray()
+            ];
+
+            // Call AI service
+            $aiResult = $this->aiService->analyzeDiagnosis($analysisData);
+
+            // Create diagnosis result
+            DiagnosisResult::create([
+                'diagnosis_session_id' => $session->id,
+                'problem_title' => $aiResult['problem_title'],
+                'problem_description' => $aiResult['problem_description'],
+                'severity' => $aiResult['severity'],
+                'confidence_score' => $aiResult['confidence_score'],
+                'likely_causes' => $aiResult['likely_causes'],
+                'recommended_actions' => $aiResult['recommended_actions'],
+                'estimated_costs' => $aiResult['estimated_costs'] ?? null,
+                'ai_insights' => $aiResult['ai_insights'] ?? null,
+                'related_issues' => $aiResult['related_issues'] ?? null,
+                'requires_immediate_attention' => $aiResult['requires_immediate_attention'] ?? false,
+                'ai_model_version' => $aiResult['model_version'] ?? '1.0',
+                'analysis_completed_at' => now()
+            ]);
+
+            // Update session status
+            $session->update([
+                'status' => 'completed',
+                'confidence_score' => $aiResult['confidence_score'],
+                'severity' => $aiResult['severity'],
+                'processed_at' => now()
+            ]);
+
+        } catch (\Exception $e) {
+            // Update session status to failed
+            $session->update([
+                'status' => 'failed',
+                'ai_response' => ['error' => $e->getMessage()]
+            ]);
+
+            \Log::error('AI Diagnosis failed for session: ' . $session->session_id, [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
     }
 }

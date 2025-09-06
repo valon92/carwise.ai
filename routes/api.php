@@ -21,7 +21,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('cars', CarController::class);
     
     // Diagnosis routes
-    Route::apiResource('diagnoses', DiagnosisController::class)->except(['update', 'destroy']);
+    Route::post('/diagnosis/submit', [DiagnosisController::class, 'submitDiagnosis']);
+    Route::get('/diagnosis/result/{sessionId}', [DiagnosisController::class, 'getResult']);
+    Route::get('/diagnosis/history', [DiagnosisController::class, 'getHistory']);
     
     // Mechanic routes
     Route::get('/mechanics', [MechanicController::class, 'index']);

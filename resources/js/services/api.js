@@ -58,20 +58,13 @@ export const carsAPI = {
 
 // Diagnosis API
 export const diagnosisAPI = {
-  getAll: () => api.get('/diagnoses'),
-  getById: (id) => api.get(`/diagnoses/${id}`),
-  create: (data) => {
-    const formData = new FormData()
-    formData.append('car_id', data.car_id)
-    formData.append('description', data.description || '')
-    formData.append('media_file', data.media_file)
-    
-    return api.post('/diagnoses', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
-  },
+  submitDiagnosis: (formData) => api.post('/diagnosis/submit', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+  getResult: (sessionId) => api.get(`/diagnosis/result/${sessionId}`),
+  getHistory: (params = {}) => api.get('/diagnosis/history', { params }),
 }
 
 // Mechanics API
