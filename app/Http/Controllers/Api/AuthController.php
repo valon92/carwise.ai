@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Mechanic;
+use App\Services\UserActivityService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +41,22 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'role' => $request->role,
+            'status' => 'active',
+            'timezone' => $request->timezone ?? 'UTC',
+            'language' => $request->language ?? 'en',
+            'notification_preferences' => [
+                'email_notifications' => true,
+                'push_notifications' => true,
+                'sms_notifications' => false,
+                'diagnosis_updates' => true,
+                'marketing_emails' => false
+            ],
+            'privacy_settings' => [
+                'profile_visibility' => 'private',
+                'show_email' => false,
+                'show_phone' => false,
+                'allow_contact' => true
+            ]
         ]);
 
         if ($request->role === 'mechanic') {
@@ -53,6 +70,15 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Log registration activity
+        UserActivityService::log(
+            'registration',
+            'User registered successfully',
+            $user->id,
+            null,
+            $request
+        );
 
         return response()->json([
             'success' => true,
@@ -87,6 +113,28 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Update user login information
+        $user->update([
+            'last_login_at' => now(),
+            'last_login_ip' => $request->ip(),
+            'login_history' => array_merge(
+                $user->login_history ?? [],
+                [
+                    [
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                        'login_at' => now()->toISOString()
+                    ]
+                ]
+            )
+        ]);
+
+        // Create user session
+        UserActivityService::createSession($user->id, $request);
+
+        // Log login activity
+        UserActivityService::logLogin($user->id, $request);
+
         return response()->json([
             'success' => true,
             'message' => 'Login successful',
@@ -97,6 +145,14 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $user = $request->user();
+        
+        // Log logout activity
+        UserActivityService::logLogout($user->id, $request);
+
+        // Deactivate user session
+        UserActivityService::updateSessionActivity(session()->getId());
+
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
