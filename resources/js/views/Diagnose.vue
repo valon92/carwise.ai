@@ -86,13 +86,21 @@
           <form @submit.prevent="submitDiagnosis" class="space-y-6">
             <!-- Vehicle Information -->
             <div class="space-y-4">
-              <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Vehicle Details</h3>
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Vehicle Details</h3>
+                <div v-if="selectedCar" class="flex items-center text-sm text-green-600 dark:text-green-400">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Pre-filled from your car
+                </div>
+              </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
                     Make *
                   </label>
-                  <select v-model="diagnosisForm.make" class="input" required>
+                  <select v-model="diagnosisForm.make" class="input" :disabled="selectedCar" required>
                     <option value="">Select Make</option>
                     <option value="Toyota">Toyota</option>
                     <option value="Honda">Honda</option>
@@ -116,6 +124,7 @@
                     type="text"
                     placeholder="e.g., Camry, Civic, F-150"
                     class="input"
+                    :disabled="selectedCar"
                     required
                   >
                 </div>
@@ -130,6 +139,7 @@
                     min="1990"
                     :max="new Date().getFullYear() + 1"
                     class="input"
+                    :disabled="selectedCar"
                     required
                   >
                 </div>
@@ -142,6 +152,7 @@
                     type="number"
                     placeholder="e.g., 50000"
                     class="input"
+                    :disabled="selectedCar"
                   >
                 </div>
               </div>
@@ -149,13 +160,21 @@
 
             <!-- Engine Information -->
             <div class="space-y-4">
-              <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Engine Details</h3>
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Engine Details</h3>
+                <div v-if="selectedCar" class="flex items-center text-sm text-green-600 dark:text-green-400">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Pre-filled from your car
+                </div>
+              </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
                     Engine Type
                   </label>
-                  <select v-model="diagnosisForm.engineType" class="input">
+                  <select v-model="diagnosisForm.engineType" class="input" :disabled="selectedCar">
                     <option value="">Select Engine Type</option>
                     <option value="Gasoline">Gasoline</option>
                     <option value="Diesel">Diesel</option>
@@ -173,6 +192,7 @@
                     type="text"
                     placeholder="e.g., 2.0L, 3.5L"
                     class="input"
+                    :disabled="selectedCar"
                   >
                 </div>
               </div>
@@ -384,17 +404,20 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
-import { diagnosisAPI } from '../services/api'
+import { ref, reactive, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { diagnosisAPI, carsAPI } from '../services/api'
 
 export default {
   name: 'Diagnose',
   setup() {
+    const route = useRoute()
     const currentStep = ref(0)
     const isLoading = ref(false)
     const diagnosisResult = ref(null)
     const fileInput = ref(null)
     const uploadedFiles = ref([])
+    const selectedCar = ref(null)
 
     const steps = ['Vehicle Info', 'Symptoms', 'AI Analysis', 'Results']
 
@@ -426,6 +449,30 @@ export default {
       'Air conditioning not working',
       'Suspension problems'
     ]
+
+    const loadCarData = async (carId) => {
+      try {
+        isLoading.value = true
+        const response = await carsAPI.getById(carId)
+        if (response.data.success) {
+          selectedCar.value = response.data.car
+          // Pre-fill the form with car data
+          diagnosisForm.make = selectedCar.value.brand
+          diagnosisForm.model = selectedCar.value.model
+          diagnosisForm.year = selectedCar.value.year.toString()
+          diagnosisForm.mileage = selectedCar.value.mileage ? selectedCar.value.mileage.toString() : ''
+          diagnosisForm.engineType = selectedCar.value.fuel_type || ''
+          diagnosisForm.engineSize = selectedCar.value.specifications?.engine_size || ''
+          
+          console.log('Car data loaded:', selectedCar.value)
+        }
+      } catch (error) {
+        console.error('Error loading car data:', error)
+        alert('Error loading car data. Please try again.')
+      } finally {
+        isLoading.value = false
+      }
+    }
 
     const triggerFileUpload = () => {
       fileInput.value.click()
@@ -553,6 +600,15 @@ export default {
       }
     }
 
+    // Load car data if car ID is provided in URL
+    onMounted(() => {
+      const carId = route.query.car
+      if (carId) {
+        console.log('Loading car data for ID:', carId)
+        loadCarData(carId)
+      }
+    })
+
     return {
       currentStep,
       steps,
@@ -562,6 +618,7 @@ export default {
       diagnosisResult,
       fileInput,
       uploadedFiles,
+      selectedCar,
       triggerFileUpload,
       handleFileSelect,
       handleFileDrop,
