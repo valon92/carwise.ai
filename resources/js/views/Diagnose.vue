@@ -19,7 +19,8 @@
 
       <!-- Progress Steps -->
       <div class="mb-8">
-        <div class="flex items-center justify-center space-x-4">
+        <!-- Desktop Progress Steps -->
+        <div class="hidden md:flex items-center justify-center space-x-4">
           <div v-for="(step, index) in steps" :key="index" class="flex items-center">
             <div 
               class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300"
@@ -38,11 +39,46 @@
             </svg>
           </div>
         </div>
+
+        <!-- Mobile Progress Steps -->
+        <div class="md:hidden">
+          <!-- Current Step Display -->
+          <div class="text-center mb-4">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full mb-2"
+                 :class="currentStep >= 0 ? 'bg-primary-600 text-white' : 'bg-secondary-200 dark:bg-secondary-700 text-secondary-600 dark:text-secondary-400'">
+              {{ currentStep + 1 }}
+            </div>
+            <h3 class="text-lg font-semibold text-secondary-900 dark:text-white">
+              {{ steps[currentStep] }}
+            </h3>
+            <p class="text-sm text-secondary-600 dark:text-secondary-400">
+              Step {{ currentStep + 1 }} of {{ steps.length }}
+            </p>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2 mb-4">
+            <div 
+              class="bg-primary-600 h-2 rounded-full transition-all duration-500 ease-out"
+              :style="{ width: ((currentStep + 1) / steps.length) * 100 + '%' }"
+            ></div>
+          </div>
+
+          <!-- Step Indicators -->
+          <div class="flex justify-center space-x-2">
+            <div 
+              v-for="(step, index) in steps" 
+              :key="index"
+              class="w-2 h-2 rounded-full transition-all duration-300"
+              :class="currentStep >= index ? 'bg-primary-600' : 'bg-secondary-300 dark:bg-secondary-600'"
+            ></div>
+          </div>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
         <!-- Diagnosis Form -->
-        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-lg p-8">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
           <h2 class="text-2xl font-semibold text-secondary-900 dark:text-white mb-6">
             Vehicle Information & Symptoms
           </h2>
@@ -51,7 +87,7 @@
             <!-- Vehicle Information -->
             <div class="space-y-4">
               <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Vehicle Details</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
                     Make *
@@ -114,7 +150,7 @@
             <!-- Engine Information -->
             <div class="space-y-4">
               <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Engine Details</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
                     Engine Type
@@ -161,7 +197,7 @@
               <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3">
                 Common Symptoms (Select all that apply)
               </label>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label v-for="symptom in commonSymptoms" :key="symptom" class="flex items-center">
                   <input
                     v-model="diagnosisForm.symptoms"
@@ -236,7 +272,7 @@
         </div>
 
         <!-- Results Panel -->
-        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-lg p-8">
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
           <h2 class="text-2xl font-semibold text-secondary-900 dark:text-white mb-6">
             Diagnosis Results
           </h2>
@@ -312,7 +348,7 @@
             <!-- Estimated Costs -->
             <div v-if="diagnosisResult.estimatedCosts" class="bg-warning-50 dark:bg-warning-900/20 rounded-lg p-4">
               <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-3">Estimated Costs</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div v-for="cost in diagnosisResult.estimatedCosts" :key="cost.service" class="flex justify-between items-center">
                   <span class="text-secondary-700 dark:text-secondary-300">{{ cost.service }}</span>
                   <span class="font-medium text-secondary-900 dark:text-white">{{ cost.range }}</span>
