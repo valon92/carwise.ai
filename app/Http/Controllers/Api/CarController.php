@@ -19,9 +19,6 @@ class CarController extends Controller
         try {
             $user = Auth::user();
             $cars = Car::where('user_id', $user->id)
-                ->with(['diagnosisSessions' => function($query) {
-                    $query->latest()->limit(3);
-                }])
                 ->orderBy('created_at', 'desc')
                 ->get()
                 ->map(function($car) {
@@ -44,16 +41,9 @@ class CarController extends Controller
                         'full_name' => $car->full_name,
                         'display_name' => $car->display_name,
                         'age' => $car->age,
-                        'diagnosis_count' => $car->diagnosisSessions->count(),
-                        'last_diagnosis' => $car->diagnosisSessions->first()?->created_at?->format('M d, Y') ?? 'Never',
-                        'recent_diagnoses' => $car->diagnosisSessions->map(function($session) {
-                            return [
-                                'id' => $session->id,
-                                'problem' => $session->problem_description,
-                                'date' => $session->created_at->format('M d, Y'),
-                                'status' => $session->status,
-                            ];
-                        }),
+                        'diagnosis_count' => 0, // TODO: Implement when diagnosis_sessions has car_id
+                        'last_diagnosis' => 'Never', // TODO: Implement when diagnosis_sessions has car_id
+                        'recent_diagnoses' => [], // TODO: Implement when diagnosis_sessions has car_id
                         'created_at' => $car->created_at->format('Y-m-d H:i:s'),
                         'updated_at' => $car->updated_at->format('Y-m-d H:i:s'),
                     ];
@@ -81,9 +71,6 @@ class CarController extends Controller
         try {
             $user = Auth::user();
             $car = Car::where('user_id', $user->id)
-                ->with(['diagnosisSessions' => function($query) {
-                    $query->latest();
-                }])
                 ->findOrFail($id);
 
             return response()->json([
@@ -108,14 +95,7 @@ class CarController extends Controller
                     'full_name' => $car->full_name,
                     'display_name' => $car->display_name,
                     'age' => $car->age,
-                    'diagnosis_sessions' => $car->diagnosisSessions->map(function($session) {
-                        return [
-                            'id' => $session->id,
-                            'problem_description' => $session->problem_description,
-                            'status' => $session->status,
-                            'created_at' => $session->created_at->format('Y-m-d H:i:s'),
-                        ];
-                    }),
+                    'diagnosis_sessions' => [], // TODO: Implement when diagnosis_sessions has car_id
                     'created_at' => $car->created_at->format('Y-m-d H:i:s'),
                     'updated_at' => $car->updated_at->format('Y-m-d H:i:s'),
                 ],
@@ -273,16 +253,9 @@ class CarController extends Controller
                     'full_name' => $car->full_name,
                     'display_name' => $car->display_name,
                     'age' => $car->age,
-                    'diagnosis_count' => $car->diagnosisSessions()->count(),
-                    'last_diagnosis' => $car->diagnosisSessions()->latest()->first()?->created_at?->format('M d, Y') ?? 'Never',
-                    'recent_diagnoses' => $car->diagnosisSessions()->latest()->limit(3)->get()->map(function($session) {
-                        return [
-                            'id' => $session->id,
-                            'problem' => $session->problem_description,
-                            'date' => $session->created_at->format('M d, Y'),
-                            'status' => $session->status,
-                        ];
-                    }),
+                    'diagnosis_count' => 0, // TODO: Implement when diagnosis_sessions has car_id
+                    'last_diagnosis' => 'Never', // TODO: Implement when diagnosis_sessions has car_id
+                    'recent_diagnoses' => [], // TODO: Implement when diagnosis_sessions has car_id
                     'created_at' => $car->created_at->format('Y-m-d H:i:s'),
                     'updated_at' => $car->updated_at->format('Y-m-d H:i:s'),
                 ],
@@ -305,13 +278,13 @@ class CarController extends Controller
             $user = Auth::user();
             $car = Car::where('user_id', $user->id)->findOrFail($id);
 
-            // Check if car has diagnosis sessions
-            if ($car->diagnosisSessions()->count() > 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot delete car with existing diagnosis sessions. Please contact support.',
-                ], 422);
-            }
+            // TODO: Check if car has diagnosis sessions when diagnosis_sessions has car_id
+            // if ($car->diagnosisSessions()->count() > 0) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Cannot delete car with existing diagnosis sessions. Please contact support.',
+            //     ], 422);
+            // }
 
             $car->delete();
 
@@ -340,7 +313,7 @@ class CarController extends Controller
             $stats = [
                 'total_cars' => $cars->count(),
                 'active_cars' => $cars->where('status', 'active')->count(),
-                'total_diagnoses' => $cars->withCount('diagnosisSessions')->get()->sum('diagnosis_sessions_count'),
+                'total_diagnoses' => 0, // TODO: Implement when diagnosis_sessions has car_id
                 'brands' => $cars->selectRaw('brand, COUNT(*) as count')
                     ->groupBy('brand')
                     ->orderBy('count', 'desc')

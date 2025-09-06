@@ -52,11 +52,12 @@ class Car extends Model
 
     /**
      * Get the diagnosis sessions for the car.
+     * Note: Currently disabled as diagnosis_sessions table doesn't have car_id field
      */
-    public function diagnosisSessions(): HasMany
-    {
-        return $this->hasMany(DiagnosisSession::class);
-    }
+    // public function diagnosisSessions(): HasMany
+    // {
+    //     return $this->hasMany(DiagnosisSession::class);
+    // }
 
     /**
      * Get the car's full name.
