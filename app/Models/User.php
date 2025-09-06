@@ -87,11 +87,6 @@ class User extends Authenticatable
         return $this->hasMany(DiagnosisSession::class);
     }
 
-    public function cars()
-    {
-        return $this->hasMany(Car::class);
-    }
-
     public function mechanic()
     {
         return $this->hasOne(Mechanic::class);
