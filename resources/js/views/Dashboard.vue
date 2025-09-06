@@ -283,10 +283,14 @@ export default {
       const token = localStorage.getItem('token')
       const storedUser = localStorage.getItem('user')
       
+      console.log('Dashboard mounted, checking auth...', { token: !!token, user: !!storedUser })
+      
       if (token && storedUser) {
         user.value = JSON.parse(storedUser)
+        console.log('User found, loading data...', user.value)
         loadUserData()
       } else {
+        console.log('No auth found, redirecting to login...')
         router.push('/login')
       }
     })

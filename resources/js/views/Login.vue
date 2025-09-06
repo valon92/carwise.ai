@@ -236,8 +236,9 @@ export default {
           localStorage.setItem('token', response.data.token)
           localStorage.setItem('user', JSON.stringify(response.data.user))
           
-          // Redirect to home page
-          router.push('/')
+          console.log('Login successful, redirecting to dashboard...')
+          // Redirect to dashboard
+          router.push('/dashboard')
         }
       } catch (error) {
         if (error.response?.data?.message) {
