@@ -203,4 +203,4 @@ Ky projekt është i licencuar nën MIT License - shihni skedarin [LICENSE](LICE
 
 ---
 
-**CarWise.ai** - Diagnostikimi i makinave të bërë inteligjent! 🚗✨
+**CarWise.ai** - Diagnostikimi i makinave të bërë inteligjent! 🚗✨# carwise.ai
