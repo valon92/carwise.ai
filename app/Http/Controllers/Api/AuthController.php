@@ -18,13 +18,19 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string|max:20',
+            'date_of_birth' => 'nullable|date|before:today',
+            'gender' => 'nullable|in:male,female,other,prefer_not_to_say',
+            'location' => 'nullable|string|max:255',
+            'bio' => 'nullable|string|max:1000',
             'role' => 'required|in:customer,mechanic',
-            'experience_years' => 'required_if:role,mechanic|integer|min:0',
-            'expertise' => 'required_if:role,mechanic|array',
-            'location' => 'required_if:role,mechanic|string|max:255',
+            'experience_years' => 'required_if:role,mechanic|integer|min:0|max:50',
+            'expertise' => 'required_if:role,mechanic|array|min:1',
+            'hourly_rate' => 'nullable|numeric|min:0|max:1000',
         ]);
 
         if ($validator->fails()) {
@@ -37,9 +43,15 @@ class AuthController extends Controller
 
         $user = User::create([
             'name' => $request->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
+            'date_of_birth' => $request->date_of_birth,
+            'gender' => $request->gender,
+            'location' => $request->location,
+            'bio' => $request->bio,
             'role' => $request->role,
             'status' => 'active',
             'timezone' => $request->timezone ?? 'UTC',
@@ -65,7 +77,7 @@ class AuthController extends Controller
                 'experience_years' => $request->experience_years,
                 'expertise' => $request->expertise,
                 'location' => $request->location,
-                'hourly_rate' => 25.00, // Default rate
+                'hourly_rate' => $request->hourly_rate ?? 25.00,
             ]);
         }
 
