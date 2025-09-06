@@ -203,4 +203,107 @@ Ky projekt është i licencuar nën MIT License - shihni skedarin [LICENSE](LICE
 
 ---
 
-**CarWise.ai** - Diagnostikimi i makinave të bërë inteligjent! 🚗✨# carwise.ai
+**CarWise.ai** - Diagnostikimi i makinave të bërë inteligjent! 🚗✨# CarWise.ai - Smart Car Diagnosis Platform
+
+A modern, AI-powered car diagnosis platform built with Laravel, Vue.js, and Tailwind CSS.
+
+## 🚗 Features
+
+- **AI-Powered Diagnosis**: Smart car problem detection and analysis
+- **User Management**: Registration, login, and user profiles
+- **Car Management**: Add and manage your vehicles
+- **Mechanic Network**: Connect with certified mechanics
+- **Diagnosis History**: Track all your car diagnoses
+- **Responsive Design**: Works perfectly on desktop and mobile
+- **Dark Mode**: Modern dark/light theme support
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Laravel 11** - PHP framework
+- **Laravel Sanctum** - API authentication
+- **MySQL** - Database
+- **RESTful API** - Clean API endpoints
+
+### Frontend
+- **Vue.js 3** - Progressive JavaScript framework
+- **Vue Router** - Client-side routing
+- **Tailwind CSS 3.4.0** - Utility-first CSS framework
+- **Vite** - Fast build tool
+- **Axios** - HTTP client
+
+## 🚀 Getting Started
+
+### Prerequisites
+- PHP 8.2+
+- Composer
+- Node.js 18+
+- MySQL
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/valon92/carwise.ai.git
+   cd carwise.ai
+   ```
+
+2. **Install PHP dependencies**
+   ```bash
+   composer install
+   ```
+
+3. **Install Node.js dependencies**
+   ```bash
+   npm install
+   ```
+
+4. **Environment setup**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+5. **Database setup**
+   ```bash
+   php artisan migrate
+   php artisan db:seed
+   ```
+
+6. **Build assets**
+   ```bash
+   npm run build
+   ```
+
+7. **Start development server**
+   ```bash
+   php artisan serve
+   npm run dev
+   ```
+
+## 📱 Mobile Support
+
+- Fully responsive design
+- Mobile-first approach
+- Touch-friendly interface
+- Optimized for all screen sizes
+
+## 🎨 Design Features
+
+- Modern glassmorphism effects
+- Smooth animations and transitions
+- Custom color palette
+- Professional typography
+- Accessible design patterns
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📞 Support
+
+For support, email support@carwise.ai or create an issue in this repository.
