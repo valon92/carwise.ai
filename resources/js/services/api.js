@@ -57,6 +57,7 @@ export const carsAPI = {
   create: (data) => api.post('/cars', data),
   update: (id, data) => api.put(`/cars/${id}`, data),
   delete: (id) => api.delete(`/cars/${id}`),
+  statistics: () => api.get('/cars/statistics'),
 }
 
 // Diagnosis API

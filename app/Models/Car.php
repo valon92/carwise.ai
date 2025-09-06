@@ -2,49 +2,120 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Car extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'brand',
         'model',
         'year',
         'vin',
-        'color',
         'license_plate',
+        'color',
+        'fuel_type',
+        'transmission',
+        'mileage',
+        'purchase_date',
+        'purchase_price',
+        'notes',
+        'specifications',
+        'maintenance_history',
+        'status',
     ];
 
-    protected $casts = [
-        'year' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'year' => 'integer',
+            'mileage' => 'integer',
+            'purchase_date' => 'date',
+            'purchase_price' => 'decimal:2',
+            'specifications' => 'array',
+            'maintenance_history' => 'array',
+        ];
+    }
 
+    /**
+     * Get the user that owns the car.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function diagnoses(): HasMany
+    /**
+     * Get the diagnosis sessions for the car.
+     */
+    public function diagnosisSessions(): HasMany
     {
-        return $this->hasMany(Diagnosis::class);
+        return $this->hasMany(DiagnosisSession::class);
     }
 
-    public function getRecentDiagnosesAttribute()
+    /**
+     * Get the car's full name.
+     */
+    public function getFullNameAttribute(): string
     {
-        return $this->diagnoses()->latest()->take(3)->get();
+        return "{$this->year} {$this->brand} {$this->model}";
     }
 
-    public function getDiagnosisCountAttribute()
+    /**
+     * Get the car's display name.
+     */
+    public function getDisplayNameAttribute(): string
     {
-        return $this->diagnoses()->count();
+        return "{$this->brand} {$this->model}";
     }
 
-    public function getLastDiagnosisAttribute()
+    /**
+     * Get the car's age in years.
+     */
+    public function getAgeAttribute(): int
     {
-        $lastDiagnosis = $this->diagnoses()->latest()->first();
-        return $lastDiagnosis ? $lastDiagnosis->created_at->diffForHumans() : 'Never';
+        return now()->year - $this->year;
+    }
+
+    /**
+     * Get the car's status badge color.
+     */
+    public function getStatusBadgeColorAttribute(): string
+    {
+        return match($this->status) {
+            'active' => 'green',
+            'sold' => 'blue',
+            'scrapped' => 'red',
+            default => 'gray',
+        };
+    }
+
+    /**
+     * Scope for active cars.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    /**
+     * Scope for cars by brand.
+     */
+    public function scopeByBrand($query, $brand)
+    {
+        return $query->where('brand', $brand);
+    }
+
+    /**
+     * Scope for cars by year range.
+     */
+    public function scopeByYearRange($query, $startYear, $endYear)
+    {
+        return $query->whereBetween('year', [$startYear, $endYear]);
     }
 }

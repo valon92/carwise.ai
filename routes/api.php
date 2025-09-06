@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Car routes
     Route::apiResource('cars', CarController::class);
+    Route::get('/cars/statistics', [CarController::class, 'statistics']);
     
     // Diagnosis routes
     Route::post('/diagnosis/submit', [DiagnosisController::class, 'submitDiagnosis']);
