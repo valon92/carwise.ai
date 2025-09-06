@@ -1,9 +1,10 @@
 <template>
-  <div id="app" :class="{ 'dark': isDarkMode }" class="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 dark:from-secondary-900 dark:to-secondary-800 transition-colors duration-300">
+  <div id="app" :class="{ 'dark': isDarkMode }" class="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 dark:from-secondary-900 dark:to-secondary-800 transition-colors duration-300 flex flex-col">
     <Navbar @toggle-dark-mode="toggleDarkMode" :is-dark-mode="isDarkMode" />
-    <main class="relative">
+    <main class="relative flex-1">
       <router-view />
     </main>
+    <Footer />
     
     <!-- Modern loading overlay -->
     <div v-if="isLoading" class="fixed inset-0 bg-white/80 dark:bg-secondary-900/80 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -18,11 +19,13 @@
 <script>
 import { ref, onMounted } from 'vue'
 import Navbar from './components/Navbar.vue'
+import Footer from './components/Footer.vue'
 
 export default {
   name: 'App',
   components: {
-    Navbar
+    Navbar,
+    Footer
   },
   setup() {
     const isDarkMode = ref(false)
