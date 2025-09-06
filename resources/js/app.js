@@ -10,6 +10,7 @@ import MyCars from './views/MyCars.vue'
 import Mechanics from './views/Mechanics.vue'
 import Login from './views/Login.vue'
 import Register from './views/Register.vue'
+import Dashboard from './views/Dashboard.vue'
 
 // Import components
 import Navbar from './components/Navbar.vue'
@@ -17,6 +18,7 @@ import Navbar from './components/Navbar.vue'
 // Router configuration
 const routes = [
   { path: '/', name: 'Home', component: Home },
+  { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/diagnose', name: 'Diagnose', component: Diagnose },
   { path: '/my-cars', name: 'MyCars', component: MyCars },
   { path: '/mechanics', name: 'Mechanics', component: Mechanics },

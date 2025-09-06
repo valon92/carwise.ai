@@ -173,47 +173,6 @@
                 </div>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <!-- Date of Birth -->
-                <div>
-                  <label for="date_of_birth" class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-                    Date of Birth
-                  </label>
-                  <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg class="h-5 w-5 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                      </svg>
-                    </div>
-                    <input
-                      id="date_of_birth"
-                      name="date_of_birth"
-                      type="date"
-                      v-model="form.date_of_birth"
-                      class="input pl-10"
-                    />
-                  </div>
-                </div>
-
-                <!-- Gender -->
-                <div>
-                  <label for="gender" class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-                    Gender
-                  </label>
-                  <select
-                    id="gender"
-                    name="gender"
-                    v-model="form.gender"
-                    class="input"
-                  >
-                    <option value="">Select gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                    <option value="prefer_not_to_say">Prefer not to say</option>
-                  </select>
-                </div>
-              </div>
 
               <!-- Location -->
               <div>
@@ -572,8 +531,6 @@ export default {
       last_name: '',
       email: '',
       phone: '',
-      date_of_birth: '',
-      gender: '',
       location: '',
       
       // Account Type
@@ -655,8 +612,6 @@ export default {
           role: form.value.role,
           
           // Profile information
-          date_of_birth: form.value.date_of_birth,
-          gender: form.value.gender,
           location: form.value.location,
           bio: form.value.bio,
           
@@ -679,7 +634,7 @@ export default {
           
           // Redirect after a short delay
           setTimeout(() => {
-            router.push('/')
+            router.push('/dashboard')
           }, 1500)
         }
         
