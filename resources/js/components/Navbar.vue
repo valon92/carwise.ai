@@ -27,6 +27,17 @@
             Home
           </router-link>
           <router-link 
+            v-if="isAuthenticated"
+            to="/dashboard" 
+            class="nav-link"
+            :class="{ 'nav-link-active': $route.path === '/dashboard' }"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+            </svg>
+            Dashboard
+          </router-link>
+          <router-link 
             to="/diagnose" 
             class="nav-link"
             :class="{ 'nav-link-active': $route.path === '/diagnose' }"
@@ -100,20 +111,67 @@
           </template>
           <template v-else>
             <div class="flex items-center space-x-3">
-              <div class="hidden sm:flex items-center space-x-2">
-                <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-                  <span class="text-primary-600 dark:text-primary-400 font-medium text-sm">
-                    {{ userInitials }}
-                  </span>
+              <!-- User Profile Dropdown -->
+              <div class="relative" ref="userDropdown">
+                <button 
+                  @click="toggleUserDropdown"
+                  class="flex items-center space-x-2 p-2 rounded-lg hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-200"
+                >
+                  <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
+                    <span class="text-primary-600 dark:text-primary-400 font-medium text-sm">
+                      {{ userInitials }}
+                    </span>
+                  </div>
+                  <div class="hidden sm:block text-left">
+                    <div class="text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                      {{ user?.first_name || user?.name }}
+                    </div>
+                    <div class="text-xs text-secondary-500 dark:text-secondary-500">
+                      {{ user?.role === 'mechanic' ? 'Mechanic' : 'Car Owner' }}
+                    </div>
+                  </div>
+                  <svg class="w-4 h-4 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div 
+                  v-if="userDropdownOpen" 
+                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-secondary-800 rounded-lg shadow-lg border border-secondary-200 dark:border-secondary-700 py-1 z-50"
+                >
+                  <router-link 
+                    to="/dashboard" 
+                    class="flex items-center px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700"
+                    @click="userDropdownOpen = false"
+                  >
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                    </svg>
+                    Dashboard
+                  </router-link>
+                  <router-link 
+                    to="/my-cars" 
+                    class="flex items-center px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700"
+                    @click="userDropdownOpen = false"
+                  >
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    My Cars
+                  </router-link>
+                  <div class="border-t border-secondary-200 dark:border-secondary-700 my-1"></div>
+                  <button 
+                    @click="logout" 
+                    class="flex items-center w-full px-4 py-2 text-sm text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20"
+                  >
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Logout
+                  </button>
                 </div>
-                <span class="text-sm font-medium text-secondary-700 dark:text-secondary-300">{{ user.name }}</span>
               </div>
-              <button @click="logout" class="btn-ghost">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                </svg>
-                Logout
-              </button>
             </div>
           </template>
         </div>
@@ -128,6 +186,15 @@
           @click="mobileMenuOpen = false"
         >
           Home
+        </router-link>
+        <router-link 
+          v-if="isAuthenticated"
+          to="/dashboard" 
+          class="mobile-nav-link"
+          :class="{ 'mobile-nav-link-active': $route.path === '/dashboard' }"
+          @click="mobileMenuOpen = false"
+        >
+          Dashboard
         </router-link>
         <router-link 
           to="/diagnose" 
@@ -167,8 +234,8 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { authAPI } from '../services/api'
 
 export default {
@@ -182,9 +249,12 @@ export default {
   },
   setup() {
     const router = useRouter()
+    const route = useRoute()
     const mobileMenuOpen = ref(false)
+    const userDropdownOpen = ref(false)
     const isAuthenticated = ref(false)
     const user = ref(null)
+    const userDropdown = ref(null)
 
     const userInitials = computed(() => {
       if (!user.value) return 'U'
@@ -198,7 +268,13 @@ export default {
       }
       console.log('Button clicked! Current state:', mobileMenuOpen.value)
       mobileMenuOpen.value = !mobileMenuOpen.value
+      userDropdownOpen.value = false // Close user dropdown when mobile menu opens
       console.log('Mobile menu toggled to:', mobileMenuOpen.value)
+    }
+
+    const toggleUserDropdown = () => {
+      userDropdownOpen.value = !userDropdownOpen.value
+      mobileMenuOpen.value = false // Close mobile menu when user dropdown opens
     }
 
     const logout = async () => {
@@ -219,32 +295,52 @@ export default {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.relative') && !event.target.closest('.mobile-menu-container')) {
         mobileMenuOpen.value = false
+        userDropdownOpen.value = false
       }
     }
 
-    onMounted(() => {
-      // Check if user is authenticated
+    const checkAuthState = () => {
       const token = localStorage.getItem('token')
       const userData = localStorage.getItem('user')
       
       if (token && userData) {
         isAuthenticated.value = true
         user.value = JSON.parse(userData)
+        console.log('Navbar: User authenticated', user.value)
+      } else {
+        isAuthenticated.value = false
+        user.value = null
+        console.log('Navbar: User not authenticated')
       }
+    }
 
+    // Watch for route changes to update auth state
+    watch(() => route.path, () => {
+      checkAuthState()
+    })
+
+    onMounted(() => {
+      checkAuthState()
       document.addEventListener('click', handleClickOutside)
+      
+      // Listen for storage changes (when user logs in/out in another tab)
+      window.addEventListener('storage', checkAuthState)
     })
 
     onUnmounted(() => {
       document.removeEventListener('click', handleClickOutside)
+      window.removeEventListener('storage', checkAuthState)
     })
 
     return {
       mobileMenuOpen,
+      userDropdownOpen,
       isAuthenticated,
       user,
       userInitials,
+      userDropdown,
       toggleMobileMenu,
+      toggleUserDropdown,
       logout
     }
   }
