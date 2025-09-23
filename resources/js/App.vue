@@ -20,10 +20,45 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
-import Navbar from './components/Navbar.vue'
-import Footer from './components/Footer.vue'
-import NotificationSystem from './components/NotificationSystem.vue'
+import { ref, onMounted, defineAsyncComponent } from 'vue'
+import { initPerformanceOptimizations } from './utils/performance'
+
+// Lazy load components for better performance
+const Navbar = defineAsyncComponent({
+  loader: () => import('./components/Navbar.vue'),
+  loadingComponent: {
+    template: '<div class="h-16 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-secondary-200 dark:border-secondary-700 animate-pulse"></div>'
+  },
+  errorComponent: {
+    template: '<div class="h-16 bg-red-100 dark:bg-red-900 flex items-center justify-center text-red-600 dark:text-red-400">Failed to load navigation</div>'
+  },
+  delay: 200,
+  timeout: 3000
+})
+
+const Footer = defineAsyncComponent({
+  loader: () => import('./components/Footer.vue'),
+  loadingComponent: {
+    template: '<div class="h-32 bg-secondary-100 dark:bg-secondary-800 animate-pulse"></div>'
+  },
+  errorComponent: {
+    template: '<div class="h-32 bg-red-100 dark:bg-red-900 flex items-center justify-center text-red-600 dark:text-red-400">Failed to load footer</div>'
+  },
+  delay: 200,
+  timeout: 3000
+})
+
+const NotificationSystem = defineAsyncComponent({
+  loader: () => import('./components/NotificationSystem.vue'),
+  loadingComponent: {
+    template: '<div></div>' // Empty loading state for notifications
+  },
+  errorComponent: {
+    template: '<div></div>' // Silent fail for notifications
+  },
+  delay: 100,
+  timeout: 2000
+})
 
 export default {
   name: 'App',
@@ -50,6 +85,9 @@ export default {
         // Check system preference
         isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
       }
+
+      // Initialize performance optimizations
+      initPerformanceOptimizations()
     })
 
     return {
