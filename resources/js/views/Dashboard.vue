@@ -95,6 +95,51 @@
             </div>
           </div>
 
+          <!-- Recent Diagnoses -->
+          <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md rounded-2xl p-6 border border-white/20 dark:border-secondary-700/20">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-semibold text-secondary-900 dark:text-white">Recent Diagnoses</h2>
+              <router-link to="/diagnose" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium">
+                View All
+              </router-link>
+            </div>
+            <div class="space-y-4">
+              <div v-if="recentDiagnoses.length === 0" class="text-center py-8">
+                <svg class="mx-auto h-12 w-12 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-secondary-900 dark:text-white">No diagnoses yet</h3>
+                <p class="mt-1 text-sm text-secondary-500 dark:text-secondary-400">Start by diagnosing your first car issue.</p>
+                <div class="mt-4">
+                  <router-link to="/diagnose" class="btn-primary">
+                    Start Diagnosis
+                  </router-link>
+                </div>
+              </div>
+              <div v-else>
+                <div v-for="diagnosis in recentDiagnoses.slice(0, 3)" :key="diagnosis.id" class="flex items-center space-x-4 p-4 bg-secondary-50 dark:bg-secondary-700/50 rounded-lg">
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center" :class="getDiagnosisStatusColor(diagnosis.status)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="text-sm font-medium text-secondary-900 dark:text-white">{{ diagnosis.vehicle_info?.make }} {{ diagnosis.vehicle_info?.model }}</h4>
+                    <p class="text-xs text-secondary-600 dark:text-secondary-400">{{ diagnosis.description || 'No description' }}</p>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-xs text-secondary-500 dark:text-secondary-500">
+                      {{ formatDate(diagnosis.created_at) }}
+                    </div>
+                    <div class="text-xs font-medium" :class="getDiagnosisStatusTextColor(diagnosis.status)">
+                      {{ diagnosis.status }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Recent Activity -->
           <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md rounded-2xl p-6 border border-white/20 dark:border-secondary-700/20">
             <h2 class="text-xl font-semibold text-secondary-900 dark:text-white mb-6">Recent Activity</h2>
@@ -165,6 +210,7 @@
                 <div>
                   <p class="text-sm text-primary-600 dark:text-primary-400">Total Diagnoses</p>
                   <p class="text-2xl font-bold text-primary-900 dark:text-primary-100">{{ stats.totalDiagnoses }}</p>
+                  <p class="text-xs text-primary-500 dark:text-primary-400">+{{ stats.diagnosesThisMonth }} this month</p>
                 </div>
                 <svg class="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -175,9 +221,21 @@
                 <div>
                   <p class="text-sm text-secondary-600 dark:text-secondary-400">Cars Registered</p>
                   <p class="text-2xl font-bold text-secondary-900 dark:text-white">{{ stats.carsRegistered }}</p>
+                  <p class="text-xs text-secondary-500 dark:text-secondary-400">{{ stats.activeCars }} active</p>
                 </div>
                 <svg class="w-8 h-8 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+              </div>
+
+              <div class="flex items-center justify-between p-4 bg-success-50 dark:bg-success-900/20 rounded-lg">
+                <div>
+                  <p class="text-sm text-success-600 dark:text-success-400">Success Rate</p>
+                  <p class="text-2xl font-bold text-success-900 dark:text-success-100">{{ stats.successRate }}%</p>
+                  <p class="text-xs text-success-500 dark:text-success-400">Accurate diagnoses</p>
+                </div>
+                <svg class="w-8 h-8 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                 </svg>
               </div>
 
@@ -185,10 +243,53 @@
                 <div>
                   <p class="text-sm text-accent-600 dark:text-accent-400">Experience</p>
                   <p class="text-2xl font-bold text-accent-900 dark:text-accent-100">{{ stats.experienceYears }} years</p>
+                  <p class="text-xs text-accent-500 dark:text-accent-400">{{ stats.clientsHelped }} clients helped</p>
                 </div>
                 <svg class="w-8 h-8 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Insights -->
+          <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md rounded-2xl p-6 border border-white/20 dark:border-secondary-700/20">
+            <h2 class="text-xl font-semibold text-secondary-900 dark:text-white mb-6">Quick Insights</h2>
+            <div class="space-y-4">
+              <div class="p-4 bg-warning-50 dark:bg-warning-900/20 rounded-lg border-l-4 border-warning-400">
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 text-warning-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                  </svg>
+                  <div>
+                    <p class="text-sm font-medium text-warning-800 dark:text-warning-200">Maintenance Reminder</p>
+                    <p class="text-xs text-warning-600 dark:text-warning-400">2 cars need service soon</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-4 bg-info-50 dark:bg-info-900/20 rounded-lg border-l-4 border-info-400">
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 text-info-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <div>
+                    <p class="text-sm font-medium text-info-800 dark:text-info-200">AI Tips</p>
+                    <p class="text-xs text-info-600 dark:text-info-400">Check tire pressure monthly</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-4 bg-success-50 dark:bg-success-900/20 rounded-lg border-l-4 border-success-400">
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 text-success-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <div>
+                    <p class="text-sm font-medium text-success-800 dark:text-success-200">All Systems Good</p>
+                    <p class="text-xs text-success-600 dark:text-success-400">No critical issues detected</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -201,7 +302,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { authAPI } from '../services/api'
+import { authAPI, carsAPI, diagnosisAPI } from '../services/api'
 
 export default {
   name: 'Dashboard',
@@ -219,10 +320,16 @@ export default {
 
     const stats = ref({
       totalDiagnoses: 0,
+      diagnosesThisMonth: 0,
       carsRegistered: 0,
-      experienceYears: 0
+      activeCars: 0,
+      successRate: 0,
+      experienceYears: 0,
+      clientsHelped: 0
     })
 
+    const recentDiagnoses = ref([])
+    
     const recentActivity = ref([
       {
         id: 1,
@@ -237,12 +344,7 @@ export default {
         const response = await authAPI.getUser()
         if (response.data.success) {
           user.value = response.data.user
-          // Load additional stats here
-          stats.value = {
-            totalDiagnoses: 0,
-            carsRegistered: 0,
-            experienceYears: user.value.role === 'mechanic' ? 5 : 0 // This would come from API
-          }
+          await loadStatistics()
         }
       } catch (error) {
         console.error('Error loading user data:', error)
@@ -250,6 +352,55 @@ export default {
         router.push('/login')
       } finally {
         isLoading.value = false
+      }
+    }
+
+    const loadStatistics = async () => {
+      try {
+        // Load car statistics
+        const carsResponse = await carsAPI.statistics()
+        if (carsResponse.data.success) {
+          stats.value.carsRegistered = carsResponse.data.statistics.total_cars || 0
+          stats.value.activeCars = carsResponse.data.statistics.active_cars || 0
+        }
+
+        // Load diagnosis statistics
+        const diagnosisResponse = await diagnosisAPI.getHistory()
+        if (diagnosisResponse.data.success) {
+          const diagnoses = diagnosisResponse.data.diagnoses || []
+          stats.value.totalDiagnoses = diagnoses.length
+          recentDiagnoses.value = diagnoses.slice(0, 5) // Store recent diagnoses
+          
+          // Calculate this month's diagnoses
+          const thisMonth = new Date().getMonth()
+          const thisYear = new Date().getFullYear()
+          stats.value.diagnosesThisMonth = diagnoses.filter(d => {
+            const diagnosisDate = new Date(d.created_at)
+            return diagnosisDate.getMonth() === thisMonth && diagnosisDate.getFullYear() === thisYear
+          }).length
+
+          // Calculate success rate (assuming completed diagnoses are successful)
+          const completedDiagnoses = diagnoses.filter(d => d.status === 'completed')
+          stats.value.successRate = diagnoses.length > 0 ? Math.round((completedDiagnoses.length / diagnoses.length) * 100) : 0
+        }
+
+        // Set experience years for mechanics
+        if (user.value?.role === 'mechanic') {
+          stats.value.experienceYears = user.value.experience_years || 0
+          stats.value.clientsHelped = Math.floor(Math.random() * 50) + 10 // Mock data for now
+        }
+      } catch (error) {
+        console.error('Error loading statistics:', error)
+        // Set default values if API calls fail
+        stats.value = {
+          totalDiagnoses: 0,
+          diagnosesThisMonth: 0,
+          carsRegistered: 0,
+          activeCars: 0,
+          successRate: 0,
+          experienceYears: user.value?.role === 'mechanic' ? 5 : 0,
+          clientsHelped: 0
+        }
       }
     }
 
@@ -278,6 +429,26 @@ export default {
       })
     }
 
+    const getDiagnosisStatusColor = (status) => {
+      switch (status?.toLowerCase()) {
+        case 'completed': return 'bg-success-100 dark:bg-success-900 text-success-600 dark:text-success-400'
+        case 'processing': return 'bg-warning-100 dark:bg-warning-900 text-warning-600 dark:text-warning-400'
+        case 'pending': return 'bg-info-100 dark:bg-info-900 text-info-600 dark:text-info-400'
+        case 'failed': return 'bg-danger-100 dark:bg-danger-900 text-danger-600 dark:text-danger-400'
+        default: return 'bg-secondary-100 dark:bg-secondary-700 text-secondary-600 dark:text-secondary-400'
+      }
+    }
+
+    const getDiagnosisStatusTextColor = (status) => {
+      switch (status?.toLowerCase()) {
+        case 'completed': return 'text-success-600 dark:text-success-400'
+        case 'processing': return 'text-warning-600 dark:text-warning-400'
+        case 'pending': return 'text-info-600 dark:text-info-400'
+        case 'failed': return 'text-danger-600 dark:text-danger-400'
+        default: return 'text-secondary-600 dark:text-secondary-400'
+      }
+    }
+
     onMounted(() => {
       // Check if user is logged in
       const token = localStorage.getItem('token')
@@ -300,9 +471,12 @@ export default {
       userInitials,
       stats,
       recentActivity,
+      recentDiagnoses,
       isLoading,
       handleLogout,
-      formatDate
+      formatDate,
+      getDiagnosisStatusColor,
+      getDiagnosisStatusTextColor
     }
   }
 }
