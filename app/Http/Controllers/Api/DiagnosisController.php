@@ -60,7 +60,7 @@ class DiagnosisController extends Controller
                 'engine_type' => $request->engine_type,
                 'engine_size' => $request->engine_size,
                 'description' => $request->description,
-                'symptoms' => $request->symptoms ? json_decode($request->symptoms, true) : [],
+                'symptoms' => is_array($request->symptoms) ? $request->symptoms : ($request->symptoms ? json_decode($request->symptoms, true) : []),
                 'status' => 'processing'
             ]);
 

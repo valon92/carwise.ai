@@ -46,7 +46,7 @@ class AIDiagnosisService
             'Authorization' => 'Bearer ' . $this->apiKey,
             'Content-Type' => 'application/json',
         ])->post($this->apiUrl . '/chat/completions', [
-            'model' => 'gpt-4',
+            'model' => config('services.openai.model', 'gpt-4'),
             'messages' => [
                 [
                     'role' => 'system',
@@ -57,8 +57,8 @@ class AIDiagnosisService
                     'content' => $prompt
                 ]
             ],
-            'max_tokens' => 2000,
-            'temperature' => 0.3
+            'max_tokens' => config('services.openai.max_tokens', 2000),
+            'temperature' => config('services.openai.temperature', 0.3)
         ]);
 
         if (!$response->successful()) {
