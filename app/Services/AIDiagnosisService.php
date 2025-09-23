@@ -136,15 +136,16 @@ class AIDiagnosisService
     }
 
     /**
-     * Generate mock AI response for demo purposes.
+     * Generate enhanced mock AI response for demo purposes.
      */
     private function generateMockAIResponse(array $data): array
     {
         $symptoms = $data['symptoms'] ?? [];
         $description = strtolower($data['description']);
+        $vehicleInfo = $data['vehicle_info'] ?? [];
         
-        // Simple rule-based mock responses
-        if (str_contains($description, 'engine') && str_contains($description, 'start')) {
+        // Enhanced rule-based mock responses with more sophisticated analysis
+        if (str_contains($description, 'engine') && (str_contains($description, 'start') || str_contains($description, 'won\'t start'))) {
             return [
                 'problem_title' => 'Engine Starting Issues',
                 'problem_description' => 'The vehicle is experiencing difficulty starting, which could be related to the ignition system, fuel delivery, or battery.',
@@ -238,31 +239,185 @@ class AIDiagnosisService
             ];
         }
         
-        // Default response
+        // Enhanced analysis based on symptoms
+        if (in_array('Warning lights on', $symptoms)) {
+            return [
+                'problem_title' => 'Dashboard Warning Lights',
+                'problem_description' => 'Warning lights on the dashboard indicate a system malfunction that requires immediate attention.',
+                'severity' => 'high',
+                'confidence_score' => 90,
+                'likely_causes' => [
+                    [
+                        'title' => 'Engine Management System',
+                        'description' => 'Check Engine Light (CEL) indicates engine or emissions system issues.',
+                        'probability' => 80
+                    ],
+                    [
+                        'title' => 'ABS System',
+                        'description' => 'Anti-lock Braking System warning may indicate brake system problems.',
+                        'probability' => 60
+                    ],
+                    [
+                        'title' => 'Airbag System',
+                        'description' => 'Airbag warning light indicates safety system malfunction.',
+                        'probability' => 50
+                    ]
+                ],
+                'recommended_actions' => [
+                    [
+                        'title' => 'Immediate Diagnostic Scan',
+                        'description' => 'Use OBD-II scanner to read diagnostic trouble codes.',
+                        'urgency' => 'Immediate'
+                    ],
+                    [
+                        'title' => 'Professional Inspection',
+                        'description' => 'Have certified mechanic inspect the affected systems.',
+                        'urgency' => 'Within 24 hours'
+                    ]
+                ],
+                'estimated_costs' => [
+                    ['service' => 'Diagnostic Scan', 'min' => 50, 'max' => 100],
+                    ['service' => 'System Repair', 'min' => 200, 'max' => 1000]
+                ],
+                'requires_immediate_attention' => true,
+                'model_version' => '1.0'
+            ];
+        }
+
+        if (in_array('Poor fuel economy', $symptoms)) {
+            return [
+                'problem_title' => 'Reduced Fuel Efficiency',
+                'problem_description' => 'The vehicle is consuming more fuel than normal, indicating potential efficiency issues.',
+                'severity' => 'medium',
+                'confidence_score' => 75,
+                'likely_causes' => [
+                    [
+                        'title' => 'Dirty Air Filter',
+                        'description' => 'Clogged air filter restricts airflow to the engine.',
+                        'probability' => 70
+                    ],
+                    [
+                        'title' => 'Faulty Oxygen Sensor',
+                        'description' => 'O2 sensor not properly regulating fuel mixture.',
+                        'probability' => 65
+                    ],
+                    [
+                        'title' => 'Worn Spark Plugs',
+                        'description' => 'Old or fouled spark plugs reduce combustion efficiency.',
+                        'probability' => 60
+                    ]
+                ],
+                'recommended_actions' => [
+                    [
+                        'title' => 'Replace Air Filter',
+                        'description' => 'Check and replace air filter if dirty.',
+                        'urgency' => 'Within 1 week'
+                    ],
+                    [
+                        'title' => 'Spark Plug Service',
+                        'description' => 'Inspect and replace spark plugs if needed.',
+                        'urgency' => 'Within 2 weeks'
+                    ]
+                ],
+                'estimated_costs' => [
+                    ['service' => 'Air Filter Replacement', 'min' => 20, 'max' => 50],
+                    ['service' => 'Spark Plug Replacement', 'min' => 100, 'max' => 300]
+                ],
+                'requires_immediate_attention' => false,
+                'model_version' => '1.0'
+            ];
+        }
+
+        if (in_array('Overheating', $symptoms)) {
+            return [
+                'problem_title' => 'Engine Overheating',
+                'problem_description' => 'Engine temperature is exceeding normal operating range, which can cause serious damage.',
+                'severity' => 'critical',
+                'confidence_score' => 95,
+                'likely_causes' => [
+                    [
+                        'title' => 'Coolant Leak',
+                        'description' => 'Loss of coolant due to leak in the cooling system.',
+                        'probability' => 85
+                    ],
+                    [
+                        'title' => 'Faulty Thermostat',
+                        'description' => 'Thermostat not opening properly to allow coolant flow.',
+                        'probability' => 70
+                    ],
+                    [
+                        'title' => 'Water Pump Failure',
+                        'description' => 'Water pump not circulating coolant through the engine.',
+                        'probability' => 60
+                    ]
+                ],
+                'recommended_actions' => [
+                    [
+                        'title' => 'Stop Driving Immediately',
+                        'description' => 'Pull over and turn off engine to prevent damage.',
+                        'urgency' => 'Immediate'
+                    ],
+                    [
+                        'title' => 'Check Coolant Level',
+                        'description' => 'Inspect coolant reservoir and radiator for leaks.',
+                        'urgency' => 'Immediate'
+                    ],
+                    [
+                        'title' => 'Emergency Towing',
+                        'description' => 'Have vehicle towed to repair facility.',
+                        'urgency' => 'Immediate'
+                    ]
+                ],
+                'estimated_costs' => [
+                    ['service' => 'Cooling System Repair', 'min' => 300, 'max' => 800],
+                    ['service' => 'Engine Damage Assessment', 'min' => 200, 'max' => 500]
+                ],
+                'requires_immediate_attention' => true,
+                'model_version' => '1.0'
+            ];
+        }
+
+        // Default enhanced response
         return [
-            'problem_title' => 'General Vehicle Issue',
-            'problem_description' => 'Based on the symptoms described, there appears to be a vehicle issue that requires professional diagnosis.',
+            'problem_title' => 'Vehicle Diagnostic Required',
+            'problem_description' => 'Based on the symptoms described, a comprehensive diagnostic is recommended to identify the root cause.',
             'severity' => 'medium',
-            'confidence_score' => 60,
+            'confidence_score' => 65,
             'likely_causes' => [
                 [
-                    'title' => 'Multiple Potential Causes',
-                    'description' => 'The symptoms could be related to several different systems.',
-                    'probability' => 50
+                    'title' => 'Multiple System Analysis',
+                    'description' => 'Symptoms may be related to engine, transmission, electrical, or other systems.',
+                    'probability' => 55
+                ],
+                [
+                    'title' => 'Wear and Tear',
+                    'description' => 'Normal aging components may require maintenance or replacement.',
+                    'probability' => 45
                 ]
             ],
             'recommended_actions' => [
                 [
-                    'title' => 'Professional Diagnostic',
-                    'description' => 'Schedule a comprehensive diagnostic with a certified mechanic.',
+                    'title' => 'Comprehensive Diagnostic',
+                    'description' => 'Schedule a full vehicle inspection with diagnostic equipment.',
                     'urgency' => 'Within 1 week'
+                ],
+                [
+                    'title' => 'Preventive Maintenance',
+                    'description' => 'Consider routine maintenance to prevent future issues.',
+                    'urgency' => 'Within 2 weeks'
                 ]
             ],
             'estimated_costs' => [
-                ['service' => 'Diagnostic Fee', 'min' => 100, 'max' => 200]
+                ['service' => 'Diagnostic Fee', 'min' => 100, 'max' => 200],
+                ['service' => 'Maintenance Service', 'min' => 150, 'max' => 400]
             ],
             'requires_immediate_attention' => false,
-            'model_version' => '1.0'
+            'model_version' => '1.0',
+            'ai_insights' => [
+                'Based on vehicle age and mileage, consider preventive maintenance.',
+                'Regular diagnostic checks can prevent costly repairs.',
+                'Document symptoms for better diagnostic accuracy.'
+            ]
         ];
     }
 }

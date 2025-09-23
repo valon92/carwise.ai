@@ -315,14 +315,42 @@
           <div v-else-if="diagnosisResult" class="space-y-6">
             <!-- Diagnosis Summary -->
             <div class="bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-lg p-6">
-              <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-3">Diagnosis Summary</h3>
-              <div class="flex items-center mb-4">
-                <div class="w-3 h-3 rounded-full mr-3" :class="getSeverityColor(diagnosisResult.severity)"></div>
-                <span class="font-medium" :class="getSeverityTextColor(diagnosisResult.severity)">
-                  {{ diagnosisResult.severity }} Priority
-                </span>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-secondary-900 dark:text-white">Diagnosis Summary</h3>
+                <div class="flex items-center space-x-4">
+                  <div class="flex items-center">
+                    <div class="w-3 h-3 rounded-full mr-2" :class="getSeverityColor(diagnosisResult.severity)"></div>
+                    <span class="font-medium text-sm" :class="getSeverityTextColor(diagnosisResult.severity)">
+                      {{ diagnosisResult.severity?.toUpperCase() || 'MEDIUM' }} Priority
+                    </span>
+                  </div>
+                  <div class="text-sm text-secondary-600 dark:text-secondary-400">
+                    {{ diagnosisResult.confidence_score || 75 }}% Confidence
+                  </div>
+                </div>
               </div>
-              <p class="text-secondary-700 dark:text-secondary-300">{{ diagnosisResult.summary }}</p>
+              <h4 class="text-xl font-semibold text-secondary-900 dark:text-white mb-2">
+                {{ diagnosisResult.problem_title || 'Vehicle Issue Detected' }}
+              </h4>
+              <p class="text-secondary-700 dark:text-secondary-300">
+                {{ diagnosisResult.problem_description || diagnosisResult.summary }}
+              </p>
+              
+              <!-- AI Insights -->
+              <div v-if="diagnosisResult.ai_insights" class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-400">
+                <h5 class="font-medium text-blue-900 dark:text-blue-100 mb-2 flex items-center">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                  </svg>
+                  AI Insights
+                </h5>
+                <ul class="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                  <li v-for="(insight, index) in diagnosisResult.ai_insights" :key="index" class="flex items-start">
+                    <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                    {{ insight }}
+                  </li>
+                </ul>
+              </div>
             </div>
 
             <!-- Likely Causes -->
@@ -366,12 +394,37 @@
             </div>
 
             <!-- Estimated Costs -->
-            <div v-if="diagnosisResult.estimatedCosts" class="bg-warning-50 dark:bg-warning-900/20 rounded-lg p-4">
-              <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-3">Estimated Costs</h3>
+            <div v-if="diagnosisResult.estimated_costs" class="bg-warning-50 dark:bg-warning-900/20 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-warning-600 dark:text-warning-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                </svg>
+                Estimated Costs
+              </h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div v-for="cost in diagnosisResult.estimatedCosts" :key="cost.service" class="flex justify-between items-center">
-                  <span class="text-secondary-700 dark:text-secondary-300">{{ cost.service }}</span>
-                  <span class="font-medium text-secondary-900 dark:text-white">{{ cost.range }}</span>
+                <div v-for="cost in diagnosisResult.estimated_costs" :key="cost.service" class="flex justify-between items-center p-3 bg-white dark:bg-secondary-800 rounded-lg border border-warning-200 dark:border-warning-700">
+                  <span class="text-secondary-700 dark:text-secondary-300 font-medium">{{ cost.service }}</span>
+                  <span class="font-semibold text-warning-700 dark:text-warning-300">
+                    €{{ cost.min }} - €{{ cost.max }}
+                  </span>
+                </div>
+              </div>
+              <p class="text-xs text-warning-600 dark:text-warning-400 mt-3">
+                * Cost estimates are approximate and may vary based on location and specific vehicle requirements.
+              </p>
+            </div>
+
+            <!-- Urgency Alert -->
+            <div v-if="diagnosisResult.requires_immediate_attention" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-6">
+              <div class="flex items-center">
+                <svg class="w-6 h-6 text-red-600 dark:text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                <div>
+                  <h4 class="font-semibold text-red-900 dark:text-red-100">Immediate Attention Required</h4>
+                  <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+                    This issue requires immediate professional attention to prevent further damage or safety risks.
+                  </p>
                 </div>
               </div>
             </div>
