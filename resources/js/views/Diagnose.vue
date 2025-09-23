@@ -530,6 +530,11 @@ export default {
         const response = await diagnosisAPI.submitDiagnosis(formData)
         diagnosisResult.value = response.data
         currentStep.value = 3
+        
+        // Show success notification
+        if (window.$notify) {
+          window.$notify.success('Diagnosis Complete', 'AI analysis has been completed successfully')
+        }
       } catch (error) {
         console.error('Diagnosis error:', error)
         // For demo purposes, show mock result

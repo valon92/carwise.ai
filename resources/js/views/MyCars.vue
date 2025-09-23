@@ -535,7 +535,11 @@ export default {
           if (response.data.success) {
             cars.value = cars.value.filter(car => car.id !== carId)
             await loadStatistics()
-            alert('Car deleted successfully!')
+            if (window.$notify) {
+              window.$notify.success('Car Deleted', 'Car has been removed from your garage')
+            } else {
+              alert('Car deleted successfully!')
+            }
           } else {
             alert(response.data.message || 'Error deleting car. Please try again.')
           }
@@ -570,7 +574,11 @@ export default {
             if (index !== -1) {
               cars.value[index] = response.data.car
             }
-            alert('Car updated successfully!')
+            if (window.$notify) {
+              window.$notify.success('Car Updated', 'Car information has been updated successfully')
+            } else {
+              alert('Car updated successfully!')
+            }
           } else {
             alert(response.data.message || 'Error updating car. Please try again.')
           }
@@ -579,7 +587,11 @@ export default {
           const response = await carsAPI.create(formData)
           if (response.data.success) {
             cars.value.push(response.data.car)
-            alert('Car added successfully!')
+            if (window.$notify) {
+              window.$notify.success('Car Added', 'New car has been added to your garage')
+            } else {
+              alert('Car added successfully!')
+            }
           } else {
             alert(response.data.message || 'Error adding car. Please try again.')
           }

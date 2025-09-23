@@ -32,10 +32,20 @@ api.interceptors.response.use(
   },
   (error) => {
     console.error('API Error:', error.response?.status, error.config?.url, error.response?.data)
+    
+    // Show notification for errors
+    if (window.$notify && error.response?.status >= 400) {
+      const message = error.response?.data?.message || 'An error occurred'
+      window.$notify.error('Error', message)
+    }
+    
     if (error.response?.status === 401) {
       // Token expired or invalid
       localStorage.removeItem('token')
       localStorage.removeItem('user')
+      if (window.$notify) {
+        window.$notify.warning('Session Expired', 'Please log in again')
+      }
       window.location.href = '/login'
     }
     return Promise.reject(error)

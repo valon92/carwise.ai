@@ -632,6 +632,11 @@ export default {
           
           successMessage.value = 'Account created successfully! Redirecting...'
           
+          // Show success notification
+          if (window.$notify) {
+            window.$notify.success('Welcome to CarWise!', `Account created for ${response.data.user.first_name || response.data.user.name}`)
+          }
+          
           // Redirect after a short delay
           setTimeout(() => {
             router.push('/dashboard')

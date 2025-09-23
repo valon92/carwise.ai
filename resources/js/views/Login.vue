@@ -237,6 +237,12 @@ export default {
           localStorage.setItem('user', JSON.stringify(response.data.user))
           
           console.log('Login successful, redirecting to dashboard...')
+          
+          // Show success notification
+          if (window.$notify) {
+            window.$notify.success('Welcome back!', `Hello ${response.data.user.first_name || response.data.user.name}`)
+          }
+          
           // Redirect to dashboard
           router.push('/dashboard')
         }
