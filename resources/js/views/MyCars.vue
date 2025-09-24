@@ -255,14 +255,18 @@
                 <label for="brand" class="block text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-2">
                   Brand *
                 </label>
-                <input 
+                <select 
                   id="brand"
                   v-model="carForm.brand"
-                  type="text"
                   required
                   class="input w-full"
-                  placeholder="e.g., Toyota, BMW, Mercedes"
-                />
+                  @change="onBrandChange"
+                >
+                  <option value="">Select a brand</option>
+                  <option v-for="brand in carBrands" :key="brand.id" :value="brand.name">
+                    {{ brand.name }} ({{ brand.country }})
+                  </option>
+                </select>
               </div>
 
               <div>
@@ -458,6 +462,7 @@
 <script>
 import { ref, onMounted, computed } from 'vue'
 import { carsAPI } from '../services/api'
+import axios from 'axios'
 
 export default {
   name: 'MyCars',
@@ -467,6 +472,7 @@ export default {
     const showAddCarModal = ref(false)
     const editingCar = ref(null)
     const loading = ref(false)
+    const carBrands = ref([])
     const carForm = ref({
       brand: '',
       model: '',
@@ -495,6 +501,22 @@ export default {
       } finally {
         loading.value = false
       }
+    }
+
+    const loadCarBrands = async () => {
+      try {
+        const response = await axios.get('/api/car-brands/popular')
+        if (response.data.success) {
+          carBrands.value = response.data.data
+        }
+      } catch (error) {
+        console.error('Error loading car brands:', error)
+      }
+    }
+
+    const onBrandChange = () => {
+      // Reset model when brand changes
+      carForm.value.model = ''
     }
 
     const loadStatistics = async () => {
@@ -640,6 +662,7 @@ export default {
     onMounted(() => {
       loadCars()
       loadStatistics()
+      loadCarBrands()
     })
 
     return {
@@ -649,11 +672,13 @@ export default {
       editingCar,
       loading,
       carForm,
+      carBrands,
       editCar,
       deleteCar,
       saveCar,
       closeModal,
-      viewCarHistory
+      viewCarHistory,
+      onBrandChange
     }
   }
 }

@@ -102,17 +102,9 @@
                   </label>
                   <select v-model="diagnosisForm.make" class="input" :disabled="selectedCar" required>
                     <option value="">Select Make</option>
-                    <option value="Toyota">Toyota</option>
-                    <option value="Honda">Honda</option>
-                    <option value="Ford">Ford</option>
-                    <option value="BMW">BMW</option>
-                    <option value="Mercedes">Mercedes</option>
-                    <option value="Audi">Audi</option>
-                    <option value="Volkswagen">Volkswagen</option>
-                    <option value="Nissan">Nissan</option>
-                    <option value="Hyundai">Hyundai</option>
-                    <option value="Kia">Kia</option>
-                    <option value="Other">Other</option>
+                    <option v-for="brand in carBrands" :key="brand.id" :value="brand.name">
+                      {{ brand.name }} ({{ brand.country }})
+                    </option>
                   </select>
                 </div>
                 <div>
@@ -460,6 +452,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { diagnosisAPI, carsAPI } from '../services/api'
+import axios from 'axios'
 
 export default {
   name: 'Diagnose',
@@ -471,6 +464,7 @@ export default {
     const fileInput = ref(null)
     const uploadedFiles = ref([])
     const selectedCar = ref(null)
+    const carBrands = ref([])
 
     const steps = ['Vehicle Info', 'Symptoms', 'AI Analysis', 'Results']
 
@@ -502,6 +496,17 @@ export default {
       'Air conditioning not working',
       'Suspension problems'
     ]
+
+    const loadCarBrands = async () => {
+      try {
+        const response = await axios.get('/api/car-brands/popular')
+        if (response.data.success) {
+          carBrands.value = response.data.data
+        }
+      } catch (error) {
+        console.error('Error loading car brands:', error)
+      }
+    }
 
     const loadCarData = async (carId) => {
       try {
@@ -660,6 +665,7 @@ export default {
 
     // Load car data if car ID is provided in URL
     onMounted(() => {
+      loadCarBrands()
       const carId = route.query.car
       if (carId) {
         console.log('Loading car data for ID:', carId)
@@ -677,6 +683,7 @@ export default {
       fileInput,
       uploadedFiles,
       selectedCar,
+      carBrands,
       triggerFileUpload,
       handleFileSelect,
       handleFileDrop,

@@ -4,12 +4,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CarController;
+use App\Http\Controllers\Api\CarBrandController;
 use App\Http\Controllers\Api\DiagnosisController;
 use App\Http\Controllers\Api\MechanicController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Car brands routes (public)
+Route::get('/car-brands', [CarBrandController::class, 'index']);
+Route::get('/car-brands/popular', [CarBrandController::class, 'popular']);
+Route::get('/car-brands/countries', [CarBrandController::class, 'countries']);
+Route::get('/car-brands/specialties', [CarBrandController::class, 'specialties']);
+Route::get('/car-brands/search', [CarBrandController::class, 'search']);
+Route::get('/car-brands/country/{country}', [CarBrandController::class, 'byCountry']);
+Route::get('/car-brands/specialty/{specialty}', [CarBrandController::class, 'bySpecialty']);
+Route::get('/car-brands/{id}', [CarBrandController::class, 'show']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
