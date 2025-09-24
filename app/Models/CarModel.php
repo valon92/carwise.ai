@@ -42,6 +42,26 @@ class CarModel extends Model
     ];
 
     /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->slug)) {
+                $model->slug = \Str::slug($model->name);
+            }
+        });
+
+        static::updating(function ($model) {
+            if ($model->isDirty('name') && empty($model->slug)) {
+                $model->slug = \Str::slug($model->name);
+            }
+        });
+    }
+
+    /**
      * Get the brand that owns this model.
      */
     public function brand()

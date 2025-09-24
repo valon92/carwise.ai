@@ -273,14 +273,21 @@
                 <label for="model" class="block text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-2">
                   Model *
                 </label>
-                <input 
+                <select 
                   id="model"
                   v-model="carForm.model"
-                  type="text"
                   required
                   class="input w-full"
-                  placeholder="e.g., Camry, X5, C-Class"
-                />
+                  :disabled="!carForm.brand"
+                >
+                  <option value="">Select a model</option>
+                  <option v-for="model in carModels" :key="model.id" :value="model.name">
+                    {{ model.name }} {{ model.generation ? `(${model.generation})` : '' }}
+                  </option>
+                </select>
+                <div v-if="!carForm.brand" class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
+                  Please select a brand first
+                </div>
               </div>
 
               <div>
@@ -473,6 +480,7 @@ export default {
     const editingCar = ref(null)
     const loading = ref(false)
     const carBrands = ref([])
+    const carModels = ref([])
     const carForm = ref({
       brand: '',
       model: '',
@@ -514,9 +522,35 @@ export default {
       }
     }
 
+    const loadCarModels = async (brandName) => {
+      try {
+        if (!brandName) {
+          carModels.value = []
+          return
+        }
+        
+        // Find brand by name
+        const brand = carBrands.value.find(b => b.name === brandName)
+        if (!brand) {
+          carModels.value = []
+          return
+        }
+        
+        const response = await axios.get(`/api/car-models/brand/${brand.id}`)
+        if (response.data.success) {
+          carModels.value = response.data.data
+        }
+      } catch (error) {
+        console.error('Error loading car models:', error)
+        carModels.value = []
+      }
+    }
+
     const onBrandChange = () => {
       // Reset model when brand changes
       carForm.value.model = ''
+      // Load models for selected brand
+      loadCarModels(carForm.value.brand)
     }
 
     const loadStatistics = async () => {
@@ -546,6 +580,8 @@ export default {
         notes: car.notes || '',
         status: car.status || 'active'
       }
+      // Load models for the car's brand
+      loadCarModels(car.brand)
       showAddCarModal.value = true
     }
 
@@ -673,6 +709,7 @@ export default {
       loading,
       carForm,
       carBrands,
+      carModels,
       editCar,
       deleteCar,
       saveCar,

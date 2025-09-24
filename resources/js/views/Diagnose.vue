@@ -100,7 +100,7 @@
                   <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
                     Make *
                   </label>
-                  <select v-model="diagnosisForm.make" class="input" :disabled="selectedCar" required>
+                  <select v-model="diagnosisForm.make" class="input" :disabled="selectedCar" required @change="onMakeChange">
                     <option value="">Select Make</option>
                     <option v-for="brand in carBrands" :key="brand.id" :value="brand.name">
                       {{ brand.name }} ({{ brand.country }})
@@ -111,14 +111,20 @@
                   <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
                     Model *
                   </label>
-                  <input
-                    v-model="diagnosisForm.model"
-                    type="text"
-                    placeholder="e.g., Camry, Civic, F-150"
-                    class="input"
-                    :disabled="selectedCar"
+                  <select 
+                    v-model="diagnosisForm.model" 
+                    class="input" 
+                    :disabled="selectedCar || !diagnosisForm.make" 
                     required
                   >
+                    <option value="">Select a model</option>
+                    <option v-for="model in carModels" :key="model.id" :value="model.name">
+                      {{ model.name }} {{ model.generation ? `(${model.generation})` : '' }}
+                    </option>
+                  </select>
+                  <div v-if="!diagnosisForm.make" class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
+                    Please select a make first
+                  </div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
@@ -465,6 +471,7 @@ export default {
     const uploadedFiles = ref([])
     const selectedCar = ref(null)
     const carBrands = ref([])
+    const carModels = ref([])
 
     const steps = ['Vehicle Info', 'Symptoms', 'AI Analysis', 'Results']
 
@@ -508,6 +515,37 @@ export default {
       }
     }
 
+    const loadCarModels = async (brandName) => {
+      try {
+        if (!brandName) {
+          carModels.value = []
+          return
+        }
+        
+        // Find brand by name
+        const brand = carBrands.value.find(b => b.name === brandName)
+        if (!brand) {
+          carModels.value = []
+          return
+        }
+        
+        const response = await axios.get(`/api/car-models/brand/${brand.id}`)
+        if (response.data.success) {
+          carModels.value = response.data.data
+        }
+      } catch (error) {
+        console.error('Error loading car models:', error)
+        carModels.value = []
+      }
+    }
+
+    const onMakeChange = () => {
+      // Reset model when make changes
+      diagnosisForm.model = ''
+      // Load models for selected make
+      loadCarModels(diagnosisForm.make)
+    }
+
     const loadCarData = async (carId) => {
       try {
         isLoading.value = true
@@ -521,6 +559,9 @@ export default {
           diagnosisForm.mileage = selectedCar.value.mileage ? selectedCar.value.mileage.toString() : ''
           diagnosisForm.engineType = selectedCar.value.fuel_type || ''
           diagnosisForm.engineSize = selectedCar.value.specifications?.engine_size || ''
+          
+          // Load models for the car's brand
+          loadCarModels(selectedCar.value.brand)
           
           console.log('Car data loaded:', selectedCar.value)
         }
@@ -684,13 +725,15 @@ export default {
       uploadedFiles,
       selectedCar,
       carBrands,
+      carModels,
       triggerFileUpload,
       handleFileSelect,
       handleFileDrop,
       removeFile,
       submitDiagnosis,
       getSeverityColor,
-      getSeverityTextColor
+      getSeverityTextColor,
+      onMakeChange
     }
   }
 }
