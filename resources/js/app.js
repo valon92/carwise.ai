@@ -11,6 +11,12 @@ const Mechanics = () => import('./views/Mechanics.vue')
 const Login = () => import('./views/Login.vue')
 const Register = () => import('./views/Register.vue')
 const Dashboard = () => import('./views/Dashboard.vue')
+const Admin = () => import('./views/Admin.vue')
+const ProfileEdit = () => import('./views/ProfileEdit.vue')
+const DiagnosisHistory = () => import('./views/DiagnosisHistory.vue')
+const PrivacyPolicy = () => import('./views/PrivacyPolicy.vue')
+const TermsOfService = () => import('./views/TermsOfService.vue')
+const CookiePolicy = () => import('./views/CookiePolicy.vue')
 
 // Lazy load components
 const Navbar = () => import('./components/Navbar.vue')
@@ -36,6 +42,17 @@ const routes = [
       title: 'Dashboard - CarWise AI',
       description: 'Your personal car management dashboard',
       requiresAuth: true
+    }
+  },
+  { 
+    path: '/admin', 
+    name: 'Admin', 
+    component: Admin,
+    meta: { 
+      title: 'Admin Panel - CarWise AI',
+      description: 'System administration panel',
+      requiresAuth: true,
+      requiresAdmin: true
     }
   },
   { 
@@ -82,6 +99,53 @@ const routes = [
     meta: { 
       title: 'Register - CarWise AI',
       description: 'Create your CarWise account'
+    }
+  },
+  { 
+    path: '/profile/edit', 
+    name: 'ProfileEdit', 
+    component: ProfileEdit,
+    meta: { 
+      title: 'Edit Profile - CarWise AI',
+      description: 'Update your profile information',
+      requiresAuth: true
+    }
+  },
+  { 
+    path: '/diagnosis/history', 
+    name: 'DiagnosisHistory', 
+    component: DiagnosisHistory,
+    meta: { 
+      title: 'Diagnosis History - CarWise AI',
+      description: 'View your past car diagnoses',
+      requiresAuth: true
+    }
+  },
+  { 
+    path: '/privacy-policy', 
+    name: 'PrivacyPolicy', 
+    component: PrivacyPolicy,
+    meta: { 
+      title: 'Privacy Policy - CarWise AI',
+      description: 'Learn how we protect your privacy and personal information'
+    }
+  },
+  { 
+    path: '/terms-of-service', 
+    name: 'TermsOfService', 
+    component: TermsOfService,
+    meta: { 
+      title: 'Terms of Service - CarWise AI',
+      description: 'Read our terms and conditions for using CarWise AI'
+    }
+  },
+  { 
+    path: '/cookie-policy', 
+    name: 'CookiePolicy', 
+    component: CookiePolicy,
+    meta: { 
+      title: 'Cookie Policy - CarWise AI',
+      description: 'Learn about our cookie usage and how to manage your preferences'
     }
   },
 ]

@@ -22,6 +22,7 @@
 <script>
 import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { initPerformanceOptimizations } from './utils/performance'
+import { getLanguageInstance } from './composables/useLanguage'
 
 // Lazy load components for better performance
 const Navbar = defineAsyncComponent({
@@ -88,6 +89,9 @@ export default {
 
       // Initialize performance optimizations
       initPerformanceOptimizations()
+      
+      // Initialize language system
+      getLanguageInstance()
     })
 
     return {

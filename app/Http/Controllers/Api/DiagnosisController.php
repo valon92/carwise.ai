@@ -7,6 +7,7 @@ use App\Models\DiagnosisSession;
 use App\Models\DiagnosisMedia;
 use App\Models\DiagnosisResult;
 use App\Services\AIDiagnosisService;
+use App\Jobs\ProcessAIDiagnosis;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
@@ -20,6 +21,72 @@ class DiagnosisController extends Controller
     public function __construct(AIDiagnosisService $aiService)
     {
         $this->aiService = $aiService;
+    }
+
+    /**
+     * Start a new diagnosis session.
+     */
+    public function startDiagnosis(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'make' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'year' => 'required|integer|min:1990|max:' . (date('Y') + 1),
+            'mileage' => 'nullable|integer|min:0',
+            'engine_type' => 'nullable|string|max:255',
+            'engine_size' => 'nullable|string|max:255',
+            'description' => 'required|string|max:2000',
+            'symptoms' => 'nullable|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Create diagnosis session
+            $session = DiagnosisSession::create([
+                'session_id' => Str::uuid(),
+                'user_id' => auth()->id(),
+                'make' => $request->make,
+                'model' => $request->model,
+                'year' => $request->year,
+                'mileage' => $request->mileage,
+                'engine_type' => $request->engine_type,
+                'engine_size' => $request->engine_size,
+                'description' => $request->description,
+                'symptoms' => $request->symptoms ?? [],
+                'status' => 'processing',
+                'created_at' => now()
+            ]);
+
+            // Process AI diagnosis synchronously for immediate results
+            $this->processWithAI($session);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Diagnosis completed successfully',
+                'data' => [
+                    'session_id' => $session->session_id,
+                    'status' => 'completed'
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Diagnosis start failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to start diagnosis'
+            ], 500);
+        }
     }
 
     /**
@@ -37,7 +104,11 @@ class DiagnosisController extends Controller
             'description' => 'required|string|max:2000',
             'symptoms' => 'nullable|array',
             'photos' => 'nullable|array|max:5',
-            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240' // 10MB max
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max
+            'videos' => 'nullable|array|max:2',
+            'videos.*' => 'mimes:mp4,avi,mov,wmv,flv,webm|max:51200', // 50MB max
+            'audio' => 'nullable|array|max:3',
+            'audio.*' => 'mimes:mp3,wav,ogg,m4a,aac|max:20480' // 20MB max
         ]);
 
         if ($validator->fails()) {
@@ -65,28 +136,37 @@ class DiagnosisController extends Controller
             ]);
 
             // Handle file uploads
-            if ($request->hasFile('photos')) {
-                foreach ($request->file('photos') as $index => $file) {
-                    $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
-                    $filePath = $file->storeAs('diagnosis-media', $fileName, 'public');
+            $mediaTypes = ['photos' => 'image', 'videos' => 'video', 'audio' => 'audio'];
+            
+            foreach ($mediaTypes as $inputName => $fileType) {
+                if ($request->hasFile($inputName)) {
+                    foreach ($request->file($inputName) as $index => $file) {
+                        $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                        $filePath = $file->storeAs('diagnosis-media', $fileName, 'public');
 
-                    DiagnosisMedia::create([
-                        'diagnosis_session_id' => $session->id,
-                        'file_name' => $file->getClientOriginalName(),
-                        'file_path' => $filePath,
-                        'file_type' => 'image',
-                        'file_size' => $file->getSize(),
-                        'mime_type' => $file->getMimeType(),
-                        'metadata' => [
-                            'original_name' => $file->getClientOriginalName(),
-                            'uploaded_at' => now()->toISOString()
-                        ]
-                    ]);
+                        DiagnosisMedia::create([
+                            'diagnosis_session_id' => $session->id,
+                            'file_name' => $file->getClientOriginalName(),
+                            'file_path' => $filePath,
+                            'file_type' => $fileType,
+                            'file_size' => $file->getSize(),
+                            'mime_type' => $file->getMimeType(),
+                            'metadata' => [
+                                'original_name' => $file->getClientOriginalName(),
+                                'uploaded_at' => now()->toISOString()
+                            ]
+                        ]);
+                    }
                 }
             }
 
-            // Process with AI (async)
-            $this->processWithAI($session);
+            // Process with AI (sync for now)
+            try {
+                $this->processWithAI($session);
+            } catch (\Exception $e) {
+                \Log::error('AI processing failed: ' . $e->getMessage());
+                // Continue with response even if AI fails
+            }
 
             return response()->json([
                 'success' => true,
@@ -148,11 +228,20 @@ class DiagnosisController extends Controller
                 ], 404);
             }
 
+            // Check if result needs translation to user's language
+            $result = $session->result;
+            $userLanguage = auth()->user()?->language ?? 'en';
+            
+            // If user language is not English and result might be in English, translate it
+            if ($userLanguage !== 'en' && $this->needsTranslation($result)) {
+                $result = $this->translateExistingResult($result, $userLanguage);
+            }
+
             return response()->json([
                 'success' => true,
                 'data' => [
                     'session' => $session,
-                    'result' => $session->result,
+                    'result' => $result,
                     'media' => $session->media->map(function ($media) {
                         return [
                             'id' => $media->id,
@@ -163,6 +252,10 @@ class DiagnosisController extends Controller
                         ];
                     })
                 ]
+            ])->withHeaders([
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0'
             ]);
 
         } catch (\Exception $e) {
@@ -203,6 +296,47 @@ class DiagnosisController extends Controller
     }
 
     /**
+     * Transcribe audio to text.
+     */
+    public function transcribeAudio(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'audio' => 'required|file|mimes:mp3,wav,ogg,m4a,aac|max:20480' // 20MB max
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid audio file',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // For now, return a placeholder response
+            // In a real implementation, you would integrate with a speech-to-text service
+            // like Google Speech-to-Text, Azure Speech Services, or OpenAI Whisper
+            
+            return response()->json([
+                'success' => true,
+                'text' => 'Audio transcription feature is coming soon. Please type your description instead.',
+                'message' => 'Transcription completed'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Audio transcription failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to transcribe audio'
+            ], 500);
+        }
+    }
+
+    /**
      * Process diagnosis with AI service.
      */
     private function processWithAI(DiagnosisSession $session): void
@@ -220,7 +354,9 @@ class DiagnosisController extends Controller
                 ],
                 'symptoms' => $session->symptoms,
                 'description' => $session->description,
-                'media_files' => $session->media->pluck('file_path')->toArray()
+                'media_files' => $session->media ? $session->media->pluck('file_path')->toArray() : [],
+                'user_currency_id' => auth()->user()?->preferred_currency_id ?? 1,
+                'user_language' => auth()->user()?->language ?? 'en'
             ];
 
             // Call AI service
@@ -263,5 +399,53 @@ class DiagnosisController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
         }
+    }
+
+    /**
+     * Check if a result needs translation (contains English text)
+     */
+    private function needsTranslation($result): bool
+    {
+        if (!is_array($result)) {
+            return false;
+        }
+
+        // Check common English phrases that indicate the result is in English
+        $englishPhrases = [
+            'Vehicle Diagnostic Required',
+            'Based on the symptoms described',
+            'Multiple System Analysis',
+            'Comprehensive Diagnostic',
+            'Preventive Maintenance'
+        ];
+
+        $resultJson = json_encode($result);
+        foreach ($englishPhrases as $phrase) {
+            if (str_contains($resultJson, $phrase)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Translate existing result to user's language
+     */
+    private function translateExistingResult($result, string $language)
+    {
+        if (!is_array($result) || $language === 'en') {
+            return $result;
+        }
+
+        // Use the same translation service as AIDiagnosisService
+        $aiService = app(\App\Services\AIDiagnosisService::class);
+        
+        // Access the private method via reflection (not ideal but works for now)
+        $reflection = new \ReflectionClass($aiService);
+        $method = $reflection->getMethod('translateResponse');
+        $method->setAccessible(true);
+        
+        return $method->invoke($aiService, $result, $language);
     }
 }

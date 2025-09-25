@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: carwise-app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - carwise-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: carwise-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: carwise_production
+      MYSQL_USER: carwise_user
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    networks:
+      - carwise-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: carwise-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - carwise-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: carwise-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./public:/var/www/html/public
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - app
+    networks:
+      - carwise-network
+
+  monitoring:
+    image: prom/prometheus:latest
+    container_name: carwise-monitoring
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - carwise-network
+
+volumes:
+  mysql_data:
+  redis_data:
+  prometheus_data:
+
+networks:
+  carwise-network:
+    driver: bridge

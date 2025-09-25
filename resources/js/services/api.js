@@ -58,6 +58,7 @@ export const authAPI = {
   login: (data) => api.post('/login', data),
   logout: () => api.post('/logout'),
   getUser: () => api.get('/user'),
+  updateProfile: (data) => api.put('/user/profile', data),
 }
 
 // Cars API
@@ -72,20 +73,34 @@ export const carsAPI = {
 
 // Diagnosis API
 export const diagnosisAPI = {
+  startDiagnosis: (data) => api.post('/diagnosis/start', data),
   submitDiagnosis: (formData) => api.post('/diagnosis/submit', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   }),
-  getResult: (sessionId) => api.get(`/diagnosis/result/${sessionId}`),
+  getResult: (sessionId) => api.get(`/diagnosis/result/${sessionId}?t=${Date.now()}&_=${Math.random()}`, {
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'If-None-Match': '*'
+    }
+  }),
   getHistory: (params = {}) => api.get('/diagnosis/history', { params }),
+}
+
+export const dashboardAPI = {
+  getStatistics: () => api.get('/dashboard/statistics'),
+  getNotifications: () => api.get('/dashboard/notifications'),
 }
 
 // Mechanics API
 export const mechanicsAPI = {
   getAll: (params = {}) => api.get('/mechanics', { params }),
   getById: (id) => api.get(`/mechanics/${id}`),
-  update: (id, data) => api.put(`/mechanics/${id}`, data),
+  create: (formData) => api.post('/mechanics', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  update: (id, formData) => api.post(`/mechanics/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
 }
 
 export default api

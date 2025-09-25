@@ -10,20 +10,32 @@
             </div>
             <div>
               <h1 class="text-2xl font-bold text-secondary-900 dark:text-white">
-                Welcome back, {{ user?.first_name || user?.name }}!
+                {{ t('welcome_back_user') }}, {{ user?.first_name || user?.name }}!
               </h1>
               <p class="text-secondary-600 dark:text-secondary-400">
-                {{ user?.role === 'mechanic' ? 'Certified Mechanic' : 'Car Owner' }} • {{ user?.location || 'No location set' }}
+                {{ user?.role === 'mechanic' ? t('certified_mechanic') : t('car_owner') }} • {{ user?.location || t('no_location_set') }}
               </p>
             </div>
           </div>
           <div class="flex items-center space-x-4">
-            <button class="btn-secondary">
+            <!-- Notifications -->
+            <div class="relative">
+              <button @click="handleNotifications" class="p-2 text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-white transition-colors duration-200 relative">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.828 7l2.586 2.586a2 2 0 002.828 0L12.828 7H4.828zM4 7h8l-2 2H6l-2-2z"></path>
+                </svg>
+                <span v-if="notifications.length > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {{ notifications.length }}
+                </span>
+              </button>
+            </div>
+            
+            <button @click="handleSettings" class="btn-secondary">
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
-              Settings
+              {{ t('settings') }}
             </button>
             <button @click="handleLogout" class="btn-outline">
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,7 +93,7 @@
                 </div>
               </router-link>
 
-              <div class="group p-6 bg-gradient-to-br from-success-500 to-success-600 rounded-xl text-white hover:from-success-600 hover:to-success-700 transition-all duration-200 transform hover:scale-105 cursor-pointer">
+              <div @click="handleHistory" class="group p-6 bg-gradient-to-br from-success-500 to-success-600 rounded-xl text-white hover:from-success-600 hover:to-success-700 transition-all duration-200 transform hover:scale-105 cursor-pointer">
                 <div class="flex items-center justify-between">
                   <div>
                     <h3 class="text-lg font-semibold mb-2">History</h3>
@@ -193,7 +205,7 @@
                 </div>
               </div>
 
-              <button class="w-full btn-outline text-sm">
+              <button @click="handleEditProfile" class="w-full btn-outline text-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
@@ -210,10 +222,21 @@
                 <div>
                   <p class="text-sm text-primary-600 dark:text-primary-400">Total Diagnoses</p>
                   <p class="text-2xl font-bold text-primary-900 dark:text-primary-100">{{ stats.totalDiagnoses }}</p>
-                  <p class="text-xs text-primary-500 dark:text-primary-400">+{{ stats.diagnosesThisMonth }} this month</p>
+                  <p class="text-xs text-primary-500 dark:text-primary-400">+{{ stats.diagnosesThisMonth }} this month, +{{ stats.diagnosesThisWeek }} this week</p>
                 </div>
                 <svg class="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+
+              <div class="flex items-center justify-between p-4 bg-info-50 dark:bg-info-900/20 rounded-lg">
+                <div>
+                  <p class="text-sm text-info-600 dark:text-info-400">Avg Response Time</p>
+                  <p class="text-2xl font-bold text-info-900 dark:text-info-100">{{ stats.averageResponseTime }}s</p>
+                  <p class="text-xs text-info-500 dark:text-info-400">AI processing time</p>
+                </div>
+                <svg class="w-8 h-8 text-info-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
               </div>
 
@@ -248,6 +271,46 @@
                 <svg class="w-8 h-8 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analytics Charts -->
+          <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md rounded-2xl p-6 border border-white/20 dark:border-secondary-700/20">
+            <h2 class="text-xl font-semibold text-secondary-900 dark:text-white mb-6">Diagnosis Analytics</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Monthly Trend Chart -->
+              <div class="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 rounded-xl p-4">
+                <h3 class="font-semibold text-primary-900 dark:text-primary-100 mb-4">Monthly Diagnoses</h3>
+                <div class="h-32 flex items-end justify-between space-x-2">
+                  <div v-for="(month, index) in stats.monthlyDiagnoses" :key="index" 
+                       class="flex-1 bg-primary-500 rounded-t-lg transition-all duration-300 hover:bg-primary-600"
+                       :style="{ height: `${(month.value / Math.max(...stats.monthlyDiagnoses.map(m => m.value), 1)) * 100}%` }"
+                       :title="`${month.month}: ${month.value} diagnoses`">
+                  </div>
+                </div>
+                <div class="flex justify-between text-xs text-primary-700 dark:text-primary-300 mt-2">
+                  <span v-for="(month, index) in stats.monthlyDiagnoses" :key="index">{{ month.month }}</span>
+                </div>
+              </div>
+
+              <!-- Issue Categories -->
+              <div class="bg-gradient-to-br from-secondary-50 to-secondary-100 dark:from-secondary-900/20 dark:to-secondary-800/20 rounded-xl p-4">
+                <h3 class="font-semibold text-secondary-900 dark:text-secondary-100 mb-4">Common Issues</h3>
+                <div class="space-y-3">
+                  <div v-for="(issue, index) in stats.mostCommonIssues.slice(0, 5)" :key="index" 
+                       class="flex items-center justify-between">
+                    <span class="text-sm text-secondary-700 dark:text-secondary-300">{{ issue.name }}</span>
+                    <div class="flex items-center space-x-2">
+                      <div class="w-16 bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
+                        <div class="bg-secondary-500 h-2 rounded-full" 
+                             :style="{ width: `${(issue.count / Math.max(...stats.mostCommonIssues.map(i => i.count), 1)) * 100}%` }">
+                        </div>
+                      </div>
+                      <span class="text-xs text-secondary-600 dark:text-secondary-400 w-8">{{ issue.count }}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -296,13 +359,82 @@
         </div>
       </div>
     </div>
+
+    <!-- Notifications Modal -->
+    <div v-if="showNotificationsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white dark:bg-secondary-800 rounded-2xl max-w-md w-full max-h-96 overflow-hidden">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 border-b border-secondary-200 dark:border-secondary-700">
+          <h3 class="text-lg font-semibold text-secondary-900 dark:text-white">Notifications</h3>
+          <button @click="closeNotificationsModal" class="p-2 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="p-6 overflow-y-auto max-h-80">
+          <div v-if="notifications.length === 0" class="text-center py-8">
+            <svg class="w-12 h-12 text-secondary-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.828 7l2.586 2.586a2 2 0 002.828 0L12.828 7H4.828zM4 7h8l-2 2H6l-2-2z"></path>
+            </svg>
+            <p class="text-secondary-500 dark:text-secondary-400">No notifications yet</p>
+          </div>
+          
+          <div v-else class="space-y-4">
+            <div v-for="notification in notifications" :key="notification.id" 
+                 class="p-4 rounded-lg border border-secondary-200 dark:border-secondary-700"
+                 :class="{
+                   'bg-info-50 dark:bg-info-900/20 border-info-200 dark:border-info-700': notification.type === 'info',
+                   'bg-success-50 dark:bg-success-900/20 border-success-200 dark:border-success-700': notification.type === 'success',
+                   'bg-warning-50 dark:bg-warning-900/20 border-warning-200 dark:border-warning-700': notification.type === 'warning',
+                   'bg-danger-50 dark:bg-danger-900/20 border-danger-200 dark:border-danger-700': notification.type === 'error'
+                 }">
+              <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                  <svg v-if="notification.type === 'info'" class="w-5 h-5 text-info-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <svg v-else-if="notification.type === 'success'" class="w-5 h-5 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <svg v-else-if="notification.type === 'warning'" class="w-5 h-5 text-warning-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                  </svg>
+                  <svg v-else class="w-5 h-5 text-danger-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-sm font-medium text-secondary-900 dark:text-white">{{ notification.title }}</h4>
+                  <p class="text-sm text-secondary-600 dark:text-secondary-400 mt-1">{{ notification.message }}</p>
+                  <p class="text-xs text-secondary-500 dark:text-secondary-500 mt-2">{{ notification.time }}</p>
+                </div>
+                <div v-if="!notification.read" class="flex-shrink-0">
+                  <div class="w-2 h-2 bg-primary-500 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-end space-x-3 p-6 border-t border-secondary-200 dark:border-secondary-700">
+          <button @click="closeNotificationsModal" class="btn-outline text-sm">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { authAPI, carsAPI, diagnosisAPI } from '../services/api'
+import { authAPI, carsAPI, diagnosisAPI, dashboardAPI } from '../services/api'
+import { t } from '../utils/translations'
 
 export default {
   name: 'Dashboard',
@@ -321,14 +453,39 @@ export default {
     const stats = ref({
       totalDiagnoses: 0,
       diagnosesThisMonth: 0,
+      diagnosesThisWeek: 0,
       carsRegistered: 0,
       activeCars: 0,
       successRate: 0,
       experienceYears: 0,
-      clientsHelped: 0
+      clientsHelped: 0,
+      averageResponseTime: 0,
+      totalCostSaved: 0,
+      mostCommonIssues: [],
+      diagnosisTrends: [],
+      monthlyDiagnoses: [],
+      weeklyDiagnoses: []
     })
 
     const recentDiagnoses = ref([])
+    const notifications = ref([
+      {
+        id: 1,
+        type: 'info',
+        title: 'Welcome to CarWise AI!',
+        message: 'Your account has been created successfully.',
+        time: 'Just now',
+        read: false
+      },
+      {
+        id: 2,
+        type: 'success',
+        title: 'Diagnosis Completed',
+        message: 'Your car diagnosis has been completed successfully.',
+        time: '2 hours ago',
+        read: false
+      }
+    ])
     
     const recentActivity = ref([
       {
@@ -357,37 +514,39 @@ export default {
 
     const loadStatistics = async () => {
       try {
-        // Load car statistics
-        const carsResponse = await carsAPI.statistics()
-        if (carsResponse.data.success) {
-          stats.value.carsRegistered = carsResponse.data.statistics.total_cars || 0
-          stats.value.activeCars = carsResponse.data.statistics.active_cars || 0
-        }
-
-        // Load diagnosis statistics
-        const diagnosisResponse = await diagnosisAPI.getHistory()
-        if (diagnosisResponse.data.success) {
-          const diagnoses = diagnosisResponse.data.diagnoses || []
-          stats.value.totalDiagnoses = diagnoses.length
-          recentDiagnoses.value = diagnoses.slice(0, 5) // Store recent diagnoses
+        // Load comprehensive dashboard statistics
+        const dashboardResponse = await dashboardAPI.getStatistics()
+        if (dashboardResponse.data.success) {
+          const data = dashboardResponse.data.data
           
-          // Calculate this month's diagnoses
-          const thisMonth = new Date().getMonth()
-          const thisYear = new Date().getFullYear()
-          stats.value.diagnosesThisMonth = diagnoses.filter(d => {
-            const diagnosisDate = new Date(d.created_at)
-            return diagnosisDate.getMonth() === thisMonth && diagnosisDate.getFullYear() === thisYear
-          }).length
-
-          // Calculate success rate (assuming completed diagnoses are successful)
-          const completedDiagnoses = diagnoses.filter(d => d.status === 'completed')
-          stats.value.successRate = diagnoses.length > 0 ? Math.round((completedDiagnoses.length / diagnoses.length) * 100) : 0
+          // Basic stats
+          stats.value.totalDiagnoses = data.basic_stats.total_diagnoses
+          stats.value.diagnosesThisMonth = data.time_stats.diagnoses_this_month
+          stats.value.diagnosesThisWeek = data.time_stats.diagnoses_this_week
+          stats.value.carsRegistered = data.basic_stats.total_cars
+          stats.value.activeCars = data.basic_stats.active_cars
+          stats.value.successRate = data.basic_stats.success_rate
+          stats.value.averageResponseTime = data.time_stats.average_response_time
+          stats.value.totalCostSaved = data.analytics.total_cost_saved
+          
+          // Analytics data
+          stats.value.monthlyDiagnoses = data.analytics.monthly_diagnoses
+          stats.value.mostCommonIssues = data.analytics.common_issues
+          
+          // Recent diagnoses
+          recentDiagnoses.value = data.recent_diagnoses
+          
+          // User-specific stats
+          if (user.value?.role === 'mechanic') {
+            stats.value.experienceYears = data.user_info.experience_years
+            stats.value.clientsHelped = data.user_info.clients_helped
+          }
         }
 
-        // Set experience years for mechanics
-        if (user.value?.role === 'mechanic') {
-          stats.value.experienceYears = user.value.experience_years || 0
-          stats.value.clientsHelped = Math.floor(Math.random() * 50) + 10 // Mock data for now
+        // Load notifications
+        const notificationsResponse = await dashboardAPI.getNotifications()
+        if (notificationsResponse.data.success) {
+          notifications.value = notificationsResponse.data.data
         }
       } catch (error) {
         console.error('Error loading statistics:', error)
@@ -395,13 +554,89 @@ export default {
         stats.value = {
           totalDiagnoses: 0,
           diagnosesThisMonth: 0,
+          diagnosesThisWeek: 0,
           carsRegistered: 0,
           activeCars: 0,
           successRate: 0,
           experienceYears: user.value?.role === 'mechanic' ? 5 : 0,
-          clientsHelped: 0
+          clientsHelped: 0,
+          averageResponseTime: 0,
+          totalCostSaved: 0,
+          mostCommonIssues: [],
+          diagnosisTrends: [],
+          monthlyDiagnoses: [],
+          weeklyDiagnoses: []
         }
       }
+    }
+
+    // Helper functions for data generation
+    const getWeekNumber = (date) => {
+      const firstDayOfYear = new Date(date.getFullYear(), 0, 1)
+      const pastDaysOfYear = (date - firstDayOfYear) / 86400000
+      return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7)
+    }
+
+    const generateMonthlyData = (diagnoses) => {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const currentYear = new Date().getFullYear()
+      const monthlyData = months.map(month => ({ month, value: 0 }))
+      
+      diagnoses.forEach(diagnosis => {
+        const date = new Date(diagnosis.created_at)
+        if (date.getFullYear() === currentYear) {
+          monthlyData[date.getMonth()].value++
+        }
+      })
+      
+      return monthlyData
+    }
+
+    const generateCommonIssues = (diagnoses) => {
+      const issues = {}
+      diagnoses.forEach(diagnosis => {
+        if (diagnosis.result?.likely_causes) {
+          const causes = Array.isArray(diagnosis.result.likely_causes) 
+            ? diagnosis.result.likely_causes 
+            : JSON.parse(diagnosis.result.likely_causes || '[]')
+          
+          causes.forEach(cause => {
+            const issueName = cause.title || 'Unknown Issue'
+            issues[issueName] = (issues[issueName] || 0) + 1
+          })
+        }
+      })
+      
+      return Object.entries(issues)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10)
+    }
+
+    const handleEditProfile = () => {
+      // Navigate to profile edit page or open modal
+      router.push('/profile/edit')
+    }
+
+    const showNotificationsModal = ref(false)
+
+    const handleNotifications = () => {
+      // Show notifications modal
+      showNotificationsModal.value = true
+    }
+
+    const closeNotificationsModal = () => {
+      showNotificationsModal.value = false
+    }
+
+    const handleSettings = () => {
+      // Navigate to settings page or open settings modal
+      alert('Settings feature coming soon!')
+    }
+
+    const handleHistory = () => {
+      // Navigate to diagnosis history page
+      router.push('/diagnosis/history')
     }
 
     const handleLogout = async () => {
@@ -472,11 +707,19 @@ export default {
       stats,
       recentActivity,
       recentDiagnoses,
+      notifications,
       isLoading,
+      showNotificationsModal,
+      handleEditProfile,
+      handleNotifications,
+      closeNotificationsModal,
+      handleSettings,
+      handleHistory,
       handleLogout,
       formatDate,
       getDiagnosisStatusColor,
-      getDiagnosisStatusTextColor
+      getDiagnosisStatusTextColor,
+      t
     }
   }
 }

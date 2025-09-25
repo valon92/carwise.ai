@@ -7,13 +7,13 @@
         <!-- Company Info -->
         <div class="lg:col-span-1">
           <div class="flex items-center mb-4">
-            <div class="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-              <span class="text-white font-bold text-xl">C</span>
+            <div class="w-14 h-14 flex items-center justify-center">
+              <img src="/icons/icon1.png" alt="CarWise.ai" class="w-12 h-12" />
             </div>
-            <span class="ml-3 text-xl font-bold text-white">CarWise AI</span>
+            <span class="ml-3 text-xl font-bold text-white">CarWise.ai</span>
           </div>
           <p class="text-secondary-300 mb-6 leading-relaxed">
-            Smart car diagnosis platform powered by AI. Get instant, accurate vehicle diagnostics and connect with certified mechanics.
+            {{ t('smart_car_diagnosis_platform') }}
           </p>
           <div class="flex space-x-4">
             <a href="#" class="social-link" title="Facebook">
@@ -191,15 +191,15 @@
             © {{ currentYear }} CarWise.ai. All rights reserved.
           </div>
           <div class="flex space-x-6">
-            <a href="#" class="text-secondary-400 hover:text-primary-400 text-sm transition-colors duration-200">
+            <router-link to="/privacy-policy" class="text-secondary-400 hover:text-primary-400 text-sm transition-colors duration-200">
               Privacy Policy
-            </a>
-            <a href="#" class="text-secondary-400 hover:text-primary-400 text-sm transition-colors duration-200">
+            </router-link>
+            <router-link to="/terms-of-service" class="text-secondary-400 hover:text-primary-400 text-sm transition-colors duration-200">
               Terms of Service
-            </a>
-            <a href="#" class="text-secondary-400 hover:text-primary-400 text-sm transition-colors duration-200">
+            </router-link>
+            <router-link to="/cookie-policy" class="text-secondary-400 hover:text-primary-400 text-sm transition-colors duration-200">
               Cookie Policy
-            </a>
+            </router-link>
           </div>
         </div>
       </div>
@@ -209,6 +209,7 @@
 
 <script>
 import { computed } from 'vue'
+import { t } from '../utils/translations'
 
 export default {
   name: 'Footer',
@@ -216,7 +217,8 @@ export default {
     const currentYear = computed(() => new Date().getFullYear())
 
     return {
-      currentYear
+      currentYear,
+      t
     }
   }
 }

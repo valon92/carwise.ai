@@ -11,20 +11,20 @@
       <!-- Header -->
       <div class="sm:mx-auto sm:w-full sm:max-w-2xl">
         <div class="flex justify-center">
-          <div class="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center shadow-lg">
-            <span class="text-white font-bold text-2xl">C</span>
+          <div class="w-16 h-16 flex items-center justify-center">
+            <img src="/icons/icon1.png" alt="CarWise.ai" class="w-16 h-16 rounded-2xl shadow-lg" />
           </div>
         </div>
         <h2 class="mt-6 text-center text-3xl font-bold text-secondary-900 dark:text-white">
-          Join CarWise AI
+          {{ t('join_carwise') }}
         </h2>
         <p class="mt-2 text-center text-lg text-secondary-600 dark:text-secondary-400">
-          Create your account and start your smart car journey
+          {{ t('create_account_start_journey') }}
         </p>
         <p class="mt-1 text-center text-sm text-secondary-500 dark:text-secondary-500">
-          Already have an account?
+          {{ t('have_account') }}
           <router-link to="/login" class="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors duration-200">
-            Sign in here
+            {{ t('sign_in_here') }}
           </router-link>
         </p>
       </div>
@@ -509,6 +509,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI } from '../services/api'
+import { t } from '../utils/translations'
 
 export default {
   name: 'Register',
@@ -668,7 +669,8 @@ export default {
       availableSkills,
       passwordStrength,
       isFormValid,
-      handleRegister
+      handleRegister,
+      t
     }
   }
 }

@@ -6,10 +6,10 @@
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="text-center">
           <h1 class="text-4xl md:text-5xl font-bold text-secondary-900 dark:text-white mb-4">
-            My Cars
+            {{ t('my_cars') }}
           </h1>
           <p class="text-xl text-secondary-600 dark:text-secondary-300 mb-8 max-w-2xl mx-auto">
-            Manage your vehicles, track maintenance, and view diagnosis history all in one place
+            {{ t('manage_vehicles_description') }}
           </p>
           <button 
             @click="showAddCarModal = true"
@@ -18,7 +18,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
-            Add New Car
+            {{ t('add_new_car') }}
           </button>
         </div>
       </div>
@@ -470,6 +470,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { carsAPI } from '../services/api'
 import axios from 'axios'
+import { t } from '../utils/translations'
 
 export default {
   name: 'MyCars',
@@ -715,7 +716,8 @@ export default {
       saveCar,
       closeModal,
       viewCarHistory,
-      onBrandChange
+      onBrandChange,
+      t
     }
   }
 }

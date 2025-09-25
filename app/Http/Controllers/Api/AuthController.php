@@ -176,4 +176,71 @@ class AuthController extends Controller
             'user' => $request->user()
         ]);
     }
+
+    /**
+     * Update user profile.
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'sometimes|string|max:255',
+            'last_name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'phone' => 'sometimes|string|max:20',
+            'location' => 'sometimes|string|max:255',
+            'password' => 'sometimes|string|min:8|confirmed',
+            'experience_years' => 'sometimes|integer|min:0|max:50',
+            'hourly_rate' => 'sometimes|numeric|min:0',
+            'bio' => 'sometimes|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $updateData = $request->only([
+                'first_name', 'last_name', 'email', 'phone', 'location',
+                'experience_years', 'hourly_rate', 'bio'
+            ]);
+
+            // Update name if first_name or last_name changed
+            if ($request->has('first_name') || $request->has('last_name')) {
+                $firstName = $request->get('first_name', $user->first_name);
+                $lastName = $request->get('last_name', $user->last_name);
+                $updateData['name'] = trim($firstName . ' ' . $lastName);
+            }
+
+            // Hash password if provided
+            if ($request->has('password')) {
+                $updateData['password'] = Hash::make($request->password);
+            }
+
+            // Remove null values
+            $updateData = array_filter($updateData, function($value) {
+                return $value !== null && $value !== '';
+            });
+
+            $user->update($updateData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully',
+                'user' => $user->fresh()
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update profile',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

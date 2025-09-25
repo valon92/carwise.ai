@@ -30,6 +30,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | AI Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for AI providers used in the application
+    |
+    */
+
+    'default_ai_provider' => env('DEFAULT_AI_PROVIDER', 'gemini'),
+    'ai_fallback_enabled' => env('AI_FALLBACK_ENABLED', true),
+    'max_ai_cost_per_diagnosis' => env('MAX_AI_COST_PER_DIAGNOSIS', 0.10),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

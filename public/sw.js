@@ -1,10 +1,12 @@
 // Service Worker for CarWise AI
-const CACHE_NAME = 'carwise-ai-v1'
+const CACHE_NAME = 'carwise-ai-v2'
 const urlsToCache = [
   '/',
-  '/css/app.css',
-  '/js/app.js',
   '/manifest.json',
+  '/favicon.ico',
+  '/icons/icon-72x72.png',
+  '/icons/icon-144x144.png',
+  '/icons/icon-192x192.png',
   // Add other critical assets here
 ]
 

@@ -38,9 +38,41 @@ return [
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
         'api_url' => env('OPENAI_API_URL', 'https://api.openai.com/v1'),
-        'model' => env('OPENAI_MODEL', 'gpt-4'),
+        'model' => env('OPENAI_MODEL', 'gpt-3.5-turbo'),
         'max_tokens' => env('OPENAI_MAX_TOKENS', 2000),
         'temperature' => env('OPENAI_TEMPERATURE', 0.3),
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'api_url' => env('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+        'model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
+        'max_tokens' => env('GEMINI_MAX_TOKENS', 2000),
+        'temperature' => env('GEMINI_TEMPERATURE', 0.3),
+    ],
+
+    'claude' => [
+        'api_key' => env('CLAUDE_API_KEY'),
+        'api_url' => env('CLAUDE_API_URL', 'https://api.anthropic.com/v1'),
+        'model' => env('CLAUDE_MODEL', 'claude-3-sonnet-20240229'),
+        'max_tokens' => env('CLAUDE_MAX_TOKENS', 2000),
+        'temperature' => env('CLAUDE_TEMPERATURE', 0.3),
+    ],
+
+    'cohere' => [
+        'api_key' => env('COHERE_API_KEY'),
+        'api_url' => env('COHERE_API_URL', 'https://api.cohere.ai/v1'),
+        'model' => env('COHERE_MODEL', 'command-r-plus-4'),
+        'max_tokens' => env('COHERE_MAX_TOKENS', 2000),
+        'temperature' => env('COHERE_TEMPERATURE', 0.3),
+    ],
+
+    'mistral' => [
+        'api_key' => env('MISTRAL_API_KEY'),
+        'api_url' => env('MISTRAL_API_URL', 'https://api.mistral.ai/v1'),
+        'model' => env('MISTRAL_MODEL', 'mistral-small-latest'),
+        'max_tokens' => env('MISTRAL_MAX_TOKENS', 2000),
+        'temperature' => env('MISTRAL_TEMPERATURE', 0.3),
     ],
 
 ];

@@ -32,6 +32,7 @@ class User extends Authenticatable
         'location',
         'timezone',
         'language',
+        'preferred_currency_id',
         'status',
         'last_login_at',
         'last_login_ip',
@@ -105,6 +106,11 @@ class User extends Authenticatable
     public function preferences()
     {
         return $this->hasMany(UserPreference::class);
+    }
+
+    public function preferredCurrency()
+    {
+        return $this->belongsTo(Currency::class, 'preferred_currency_id');
     }
 
     public function isMechanic()

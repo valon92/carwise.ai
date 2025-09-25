@@ -11,22 +11,69 @@
       <!-- Header -->
       <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <div class="flex justify-center">
-          <div class="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center shadow-lg">
-            <span class="text-white font-bold text-2xl">C</span>
+          <div class="w-16 h-16 flex items-center justify-center">
+            <img src="/icons/icon1.png" alt="CarWise.ai" class="w-16 h-16 rounded-2xl shadow-lg" />
           </div>
         </div>
         <h2 class="mt-6 text-center text-3xl font-bold text-secondary-900 dark:text-white">
-          Welcome Back
+          {{ t('welcome_back') }}
         </h2>
         <p class="mt-2 text-center text-lg text-secondary-600 dark:text-secondary-400">
-          Sign in to your CarWise AI account
+          {{ t('sign_in_to_carwise') }}
         </p>
         <p class="mt-1 text-center text-sm text-secondary-500 dark:text-secondary-500">
-          Don't have an account?
+          {{ t('no_account') }}
           <router-link to="/register" class="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors duration-200">
-            Create one here
+            {{ t('create_one_here') }}
           </router-link>
         </p>
+      </div>
+
+      <!-- Demo Credentials -->
+      <div class="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 backdrop-blur-md py-4 px-4 shadow-lg sm:rounded-xl border border-primary-200 dark:border-primary-700">
+          <div class="text-center">
+            <div class="flex items-center justify-center mb-3">
+              <svg class="w-5 h-5 text-primary-600 dark:text-primary-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <h3 class="text-sm font-semibold text-primary-700 dark:text-primary-300">Demo Credentials</h3>
+            </div>
+            <p class="text-xs text-secondary-600 dark:text-secondary-400 mb-3">Try the platform with our demo account</p>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between bg-white dark:bg-secondary-800 rounded-lg px-3 py-2 border border-secondary-200 dark:border-secondary-700">
+                <span class="text-xs font-medium text-secondary-600 dark:text-secondary-400">Email:</span>
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs font-mono text-secondary-800 dark:text-secondary-200">demo@carwise.ai</span>
+                  <button 
+                    @click="fillDemoCredentials"
+                    class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-200"
+                    title="Fill demo credentials"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="flex items-center justify-between bg-white dark:bg-secondary-800 rounded-lg px-3 py-2 border border-secondary-200 dark:border-secondary-700">
+                <span class="text-xs font-medium text-secondary-600 dark:text-secondary-400">Password:</span>
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs font-mono text-secondary-800 dark:text-secondary-200">password123</span>
+                  <button 
+                    @click="fillDemoCredentials"
+                    class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-200"
+                    title="Fill demo credentials"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Login Form -->
@@ -189,14 +236,6 @@
           </form>
         </div>
 
-        <!-- Demo Credentials -->
-        <div class="mt-6 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
-          <h3 class="text-sm font-medium text-primary-800 dark:text-primary-200 mb-2">Demo Credentials:</h3>
-          <div class="text-sm text-primary-700 dark:text-primary-300 space-y-1">
-            <p><strong>Email:</strong> demo@carwise.ai</p>
-            <p><strong>Password:</strong> password123</p>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -206,6 +245,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI } from '../services/api'
+import { t } from '../utils/translations'
 
 export default {
   name: 'Login',
@@ -257,12 +297,19 @@ export default {
       }
     }
 
+    const fillDemoCredentials = () => {
+      form.value.email = 'demo@carwise.ai'
+      form.value.password = 'password123'
+    }
+
     return {
       form,
       isLoading,
       errorMessage,
       showPassword,
-      handleLogin
+      handleLogin,
+      fillDemoCredentials,
+      t
     }
   }
 }

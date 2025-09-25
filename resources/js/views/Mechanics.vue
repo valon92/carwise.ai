@@ -9,12 +9,60 @@
           </svg>
         </div>
         <h1 class="text-4xl font-bold text-secondary-900 dark:text-white mb-4">
-          Certified Mechanics
+          {{ t('certified_mechanics') }}
         </h1>
         <p class="text-xl text-secondary-600 dark:text-secondary-400 max-w-3xl mx-auto">
-          Connect with professional mechanics for expert advice and services. 
-          Find certified professionals in your area with verified expertise.
+          {{ t('connect_with_professionals') }}
         </p>
+      </div>
+
+      <!-- Add Mechanic Button -->
+      <div class="flex justify-end mb-8">
+        <button 
+          @click="showAddForm = !showAddForm"
+          class="btn-primary flex items-center space-x-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          <span>Add Mechanic</span>
+        </button>
+      </div>
+
+      <!-- Add Mechanic Form (collapsible) -->
+      <div v-if="showAddForm" class="card-hover mb-8">
+        <h2 class="text-xl font-semibold text-secondary-900 dark:text-white mb-4">Add New Mechanic</h2>
+        <form @submit.prevent="submitMechanic" class="space-y-4" enctype="multipart/form-data">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input v-model="form.name" class="input" placeholder="Full name or business name" required />
+            <input v-model="form.phone" class="input" placeholder="Phone number" />
+            <input v-model="form.email" class="input" placeholder="Email" />
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input v-model="form.address" class="input" placeholder="Address" />
+            <input v-model="form.city" class="input" placeholder="City" required />
+            <input v-model="form.country" class="input" placeholder="Country" required />
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input v-model.number="form.lat" class="input" placeholder="Latitude" />
+            <input v-model.number="form.lng" class="input" placeholder="Longitude" />
+            <input v-model.number="form.hourly_rate" class="input" placeholder="Hourly rate" />
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <textarea v-model="form.bio" class="input" placeholder="Short bio"></textarea>
+            <input ref="logo" type="file" accept="image/*" class="input" />
+          </div>
+          <div>
+            <label class="block text-sm mb-2 text-secondary-700 dark:text-secondary-300">Gallery images (optional)</label>
+            <input ref="gallery" type="file" multiple accept="image/*" class="input" />
+          </div>
+          <div class="flex items-center space-x-3">
+            <button class="btn-primary" :disabled="isSubmitting">{{ isSubmitting ? 'Saving...' : 'Save' }}</button>
+            <button type="button" @click="showAddForm = false" class="btn-secondary">Cancel</button>
+            <span v-if="submitError" class="text-danger-600 text-sm">{{ submitError }}</span>
+            <span v-if="submitSuccess" class="text-success-600 text-sm">Saved!</span>
+          </div>
+        </form>
       </div>
 
       <!-- Search and Filters -->
@@ -22,7 +70,7 @@
         <div class="grid md:grid-cols-3 gap-6">
           <div>
             <label for="search" class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-              Search Mechanics
+              {{ t('search_mechanics') }}
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -35,7 +83,7 @@
                 v-model="searchQuery"
                 type="text"
                 class="input pl-10"
-                placeholder="Search by name or expertise..."
+                placeholder="Search by name, city, country, expertise, or services..."
               />
             </div>
           </div>
@@ -49,11 +97,41 @@
               class="input"
             >
               <option value="">All Locations</option>
-              <option value="prishtina">Prishtina</option>
-              <option value="peja">Peja</option>
-              <option value="prizren">Prizren</option>
-              <option value="gjakova">Gjakova</option>
-              <option value="ferizaj">Ferizaj</option>
+              <option value="London">London, UK</option>
+              <option value="Manchester">Manchester, UK</option>
+              <option value="Birmingham">Birmingham, UK</option>
+              <option value="Paris">Paris, France</option>
+              <option value="Lyon">Lyon, France</option>
+              <option value="Berlin">Berlin, Germany</option>
+              <option value="Munich">Munich, Germany</option>
+              <option value="Rome">Rome, Italy</option>
+              <option value="Milan">Milan, Italy</option>
+              <option value="Madrid">Madrid, Spain</option>
+              <option value="Amsterdam">Amsterdam, Netherlands</option>
+              <option value="Stockholm">Stockholm, Sweden</option>
+              <option value="New York">New York, USA</option>
+              <option value="Los Angeles">Los Angeles, USA</option>
+              <option value="Chicago">Chicago, USA</option>
+              <option value="Miami">Miami, USA</option>
+              <option value="Toronto">Toronto, Canada</option>
+              <option value="Vancouver">Vancouver, Canada</option>
+              <option value="Montreal">Montreal, Canada</option>
+              <option value="Tokyo">Tokyo, Japan</option>
+              <option value="Shanghai">Shanghai, China</option>
+              <option value="Seoul">Seoul, South Korea</option>
+              <option value="Singapore">Singapore</option>
+              <option value="Bangkok">Bangkok, Thailand</option>
+              <option value="Kuala Lumpur">Kuala Lumpur, Malaysia</option>
+              <option value="Johannesburg">Johannesburg, South Africa</option>
+              <option value="Cairo">Cairo, Egypt</option>
+              <option value="Lagos">Lagos, Nigeria</option>
+              <option value="São Paulo">São Paulo, Brazil</option>
+              <option value="Buenos Aires">Buenos Aires, Argentina</option>
+              <option value="Santiago">Santiago, Chile</option>
+              <option value="Lima">Lima, Peru</option>
+              <option value="Sydney">Sydney, Australia</option>
+              <option value="Melbourne">Melbourne, Australia</option>
+              <option value="Auckland">Auckland, New Zealand</option>
             </select>
           </div>
           <div>
@@ -66,13 +144,50 @@
               class="input"
             >
               <option value="">All Specialties</option>
-              <option value="engine">Engine</option>
-              <option value="transmission">Transmission</option>
-              <option value="brakes">Brakes</option>
-              <option value="electrical">Electrical</option>
-              <option value="diagnostics">Diagnostics</option>
+              <option value="Engine">Engine</option>
+              <option value="Transmission">Transmission</option>
+              <option value="Diagnostics">Diagnostics</option>
+              <option value="AC Systems">AC Systems</option>
+              <option value="4WD Systems">4WD Systems</option>
+              <option value="Performance Tuning">Performance Tuning</option>
+              <option value="Luxury Cars">Luxury Cars</option>
+              <option value="General Repair">General Repair</option>
+              <option value="Exotic Vehicles">Exotic Vehicles</option>
+              <option value="Hybrid Systems">Hybrid Systems</option>
+              <option value="Winter Systems">Winter Systems</option>
+              <option value="Classic Restoration">Classic Restoration</option>
+              <option value="Bodywork">Bodywork</option>
+              <option value="Paint">Paint</option>
+              <option value="Suspension">Suspension</option>
+              <option value="Brakes">Brakes</option>
+              <option value="Electrical">Electrical</option>
+              <option value="BMW">BMW</option>
+              <option value="Mercedes">Mercedes</option>
+              <option value="Audi">Audi</option>
+              <option value="French Cars">French Cars</option>
+              <option value="Italian Cars">Italian Cars</option>
+              <option value="German Cars">German Cars</option>
+              <option value="Japanese Cars">Japanese Cars</option>
+              <option value="Korean Cars">Korean Cars</option>
+              <option value="Chinese Cars">Chinese Cars</option>
+              <option value="Swedish Cars">Swedish Cars</option>
+              <option value="Brazilian Cars">Brazilian Cars</option>
+              <option value="Indian Cars">Indian Cars</option>
             </select>
           </div>
+        </div>
+        
+        <!-- Clear Filters Button -->
+        <div class="flex justify-end mt-4">
+          <button 
+            @click="clearFilters"
+            class="btn-secondary text-sm px-4 py-2 flex items-center space-x-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <span>Clear Filters</span>
+          </button>
         </div>
       </div>
 
@@ -97,7 +212,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
-                {{ mechanic.location }}
+                {{ mechanic.city }}, {{ mechanic.country }}
               </p>
               <div class="flex items-center mt-2">
                 <div class="flex items-center">
@@ -107,7 +222,7 @@
                   <span class="ml-1 text-sm text-secondary-600 dark:text-secondary-400 font-medium">{{ mechanic.rating }}</span>
                 </div>
                 <span class="mx-2 text-secondary-400">•</span>
-                <span class="text-sm text-secondary-600 dark:text-secondary-400">{{ mechanic.reviewCount }} reviews</span>
+                <span class="text-sm text-secondary-600 dark:text-secondary-400">{{ mechanic.review_count }} reviews</span>
               </div>
             </div>
           </div>
@@ -134,7 +249,7 @@
                 </svg>
                 Experience
               </span>
-              <span class="text-sm font-medium text-secondary-900 dark:text-white">{{ mechanic.experience }} years</span>
+              <span class="text-sm font-medium text-secondary-900 dark:text-white">{{ mechanic.experience_years }} years</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-sm text-secondary-600 dark:text-secondary-400 flex items-center">
@@ -152,18 +267,10 @@
                 </svg>
                 Hourly Rate
               </span>
-              <span class="text-sm font-medium text-secondary-900 dark:text-white">€{{ mechanic.hourlyRate }}/hr</span>
+              <span class="text-sm font-medium text-secondary-900 dark:text-white">€{{ mechanic.hourly_rate }}/hr</span>
             </div>
           </div>
 
-          <!-- Recent Reviews -->
-          <div class="mb-6">
-            <h4 class="text-sm font-medium text-secondary-900 dark:text-white mb-3">Recent Review</h4>
-            <div class="bg-secondary-50 dark:bg-secondary-800/50 rounded-xl p-4 border border-secondary-200 dark:border-secondary-700">
-              <p class="text-sm text-secondary-700 dark:text-secondary-300 italic">"{{ mechanic.recentReview }}"</p>
-              <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-2">- {{ mechanic.recentReviewer }}</p>
-            </div>
-          </div>
 
           <!-- Actions -->
           <div class="flex space-x-3">
@@ -197,12 +304,14 @@
           </svg>
         </div>
         <h3 class="text-lg font-medium text-secondary-900 dark:text-white mb-2">No mechanics found</h3>
-        <p class="text-secondary-600 dark:text-secondary-400 mb-6">Try adjusting your search criteria or location.</p>
+        <p class="text-secondary-600 dark:text-secondary-400 mb-6">
+          No mechanics match your current search criteria. Try adjusting your filters or search terms.
+        </p>
         <button 
-          @click="searchQuery = ''; selectedLocation = ''; selectedExpertise = ''"
+          @click="clearFilters"
           class="btn-primary"
         >
-          Clear Filters
+          Clear All Filters
         </button>
       </div>
 
@@ -294,6 +403,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { mechanicsAPI } from '../services/api'
+import { t } from '../utils/translations'
 
 export default {
   name: 'Mechanics',
@@ -304,6 +414,45 @@ export default {
     const selectedExpertise = ref('')
     const showContactModal = ref(false)
     const selectedMechanic = ref(null)
+    const showAddForm = ref(false)
+    // Form state
+    const form = ref({
+      name: '', phone: '', email: '', address: '', city: '', country: '',
+      lat: '', lng: '', hourly_rate: '', bio: ''
+    })
+    const logo = ref(null)
+    const gallery = ref(null)
+    const isSubmitting = ref(false)
+    const submitError = ref('')
+    const submitSuccess = ref(false)
+
+    const submitMechanic = async () => {
+      submitError.value = ''
+      submitSuccess.value = false
+      if (isSubmitting.value) return
+      try {
+        isSubmitting.value = true
+        const fd = new FormData()
+        Object.entries(form.value).forEach(([k, v]) => v !== '' && fd.append(k, v))
+        if (logo.value?.files?.[0]) fd.append('logo', logo.value.files[0])
+        if (gallery.value?.files?.length) {
+          Array.from(gallery.value.files).forEach(f => fd.append('gallery[]', f))
+        }
+        const res = await mechanicsAPI.create(fd)
+        if (res.data?.success) {
+          submitSuccess.value = true
+          await loadMechanics()
+          setTimeout(() => { submitSuccess.value = false }, 2000)
+        } else {
+          submitError.value = res.data?.message || 'Failed to save'
+        }
+      } catch (e) {
+        console.error(e)
+        submitError.value = 'Failed to save mechanic'
+      } finally {
+        isSubmitting.value = false
+      }
+    }
     const contactForm = ref({
       subject: '',
       message: '',
@@ -312,15 +461,25 @@ export default {
 
     const filteredMechanics = computed(() => {
       return mechanics.value.filter(mechanic => {
+        // Enhanced search functionality
+        const searchTerm = searchQuery.value.toLowerCase()
         const matchesSearch = !searchQuery.value || 
-          mechanic.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          mechanic.expertise.some(skill => skill.toLowerCase().includes(searchQuery.value.toLowerCase()))
+          mechanic.name.toLowerCase().includes(searchTerm) ||
+          mechanic.city.toLowerCase().includes(searchTerm) ||
+          mechanic.country.toLowerCase().includes(searchTerm) ||
+          mechanic.bio?.toLowerCase().includes(searchTerm) ||
+          mechanic.expertise.some(skill => skill.toLowerCase().includes(searchTerm)) ||
+          mechanic.services?.some(service => service.toLowerCase().includes(searchTerm))
         
+        // Location filter - match city name
         const matchesLocation = !selectedLocation.value || 
-          mechanic.location.toLowerCase() === selectedLocation.value.toLowerCase()
+          mechanic.city === selectedLocation.value ||
+          mechanic.location?.toLowerCase().includes(selectedLocation.value.toLowerCase())
         
+        // Expertise filter - exact match or partial match
         const matchesExpertise = !selectedExpertise.value || 
-          mechanic.expertise.includes(selectedExpertise.value)
+          mechanic.expertise.includes(selectedExpertise.value) ||
+          mechanic.expertise.some(skill => skill.toLowerCase().includes(selectedExpertise.value.toLowerCase()))
         
         return matchesSearch && matchesLocation && matchesExpertise
       })
@@ -337,16 +496,17 @@ export default {
         if (response.data.success) {
           mechanics.value = response.data.mechanics.map(mechanic => ({
             id: mechanic.id,
-            name: mechanic.user.name,
+            name: mechanic.name || mechanic.user?.name || 'Unknown',
+            city: mechanic.city || 'Unknown',
+            country: mechanic.country || 'Unknown',
             location: mechanic.location,
-            rating: mechanic.rating,
-            reviewCount: mechanic.review_count,
-            experience: mechanic.experience_years,
-            availability: mechanic.availability,
-            hourlyRate: mechanic.hourly_rate,
-            expertise: mechanic.expertise,
-            recentReview: 'Great service and professional work.',
-            recentReviewer: 'Customer'
+            rating: mechanic.rating || 4.5,
+            review_count: mechanic.review_count || 0,
+            experience_years: mechanic.experience_years || 0,
+            availability: mechanic.availability || 'available',
+            hourly_rate: mechanic.hourly_rate || 25,
+            expertise: typeof mechanic.expertise === 'string' ? JSON.parse(mechanic.expertise) : (mechanic.expertise || ['Engine', 'Transmission', 'Diagnostics']),
+            services: typeof mechanic.services === 'string' ? JSON.parse(mechanic.services) : (mechanic.services || [])
           }))
         }
       } catch (error) {
@@ -381,6 +541,12 @@ export default {
       }
     }
 
+    const clearFilters = () => {
+      searchQuery.value = ''
+      selectedLocation.value = ''
+      selectedExpertise.value = ''
+    }
+
     onMounted(() => {
       loadMechanics()
     })
@@ -397,7 +563,17 @@ export default {
       contactMechanic,
       viewProfile,
       sendMessage,
-      closeContactModal
+      closeContactModal,
+      clearFilters,
+      showAddForm,
+      form,
+      logo,
+      gallery,
+      isSubmitting,
+      submitError,
+      submitSuccess,
+      submitMechanic,
+      t
     }
   }
 }
