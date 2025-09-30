@@ -101,11 +101,20 @@ Symptoms: {$symptomsList}
 Description: {$description}
 
 Provide structured analysis with:
-1. Diagnosis
-2. Recommendations
-3. Urgency level (critical/high/medium/low)
-4. Estimated cost
-5. Prevention tips
+1. Diagnosis with detailed problem description
+2. Likely causes with part names and images
+3. Recommended actions with repair videos
+4. Suggested parts for purchase with links to car-parts page
+5. Urgency level (critical/high/medium/low)
+6. Estimated costs
+7. Prevention tips
+
+Include:
+- Part images and descriptions for problematic components
+- Licensed repair videos from authorized companies
+- Direct links to car-parts page for purchasing suggested parts
+- Detailed compatibility information
+- Professional repair instructions
 
 Respond entirely in {$languageName}.";
     }

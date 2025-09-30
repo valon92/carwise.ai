@@ -164,14 +164,32 @@ Please provide a detailed diagnosis in JSON format with the following structure:
     {
       \"title\": \"Cause title\",
       \"description\": \"Detailed description\",
-      \"probability\": 75
+      \"probability\": 75,
+      \"part_name\": \"Name of the problematic part\",
+      \"part_image_url\": \"URL to part image\",
+      \"part_category\": \"engine|brakes|electrical|suspension|transmission|exhaust|cooling|fuel|body|interior|exterior|lighting\",
+      \"suggested_parts\": [
+        {
+          \"name\": \"Part name\",
+          \"brand\": \"Brand name\",
+          \"part_number\": \"Part number\",
+          \"price_range\": \"Price range\",
+          \"compatibility\": \"Compatible with your vehicle\"
+        }
+      ]
     }
   ],
   \"recommended_actions\": [
     {
       \"title\": \"Action title\",
       \"description\": \"Detailed description\",
-      \"urgency\": \"Immediate|Within 1 week|Within 2 weeks\"
+      \"urgency\": \"Immediate|Within 1 week|Within 2 weeks\",
+      \"video_url\": \"URL to licensed repair video\",
+      \"video_title\": \"Video title\",
+      \"video_duration\": \"Video duration\",
+      \"video_company\": \"Licensed company name\",
+      \"tools_needed\": [\"Tool 1\", \"Tool 2\"],
+      \"difficulty_level\": \"easy|medium|hard|professional\"
     }
   ],
   \"estimated_costs\": [
@@ -186,6 +204,34 @@ Please provide a detailed diagnosis in JSON format with the following structure:
   ],
   \"ai_insights\": [
     \"Additional professional insights\"
+  ],
+  \"suggested_parts_for_purchase\": [
+    {
+      \"part_name\": \"Part name\",
+      \"category\": \"engine|brakes|electrical|suspension|transmission|exhaust|cooling|fuel|body|interior|exterior|lighting\",
+      \"brand\": \"Brand name\",
+      \"part_number\": \"Part number\",
+      \"price_range\": \"Price range\",
+      \"compatibility\": \"Compatible with your vehicle\",
+      \"image_url\": \"URL to part image\",
+      \"description\": \"Part description\",
+      \"warranty\": \"Warranty information\",
+      \"availability\": \"In stock|Out of stock|Limited\",
+      \"shipping_time\": \"Shipping time\",
+      \"car_parts_url\": \"/car-parts?search=part_name&category=category\"
+    }
+  ],
+  \"repair_videos\": [
+    {
+      \"title\": \"Video title\",
+      \"url\": \"URL to licensed repair video\",
+      \"duration\": \"Video duration\",
+      \"company\": \"Licensed company name\",
+      \"description\": \"Video description\",
+      \"difficulty\": \"easy|medium|hard|professional\",
+      \"tools_required\": [\"Tool 1\", \"Tool 2\"],
+      \"estimated_time\": \"Estimated repair time\"
+    }
   ],
   \"related_issues\": [
     \"Other potential issues to watch for\"

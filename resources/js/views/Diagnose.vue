@@ -926,6 +926,85 @@
               </div>
             </div>
 
+            <!-- Suggested Parts for Purchase -->
+            <div v-if="diagnosisResult.suggested_parts_for_purchase && diagnosisResult.suggested_parts_for_purchase.length > 0" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+                Suggested Parts for Purchase
+              </h3>
+              <p class="text-sm text-secondary-600 dark:text-secondary-400 mb-4">
+                Based on the diagnosis, here are the recommended parts you can purchase from our authorized suppliers:
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div v-for="part in diagnosisResult.suggested_parts_for_purchase" :key="part.name" class="bg-white dark:bg-secondary-800 rounded-lg border border-blue-200 dark:border-blue-700 p-4">
+                  <div class="flex items-start justify-between mb-3">
+                    <div class="flex-1">
+                      <h4 class="font-medium text-secondary-900 dark:text-white mb-1">{{ part.name }}</h4>
+                      <p class="text-sm text-secondary-600 dark:text-secondary-400 mb-2">{{ part.brand }} - {{ part.part_number }}</p>
+                      <p class="text-xs text-secondary-500 dark:text-secondary-500 mb-2">{{ part.description }}</p>
+                    </div>
+                    <img v-if="part.image_url" :src="part.image_url" :alt="part.name" class="w-16 h-16 object-cover rounded-lg ml-3">
+                  </div>
+                  <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm font-medium text-green-600 dark:text-green-400">{{ part.price_range }}</span>
+                      <span class="text-xs px-2 py-1 rounded-full" :class="part.availability === 'In stock' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'">
+                        {{ part.availability }}
+                      </span>
+                    </div>
+                    <p class="text-xs text-secondary-500 dark:text-secondary-500">{{ part.compatibility }}</p>
+                    <p class="text-xs text-secondary-500 dark:text-secondary-500">Shipping: {{ part.shipping_time }}</p>
+                    <a :href="part.car_parts_url" class="block w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                      View in Car Parts Store
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Repair Videos -->
+            <div v-if="diagnosisResult.repair_videos && diagnosisResult.repair_videos.length > 0" class="bg-green-50 dark:bg-green-900/20 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                Licensed Repair Videos
+              </h3>
+              <p class="text-sm text-secondary-600 dark:text-secondary-400 mb-4">
+                Professional repair guides from authorized companies:
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div v-for="video in diagnosisResult.repair_videos" :key="video.title" class="bg-white dark:bg-secondary-800 rounded-lg border border-green-200 dark:border-green-700 p-4">
+                  <div class="flex items-start justify-between mb-3">
+                    <div class="flex-1">
+                      <h4 class="font-medium text-secondary-900 dark:text-white mb-1">{{ video.title }}</h4>
+                      <p class="text-sm text-secondary-600 dark:text-secondary-400 mb-2">{{ video.company }}</p>
+                      <p class="text-xs text-secondary-500 dark:text-secondary-500 mb-2">{{ video.description }}</p>
+                    </div>
+                    <div class="ml-3 text-right">
+                      <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                        {{ video.difficulty }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="flex justify-between items-center text-sm">
+                      <span class="text-secondary-600 dark:text-secondary-400">Duration: {{ video.duration }}</span>
+                      <span class="text-secondary-600 dark:text-secondary-400">{{ video.estimated_time }}</span>
+                    </div>
+                    <div v-if="video.tools_required && video.tools_required.length > 0" class="text-xs text-secondary-500 dark:text-secondary-500">
+                      <strong>Tools needed:</strong> {{ video.tools_required.join(', ') }}
+                    </div>
+                    <a :href="video.url" target="_blank" class="block w-full mt-3 bg-green-600 hover:bg-green-700 text-white text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                      Watch Repair Video
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- Empty State -->

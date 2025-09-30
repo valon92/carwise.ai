@@ -7,6 +7,7 @@ use App\Models\DiagnosisSession;
 use App\Models\DiagnosisMedia;
 use App\Models\DiagnosisResult;
 use App\Services\AIDiagnosisService;
+use App\Services\DiagnosisEnhancementService;
 use App\Jobs\ProcessAIDiagnosis;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -17,10 +18,12 @@ use Illuminate\Support\Str;
 class DiagnosisController extends Controller
 {
     protected $aiService;
+    protected $enhancementService;
 
-    public function __construct(AIDiagnosisService $aiService)
+    public function __construct(AIDiagnosisService $aiService, DiagnosisEnhancementService $enhancementService)
     {
         $this->aiService = $aiService;
+        $this->enhancementService = $enhancementService;
     }
 
     /**
@@ -237,6 +240,17 @@ class DiagnosisController extends Controller
             // If user language is not English and result might be in English, translate it
             if ($userLanguage !== 'en' && $this->needsTranslation($result)) {
                 $result = $this->translateExistingResult($result, $userLanguage);
+            }
+
+            // Enhance result with additional data if not already enhanced
+            if (!isset($result->suggested_parts_for_purchase) && !isset($result->repair_videos)) {
+                $enhancedResult = $this->enhancementService->enhanceDiagnosisResults(
+                    $result->toArray(), 
+                    $session->make, 
+                    $session->model, 
+                    $session->year
+                );
+                $result = (object) array_merge($result->toArray(), $enhancedResult);
             }
 
             return response()->json([
@@ -507,6 +521,14 @@ class DiagnosisController extends Controller
 
             // Call AI service
             $aiResult = $this->aiService->analyzeDiagnosis($analysisData);
+
+            // Enhance results with part images, videos, and purchase links
+            $aiResult = $this->enhancementService->enhanceDiagnosisResults(
+                $aiResult, 
+                $session->make, 
+                $session->model, 
+                $session->year
+            );
 
             // Create diagnosis result
             DiagnosisResult::create([
