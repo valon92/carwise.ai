@@ -154,47 +154,117 @@
           <div 
             v-for="part in featuredParts" 
             :key="part.id"
-            class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
+            class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 overflow-hidden border border-gray-100 dark:border-secondary-700"
             @click="viewPart(part)"
           >
-            <div class="relative overflow-hidden">
-              <img 
-                :src="part.image_url || '/images/parts/placeholder.jpg'" 
-                :alt="part.name"
-                class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div class="absolute top-4 right-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
-                ⭐ Featured
-              </div>
-              <div class="absolute bottom-4 left-4 bg-white/90 dark:bg-secondary-800/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-secondary-900 dark:text-white">
-                {{ part.brand }}
+            <!-- Image Container with Modern Design -->
+            <div class="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-secondary-700 dark:to-secondary-800">
+              <div class="aspect-w-16 aspect-h-12 relative">
+                <img 
+                  :src="part.image_url || getBrandImage(part.brand)" 
+                  :alt="part.name"
+                  class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700"
+                  loading="lazy"
+                />
+                <!-- Gradient Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                
+                <!-- Brand Logo -->
+                <div class="absolute top-4 left-4 bg-white/95 dark:bg-secondary-800/95 backdrop-blur-sm rounded-xl p-2 shadow-lg">
+                  <img 
+                    :src="getBrandLogo(part.brand)" 
+                    :alt="part.brand"
+                    class="w-8 h-8 object-contain"
+                    @error="handleImageError"
+                  />
+                </div>
+                
+                <!-- Featured Badge -->
+                <div class="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-pulse">
+                  ⭐ FEATURED
+                </div>
+                
+                <!-- Stock Status -->
+                <div class="absolute bottom-4 right-4">
+                  <span class="px-3 py-1 rounded-full text-xs font-semibold shadow-lg"
+                        :class="part.stock_quantity > 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
+                    {{ part.stock_quantity > 0 ? 'In Stock' : 'Out of Stock' }}
+                  </span>
+                </div>
               </div>
             </div>
-            <div class="p-6">
-              <h3 class="text-xl font-bold text-secondary-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                {{ part.name }}
-              </h3>
-              <p class="text-secondary-600 dark:text-secondary-400 text-sm mb-4 line-clamp-2">
-                {{ part.description }}
-              </p>
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-3xl font-bold text-primary-600 dark:text-primary-400">
-                  {{ part.formatted_price }}
-                </span>
-                <div class="flex items-center">
+            
+            <!-- Content Section -->
+            <div class="p-6 space-y-4">
+              <!-- Title and Category -->
+              <div>
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full">
+                    {{ part.category.charAt(0).toUpperCase() + part.category.slice(1) }}
+                  </span>
+                  <span class="px-2 py-1 bg-gray-100 dark:bg-secondary-700 text-gray-600 dark:text-gray-400 text-xs font-medium rounded-full">
+                    {{ part.part_number }}
+                  </span>
+                </div>
+                <h3 class="text-xl font-bold text-secondary-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
+                  {{ part.name }}
+                </h3>
+                <p class="text-secondary-600 dark:text-secondary-400 text-sm line-clamp-2">
+                  {{ part.description }}
+                </p>
+              </div>
+              
+              <!-- Rating and Reviews -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
                   <div class="flex text-yellow-400">
                     <svg v-for="i in 5" :key="i" class="w-4 h-4" :class="i <= Math.floor(parseFloat(part.rating)) ? 'text-yellow-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                     </svg>
                   </div>
-                  <span class="ml-2 text-sm text-secondary-600 dark:text-secondary-400">
-                    {{ parseFloat(part.rating).toFixed(1) }} ({{ part.review_count }})
+                  <span class="text-sm font-medium text-secondary-600 dark:text-secondary-400">
+                    {{ parseFloat(part.rating).toFixed(1) }}
+                  </span>
+                  <span class="text-xs text-secondary-500 dark:text-secondary-500">
+                    ({{ part.review_count }} reviews)
                   </span>
                 </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                    {{ part.formatted_price }}
+                  </div>
+                  <div class="text-xs text-green-600 dark:text-green-400 font-medium">
+                    Free Shipping
+                  </div>
+                </div>
               </div>
-              <button class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors duration-300">
-                View Details
-              </button>
+              
+              <!-- Action Buttons -->
+              <div class="flex gap-3">
+                <button 
+                  @click.stop="viewPart(part)"
+                  class="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:shadow-lg"
+                >
+                  View Details
+                </button>
+                <button 
+                  @click.stop="addToCart(part)"
+                  :disabled="part.stock_quantity === 0"
+                  class="px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-xl transition-all duration-300 hover:shadow-lg disabled:cursor-not-allowed"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                  </svg>
+                </button>
+              </div>
+              
+              <!-- AI Recommendation Badge -->
+              <div v-if="part.ai_recommended" class="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                </svg>
+                <span class="font-medium">AI Recommended</span>
+              </div>
             </div>
           </div>
         </div>
@@ -653,6 +723,133 @@ const scrollToCategories = () => {
   const element = document.getElementById('categories-section')
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
+// Brand integration methods
+const getBrandImage = (brand) => {
+  const brandImages = {
+    'BMW': '/images/brands/bmw-parts.jpg',
+    'Mercedes-Benz': '/images/brands/mercedes-parts.jpg',
+    'Audi': '/images/brands/audi-parts.jpg',
+    'Volkswagen': '/images/brands/vw-parts.jpg',
+    'Toyota': '/images/brands/toyota-parts.jpg',
+    'Honda': '/images/brands/honda-parts.jpg',
+    'Ford': '/images/brands/ford-parts.jpg',
+    'Chevrolet': '/images/brands/chevrolet-parts.jpg',
+    'Nissan': '/images/brands/nissan-parts.jpg',
+    'Hyundai': '/images/brands/hyundai-parts.jpg',
+    'Kia': '/images/brands/kia-parts.jpg',
+    'Mazda': '/images/brands/mazda-parts.jpg',
+    'Subaru': '/images/brands/subaru-parts.jpg',
+    'Lexus': '/images/brands/lexus-parts.jpg',
+    'Infiniti': '/images/brands/infiniti-parts.jpg',
+    'Acura': '/images/brands/acura-parts.jpg',
+    'Genesis': '/images/brands/genesis-parts.jpg',
+    'Volvo': '/images/brands/volvo-parts.jpg',
+    'Saab': '/images/brands/saab-parts.jpg',
+    'Jaguar': '/images/brands/jaguar-parts.jpg',
+    'Land Rover': '/images/brands/landrover-parts.jpg',
+    'Porsche': '/images/brands/porsche-parts.jpg',
+    'Ferrari': '/images/brands/ferrari-parts.jpg',
+    'Lamborghini': '/images/brands/lamborghini-parts.jpg',
+    'Maserati': '/images/brands/maserati-parts.jpg',
+    'Bentley': '/images/brands/bentley-parts.jpg',
+    'Rolls-Royce': '/images/brands/rollsroyce-parts.jpg',
+    'Aston Martin': '/images/brands/astonmartin-parts.jpg',
+    'McLaren': '/images/brands/mclaren-parts.jpg',
+    'Bugatti': '/images/brands/bugatti-parts.jpg'
+  }
+  return brandImages[brand] || '/images/parts/default-part.jpg'
+}
+
+const getBrandLogo = (brand) => {
+  const brandLogos = {
+    'BMW': '/images/brands/bmw-logo.png',
+    'Mercedes-Benz': '/images/brands/mercedes-logo.png',
+    'Audi': '/images/brands/audi-logo.png',
+    'Volkswagen': '/images/brands/vw-logo.png',
+    'Toyota': '/images/brands/toyota-logo.png',
+    'Honda': '/images/brands/honda-logo.png',
+    'Ford': '/images/brands/ford-logo.png',
+    'Chevrolet': '/images/brands/chevrolet-logo.png',
+    'Nissan': '/images/brands/nissan-logo.png',
+    'Hyundai': '/images/brands/hyundai-logo.png',
+    'Kia': '/images/brands/kia-logo.png',
+    'Mazda': '/images/brands/mazda-logo.png',
+    'Subaru': '/images/brands/subaru-logo.png',
+    'Lexus': '/images/brands/lexus-logo.png',
+    'Infiniti': '/images/brands/infiniti-logo.png',
+    'Acura': '/images/brands/acura-logo.png',
+    'Genesis': '/images/brands/genesis-logo.png',
+    'Volvo': '/images/brands/volvo-logo.png',
+    'Saab': '/images/brands/saab-logo.png',
+    'Jaguar': '/images/brands/jaguar-logo.png',
+    'Land Rover': '/images/brands/landrover-logo.png',
+    'Porsche': '/images/brands/porsche-logo.png',
+    'Ferrari': '/images/brands/ferrari-logo.png',
+    'Lamborghini': '/images/brands/lamborghini-logo.png',
+    'Maserati': '/images/brands/maserati-logo.png',
+    'Bentley': '/images/brands/bentley-logo.png',
+    'Rolls-Royce': '/images/brands/rollsroyce-logo.png',
+    'Aston Martin': '/images/brands/astonmartin-logo.png',
+    'McLaren': '/images/brands/mclaren-logo.png',
+    'Bugatti': '/images/brands/bugatti-logo.png'
+  }
+  return brandLogos[brand] || '/images/brands/default-logo.png'
+}
+
+const handleImageError = (event) => {
+  event.target.src = '/images/parts/default-part.jpg'
+}
+
+// Affiliate system methods
+const addToCart = async (part) => {
+  try {
+    // Track affiliate click
+    await trackAffiliateClick(part)
+    
+    // Add to cart logic
+    const response = await fetch('/api/cart/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({
+        part_id: part.id,
+        quantity: 1,
+        affiliate_source: 'carwise_ai'
+      })
+    })
+    
+    if (response.ok) {
+      // Show success message
+      console.log('Part added to cart successfully')
+    }
+  } catch (error) {
+    console.error('Error adding to cart:', error)
+  }
+}
+
+const trackAffiliateClick = async (part) => {
+  try {
+    await fetch('/api/affiliate/track-click', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        part_id: part.id,
+        brand: part.brand,
+        category: part.category,
+        user_agent: navigator.userAgent,
+        referrer: document.referrer,
+        timestamp: new Date().toISOString()
+      })
+    })
+  } catch (error) {
+    console.error('Error tracking affiliate click:', error)
   }
 }
 

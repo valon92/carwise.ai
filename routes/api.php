@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\LogMonitoringController;
 use App\Http\Controllers\Api\BackupController;
 use App\Http\Controllers\Api\CarPartController;
 use App\Http\Controllers\Api\AuthorizedCompanyController;
+use App\Http\Controllers\Api\AffiliateController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -49,6 +50,25 @@ Route::get('/car-parts/featured', [CarPartController::class, 'getFeatured']);
 Route::get('/car-parts/search', [CarPartController::class, 'search']);
 Route::get('/car-parts/category/{category}', [CarPartController::class, 'getByCategory']);
 Route::get('/car-parts/{id}', [CarPartController::class, 'show']);
+
+// Affiliate routes
+Route::post('/affiliate/track-click', [AffiliateController::class, 'trackClick']);
+Route::post('/affiliate/track-purchase', [AffiliateController::class, 'trackPurchase']);
+Route::get('/affiliate/stats', [AffiliateController::class, 'getStats']);
+
+// Cart routes (public for now, will be protected later)
+Route::post('/cart/add', function(Request $request) {
+    // Simple cart implementation for affiliate tracking
+    return response()->json([
+        'success' => true,
+        'message' => 'Part added to cart successfully',
+        'data' => [
+            'part_id' => $request->part_id,
+            'quantity' => $request->quantity,
+            'affiliate_source' => $request->affiliate_source
+        ]
+    ]);
+});
 
 // Authorized companies routes (public)
 Route::get('/authorized-companies', [AuthorizedCompanyController::class, 'index']);
