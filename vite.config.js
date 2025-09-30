@@ -51,6 +51,7 @@ export default defineConfig({
         port: 5174,
         hmr: {
             host: '127.0.0.1',
+            port: 5174,
         },
         proxy: {
             '/api': {
@@ -63,9 +64,23 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': '/resources/js',
+            'vue': 'vue/dist/vue.esm-bundler.js',
         },
     },
     optimizeDeps: {
-        include: ['vue', 'vue-router', 'axios']
+        include: [
+            'vue', 
+            'vue-router', 
+            'axios',
+            '@headlessui/vue',
+            '@heroicons/vue/24/outline',
+            '@heroicons/vue/24/solid'
+        ],
+        exclude: ['@vite/client', '@vite/env']
+    },
+    // Add performance configurations
+    define: {
+        __VUE_PROD_DEVTOOLS__: false,
+        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false
     }
 });

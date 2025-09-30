@@ -14,6 +14,7 @@ class DiagnosisSession extends Model
 
     protected $fillable = [
         'user_id',
+        'car_id',
         'session_id',
         'make',
         'model',
@@ -42,6 +43,14 @@ class DiagnosisSession extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the car that this diagnosis session belongs to.
+     */
+    public function car(): BelongsTo
+    {
+        return $this->belongsTo(Car::class);
     }
 
     /**

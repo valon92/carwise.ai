@@ -6,10 +6,10 @@
         <div class="flex justify-between items-center py-6">
           <div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-              {{ t('admin_panel') }}
+              Admin Panel
             </h1>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {{ t('manage_system_overview') }}
+              Manage system and view overview
             </p>
           </div>
           <div class="flex items-center space-x-4">
@@ -21,7 +21,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
-              <span>{{ t('refresh') }}</span>
+              <span>Refresh</span>
             </button>
           </div>
         </div>
@@ -82,7 +82,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
           <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-              {{ t('recent_activity') }}
+              Recent Activity
             </h3>
           </div>
           <div class="p-6">
@@ -119,22 +119,22 @@
           <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex justify-between items-center">
               <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                {{ t('users_management') }}
+                Users Management
               </h3>
               <div class="flex space-x-4">
                 <select
                   v-model="userFilters.role"
                   class="input-sm"
                 >
-                  <option value="all">{{ t('all_roles') }}</option>
-                  <option value="customer">{{ t('customers') }}</option>
-                  <option value="mechanic">{{ t('mechanics') }}</option>
-                  <option value="admin">{{ t('admins') }}</option>
+                  <option value="all">All Roles</option>
+                  <option value="customer">Customers</option>
+                  <option value="mechanic">Mechanics</option>
+                  <option value="admin">Admins</option>
                 </select>
                 <input
                   v-model="userFilters.search"
                   type="text"
-                  :placeholder="t('search_users')"
+                  placeholder="Search users..."
                   class="input-sm"
                 />
               </div>
@@ -145,19 +145,19 @@
               <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    {{ t('user') }}
+                    User
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    {{ t('role') }}
+                    Role
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    {{ t('status') }}
+                    Status
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    {{ t('joined') }}
+                    Joined
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    {{ t('actions') }}
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -210,9 +210,9 @@
                       @change="updateUserStatus(user.id, $event.target.value)"
                       class="input-sm"
                     >
-                      <option value="active">{{ t('active') }}</option>
-                      <option value="inactive">{{ t('inactive') }}</option>
-                      <option value="suspended">{{ t('suspended') }}</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="suspended">Suspended</option>
                     </select>
                   </td>
                 </tr>
@@ -224,15 +224,15 @@
 
       <!-- Other tabs content would go here -->
       <div v-if="activeTab === 'cars'" class="text-center py-12">
-        <p class="text-gray-500 dark:text-gray-400">{{ t('cars_management_coming_soon') }}</p>
+        <p class="text-gray-500 dark:text-gray-400">Cars management coming soon</p>
       </div>
       
       <div v-if="activeTab === 'diagnoses'" class="text-center py-12">
-        <p class="text-gray-500 dark:text-gray-400">{{ t('diagnoses_management_coming_soon') }}</p>
+        <p class="text-gray-500 dark:text-gray-400">Diagnoses management coming soon</p>
       </div>
       
       <div v-if="activeTab === 'settings'" class="text-center py-12">
-        <p class="text-gray-500 dark:text-gray-400">{{ t('system_settings_coming_soon') }}</p>
+        <p class="text-gray-500 dark:text-gray-400">System settings coming soon</p>
       </div>
     </div>
   </div>
@@ -240,7 +240,6 @@
 
 <script>
 import { ref, onMounted, computed } from 'vue'
-import { t } from '../utils/translations'
 import api from '../services/api'
 
 export default {
@@ -257,34 +256,34 @@ export default {
     })
 
     const tabs = [
-      { id: 'dashboard', name: t('dashboard') },
-      { id: 'users', name: t('users') },
-      { id: 'cars', name: t('cars') },
-      { id: 'diagnoses', name: t('diagnoses') },
-      { id: 'settings', name: t('settings') }
+      { id: 'dashboard', name: 'Dashboard' },
+      { id: 'users', name: 'Users' },
+      { id: 'cars', name: 'Cars' },
+      { id: 'diagnoses', name: 'Diagnoses' },
+      { id: 'settings', name: 'Settings' }
     ]
 
     const dashboardStats = ref([
       {
-        title: t('total_users'),
+        title: 'Total Users',
         value: 0,
         icon: 'svg',
         bgColor: 'bg-blue-500'
       },
       {
-        title: t('total_cars'),
+        title: 'Total Cars',
         value: 0,
         icon: 'svg',
         bgColor: 'bg-green-500'
       },
       {
-        title: t('total_diagnoses'),
+        title: 'Total Diagnoses',
         value: 0,
         icon: 'svg',
         bgColor: 'bg-yellow-500'
       },
       {
-        title: t('active_mechanics'),
+        title: 'Active Mechanics',
         value: 0,
         icon: 'svg',
         bgColor: 'bg-purple-500'
@@ -299,25 +298,25 @@ export default {
           const stats = response.data.data
           dashboardStats.value = [
             {
-              title: t('total_users'),
+              title: 'Total Users',
               value: stats.users.total,
               icon: 'svg',
               bgColor: 'bg-blue-500'
             },
             {
-              title: t('total_cars'),
+              title: 'Total Cars',
               value: stats.cars.total,
               icon: 'svg',
               bgColor: 'bg-green-500'
             },
             {
-              title: t('total_diagnoses'),
+              title: 'Total Diagnoses',
               value: stats.diagnoses.total,
               icon: 'svg',
               bgColor: 'bg-yellow-500'
             },
             {
-              title: t('active_mechanics'),
+              title: 'Active Mechanics',
               value: stats.users.mechanics,
               icon: 'svg',
               bgColor: 'bg-purple-500'
@@ -398,8 +397,7 @@ export default {
       updateUserStatus,
       refreshData,
       formatDate,
-      formatTime,
-      t
+      formatTime
     }
   }
 }

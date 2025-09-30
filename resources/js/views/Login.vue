@@ -16,15 +16,15 @@
           </div>
         </div>
         <h2 class="mt-6 text-center text-3xl font-bold text-secondary-900 dark:text-white">
-          {{ t('welcome_back') }}
+          Welcome Back
         </h2>
         <p class="mt-2 text-center text-lg text-secondary-600 dark:text-secondary-400">
-          {{ t('sign_in_to_carwise') }}
+          Sign in to CarWise to continue
         </p>
         <p class="mt-1 text-center text-sm text-secondary-500 dark:text-secondary-500">
-          {{ t('no_account') }}
+          Don't have an account?
           <router-link to="/register" class="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors duration-200">
-            {{ t('create_one_here') }}
+            Create one here
           </router-link>
         </p>
       </div>
@@ -245,7 +245,6 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI } from '../services/api'
-import { t } from '../utils/translations'
 
 export default {
   name: 'Login',
@@ -308,8 +307,7 @@ export default {
       errorMessage,
       showPassword,
       handleLogin,
-      fillDemoCredentials,
-      t
+      fillDemoCredentials
     }
   }
 }

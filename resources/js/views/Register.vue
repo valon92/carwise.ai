@@ -16,15 +16,15 @@
           </div>
         </div>
         <h2 class="mt-6 text-center text-3xl font-bold text-secondary-900 dark:text-white">
-          {{ t('join_carwise') }}
+          Join CarWise
         </h2>
         <p class="mt-2 text-center text-lg text-secondary-600 dark:text-secondary-400">
-          {{ t('create_account_start_journey') }}
+          Create your account and start your journey
         </p>
         <p class="mt-1 text-center text-sm text-secondary-500 dark:text-secondary-500">
-          {{ t('have_account') }}
+          Already have an account?
           <router-link to="/login" class="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors duration-200">
-            {{ t('sign_in_here') }}
+            Sign in here
           </router-link>
         </p>
       </div>
@@ -236,7 +236,7 @@
                     </div>
                     <h4 class="text-lg font-semibold text-secondary-900 dark:text-white">Car Owner</h4>
                     <p class="text-sm text-secondary-600 dark:text-secondary-400 text-center mt-1">
-                      Get AI-powered car diagnosis and connect with trusted mechanics
+                      Get AI-powered car diagnosis and find quality car parts
                     </p>
                   </label>
                 </div>
@@ -509,7 +509,6 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI } from '../services/api'
-import { t } from '../utils/translations'
 
 export default {
   name: 'Register',
@@ -669,8 +668,7 @@ export default {
       availableSkills,
       passwordStrength,
       isFormValid,
-      handleRegister,
-      t
+      handleRegister
     }
   }
 }

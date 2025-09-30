@@ -5,172 +5,304 @@ namespace App\Services\AIProviders;
 use App\Contracts\AIProviderInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 class CohereProvider implements AIProviderInterface
 {
     private string $apiKey;
-    private string $apiUrl;
+    private string $baseUrl;
     private string $model;
-    private float $temperature;
-    private int $maxTokens;
 
     public function __construct()
     {
-        $this->apiKey = config('services.cohere.api_key') ?? '';
-        $this->apiUrl = config('services.cohere.api_url', 'https://api.cohere.ai/v1');
-        $this->model = config('services.cohere.model', 'command');
-        $this->temperature = config('services.cohere.temperature', 0.3);
-        $this->maxTokens = config('services.cohere.max_tokens', 2000);
-    }
+        $this->apiKey = Config::get('services.cohere.api_key') ?? '';
+        $this->baseUrl = Config::get('services.cohere.base_url') ?? 'https://api.cohere.ai/v1';
+        $this->model = Config::get('services.cohere.model') ?? 'command-r-plus';
 
-    public function getProviderName(): string
-    {
-        return 'cohere';
+        if (empty($this->apiKey)) {
+            Log::warning('Cohere API key is not configured');
+        }
     }
 
     public function isAvailable(): bool
     {
-        return !empty($this->apiKey) && $this->apiKey !== 'your_cohere_api_key_here';
+        if (empty($this->apiKey)) {
+            return false;
+        }
+
+        try {
+            $response = Http::timeout(5)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json',
+                ])
+                ->post($this->baseUrl . '/generate', [
+                    'model' => $this->model,
+                    'prompt' => 'test',
+                    'max_tokens' => 5
+                ]);
+
+            return $response->successful();
+        } catch (\Exception $e) {
+            Log::warning('Cohere provider availability check failed', ['error' => $e->getMessage()]);
+            return false;
+        }
     }
 
-    public function getEstimatedCost(array $data): float
+    public function getProviderInfo(): array
     {
-        // Cohere free tier: 1000 requests/month
-        // Paid: $0.0015 per 1K tokens
-        return 0.0;
+        return [
+            'name' => 'Cohere',
+            'provider' => 'cohere',
+            'model' => $this->model,
+            'available' => $this->isAvailable(),
+            'features' => ['text_generation', 'multilingual', 'retrieval_augmented'],
+            'limits' => [
+                'max_tokens' => 4096,
+                'rate_limit' => '100 requests/minute',
+                'context_window' => '128K tokens'
+            ]
+        ];
     }
 
     public function analyzeDiagnosis(array $data): array
     {
-        if (!$this->isAvailable()) {
-            throw new \Exception('Cohere API key is not set.');
-        }
-
-        $prompt = $this->buildPrompt($data);
-        
         try {
-            $response = Http::timeout(60)->withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json'
-            ])->post("{$this->apiUrl}/chat", [
-                'model' => $this->model,
-                'message' => $prompt,
-                'temperature' => $this->temperature,
-                'max_tokens' => $this->maxTokens,
-                'stop_sequences' => ['\n\n---']
-            ]);
-
-            if (!$response->successful()) {
-                Log::error('Cohere API request failed', [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
-                throw new \Exception('Cohere API request failed: ' . $response->body());
-            }
-
-            $responseData = $response->json();
-            
-            if (!isset($responseData['text'])) {
-                Log::error('Cohere API: Unexpected response format', ['response' => $responseData]);
-                throw new \Exception('Unexpected response format from Cohere API.');
-            }
-
-            $jsonString = $responseData['text'];
-            
-            // Clean up the response
-            $jsonString = trim($jsonString);
-            if (strpos($jsonString, '```json') !== false) {
-                $jsonString = preg_replace('/```json\s*/', '', $jsonString);
-                $jsonString = preg_replace('/\s*```/', '', $jsonString);
-            }
-            
-            $parsedResult = json_decode($jsonString, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                Log::error('Cohere API: Failed to parse JSON response', ['response' => $jsonString, 'error' => json_last_error_msg()]);
-                throw new \Exception('Failed to parse Cohere API response.');
-            }
-            
-            // Add AI provider to the result for tracking
-            $parsedResult['ai_provider'] = $this->getProviderName();
-
-            return $parsedResult;
-
-        } catch (\Illuminate\Http\Client\RequestException $e) {
-            Log::error('Cohere API Request Failed: ' . $e->getMessage(), [
-                'status' => $e->response->status(),
-                'response' => $e->response->json(),
-                'data' => $data
-            ]);
-            throw new \Exception('Cohere API request failed: ' . $e->getMessage());
+            Log::info('Starting Cohere diagnosis analysis');
+            $prompt = $this->buildDiagnosisPrompt($data);
+            $response = $this->makeRequest($prompt);
+            $analysis = $this->parseResponse($response, $data['user_language'] ?? 'en');
+            Log::info('Cohere diagnosis completed');
+            return $analysis;
         } catch (\Exception $e) {
-            Log::error('Cohere API Error: ' . $e->getMessage(), ['data' => $data]);
-            throw new \Exception('Cohere API error: ' . $e->getMessage());
+            Log::error('Cohere diagnosis failed', ['error' => $e->getMessage()]);
+            throw new \Exception('Cohere analysis failed: ' . $e->getMessage());
         }
     }
 
-    private function buildPrompt(array $data): string
+    private function buildDiagnosisPrompt(array $data): string
     {
-        $currency = $data['currency_code'] ?? 'USD';
         $language = $data['user_language'] ?? 'en';
+        $make = $data['make'] ?? $data['car_brand'] ?? 'Unknown';
+        $model = $data['model'] ?? $data['car_model'] ?? 'Unknown';
+        $year = $data['year'] ?? $data['car_year'] ?? 'Unknown';
+        $mileage = $data['mileage'] ?? 'Unknown';
+        $description = $data['description'] ?? $data['problem_description'] ?? '';
+        
+        $symptoms = $data['symptoms'] ?? [];
+        if (is_string($symptoms)) {
+            $symptoms = json_decode($symptoms, true) ?? [$symptoms];
+        }
+        $symptomsList = implode(', ', $symptoms);
 
-        $symptomsList = implode(', ', $data['symptoms'] ?? []);
+        $languageNames = [
+            'sq' => 'Albanian (Shqip)', 'en' => 'English', 'de' => 'German (Deutsch)',
+            'fr' => 'French (Français)', 'pt' => 'Portuguese (Português)', 
+            'es' => 'Spanish (Español)', 'it' => 'Italian (Italiano)'
+        ];
+        $languageName = $languageNames[$language] ?? 'English';
 
-        return "You are a professional automotive diagnostic expert. Analyze the following vehicle diagnosis request and provide a comprehensive response in {$language} language.
+        return "You are an expert automotive diagnostic AI for CarWise.ai. Analyze the vehicle problem below and provide your response EXCLUSIVELY in {$languageName}.
 
-Vehicle Information:
-- Make: {$data['make']}
-- Model: {$data['model']}
-- Year: {$data['year']}
-- Mileage: {$data['mileage']} km
-- Engine Type: {$data['engine_type']}
-- Engine Size: {$data['engine_size']}
+VEHICLE INFORMATION:
+- Make: {$make}
+- Model: {$model}
+- Year: {$year}
+- Mileage: {$mileage} km
 
-Symptoms: {$symptomsList}
-Description: {$data['description']}
+PROBLEM DETAILS:
+- Symptoms: {$symptomsList}
+- Description: {$description}
 
-Please provide a detailed diagnosis in JSON format with the following structure:
-```json
-{
-  \"problem_title\": \"A concise title for the main problem\",
-  \"problem_description\": \"A detailed description of the problem\",
-  \"severity\": \"low|medium|high|critical\",
-  \"confidence_score\": 85,
-  \"likely_causes\": [
-    {
-      \"title\": \"Cause title\",
-      \"description\": \"Detailed description\",
-      \"probability\": 75
+INSTRUCTIONS:
+Respond ONLY in {$languageName} with a comprehensive diagnostic analysis including:
+
+1. PROBLEM DIAGNOSIS: What is likely wrong with the vehicle
+2. RECOMMENDED SOLUTIONS: Specific repair steps
+3. URGENCY LEVEL: How quickly this needs attention (Critical/High/Medium/Low)
+4. ESTIMATED REPAIR COST: Price range for fixing the issue
+5. PREVENTION TIPS: How to avoid this problem in the future
+
+Be specific about this {$make} {$model} {$year} and consider common issues for this vehicle. Provide practical advice that the car owner can understand and act upon.
+
+Important: Your entire response must be in {$languageName} language.";
     }
-  ],
-  \"recommended_actions\": [
-    {
-      \"title\": \"Action title\",
-      \"description\": \"Detailed description\",
-      \"urgency\": \"Immediate|Within 1 week|Within 2 weeks\"
-    }
-  ],
-  \"estimated_costs\": [
-    {
-      \"service\": \"Service name\",
-      \"min\": 100,
-      \"max\": 300,
-      \"currency\": \"{$currency}\",
-      \"formatted_min\": \"{$currency} 100\",
-      \"formatted_max\": \"{$currency} 300\"
-    }
-  ],
-  \"ai_insights\": [
-    \"Additional professional insights\"
-  ],
-  \"related_issues\": [
-    \"Other potential issues to watch for\"
-  ],
-  \"requires_immediate_attention\": true,
-  \"ai_model_version\": \"cohere-command\"
-}
-```
 
-Provide accurate, professional diagnosis based on the symptoms and vehicle information.";
+    private function makeRequest(string $prompt, array $parameters = []): array
+    {
+        $payload = array_merge([
+            'model' => $this->model,
+            'prompt' => $prompt,
+            'max_tokens' => 2500,
+            'temperature' => 0.3,
+            'k' => 0,
+            'stop_sequences' => [],
+            'return_likelihoods' => 'NONE'
+        ], $parameters);
+
+        $response = Http::timeout(60)
+            ->withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ])
+            ->post($this->baseUrl . '/generate', $payload);
+
+        if (!$response->successful()) {
+            $error = $response->json()['message'] ?? 'Unknown error';
+            throw new \Exception('Cohere API error: ' . $error);
+        }
+
+        $responseData = $response->json();
+        if (!isset($responseData['generations'][0]['text'])) {
+            throw new \Exception('Invalid response format from Cohere API');
+        }
+
+        return $responseData;
+    }
+
+    private function parseResponse(array $response, string $language): array
+    {
+        $content = $response['generations'][0]['text'];
+        
+        // Parse structured response
+        $diagnosis = $content;
+        $recommendations = '';
+        $urgency = 'medium';
+        $estimatedCost = '';
+
+        // Extract diagnosis section
+        if (preg_match('/(?:PROBLEM DIAGNOSIS|DIJAGNOZA|PROBLEMDIAGNOSE|DIAGNOSTIC|DIAGNÓSTICO|DIAGNOSI)[:：]\s*(.*?)(?=(?:RECOMMENDED|REKOMAN|EMPFOHLEN|RECOMMANDÉ|RECOMENDADO|RACCOMANDATO))/si', $content, $matches)) {
+            $diagnosis = trim($matches[1]);
+        }
+
+        // Extract recommendations
+        if (preg_match('/(?:RECOMMENDED SOLUTIONS|SOLUTION|LÖSUNG|SOLUÇÃO|SOLUCIÓN|SOLUZIONE|ZGJIDHJE)[:：]\s*(.*?)(?=(?:URGENCY|DRINGLICHKEIT|URGENCE|URGENCIA|SHKALLA))/si', $content, $matches)) {
+            $recommendations = trim($matches[1]);
+        }
+
+        // Extract urgency level
+        if (preg_match('/(?:URGENCY LEVEL|SHKALLA E URGJENCËS|DRINGLICHKEITSSTUFE|NIVEAU D\'URGENCE|NIVEL DE URGENCIA|LIVELLO DI URGENZA)[:：]\s*(Critical|High|Medium|Low|Kritisch|Hoch|Mittel|Niedrig|Critique|Élevé|Moyen|Faible|Crítico|Alto|Medio|Bajo|Critico|Alto|Medio|Basso|Kritike|I lartë|Mesatar|I ulët)/i', $content, $matches)) {
+            $urgencyText = strtolower(trim($matches[1]));
+            $urgencyMap = [
+                'critical' => 'critical', 'kritisch' => 'critical', 'critique' => 'critical', 
+                'crítico' => 'critical', 'critico' => 'critical', 'kritike' => 'critical',
+                'high' => 'high', 'hoch' => 'high', 'élevé' => 'high', 'alto' => 'high', 
+                'i lartë' => 'high',
+                'medium' => 'medium', 'mittel' => 'medium', 'moyen' => 'medium', 
+                'medio' => 'medium', 'mesatar' => 'medium',
+                'low' => 'low', 'niedrig' => 'low', 'faible' => 'low', 'bajo' => 'low', 
+                'basso' => 'low', 'i ulët' => 'low'
+            ];
+            $urgency = $urgencyMap[$urgencyText] ?? 'medium';
+        }
+
+        // Extract estimated cost
+        if (preg_match('/(?:ESTIMATED REPAIR COST|KOSTEN|COÛT|COSTO|CUSTO|KOSTO)[:：]\s*(.*?)(?=(?:PREVENTION|PRÉVENTION|PREVENCIÓN|PREVENZIONE|PARANDALIM|VORBEUGUNG))/si', $content, $matches)) {
+            $estimatedCost = trim($matches[1]);
+        }
+
+        // Fallbacks
+        if (empty($recommendations)) {
+            $recommendations = $this->generateFallbackRecommendations($language);
+        }
+        if (empty($estimatedCost)) {
+            $estimatedCost = $this->generateFallbackCost($language);
+        }
+
+        return [
+            'diagnosis' => $diagnosis,
+            'recommendations' => $recommendations,
+            'urgency' => $urgency,
+            'estimated_cost' => $estimatedCost,
+            'ai_insights' => $this->generateAIInsights($language),
+            'confidence_score' => $this->calculateConfidenceScore($response),
+            'provider' => 'cohere',
+            'model' => $this->model
+        ];
+    }
+
+    private function generateFallbackRecommendations(string $language): string
+    {
+        $recommendations = [
+            'en' => "1. Have vehicle inspected by qualified technician\n2. Document when symptoms occur\n3. Check maintenance records\n4. Compare with manufacturer recommendations\n5. Consider warranty implications",
+            'sq' => "1. Inspektoni automjetin nga teknik i kualifikuar\n2. Dokumentoni kur ndodhin simptomat\n3. Kontrolloni dosjet e mirëmbajtjes\n4. Krahasoni me rekomandimet e prodhuesit\n5. Konsideroni implikimet e garancisë",
+            'de' => "1. Fahrzeug von qualifiziertem Techniker inspizieren lassen\n2. Dokumentieren, wann Symptome auftreten\n3. Wartungsunterlagen prüfen\n4. Mit Herstellerempfehlungen vergleichen\n5. Garantieauswirkungen berücksichtigen",
+            'fr' => "1. Faire inspecter le véhicule par un technicien qualifié\n2. Documenter quand les symptômes se produisent\n3. Vérifier les dossiers d'entretien\n4. Comparer avec les recommandations du fabricant\n5. Considérer les implications de garantie",
+            'pt' => "1. Fazer o veículo ser inspecionado por técnico qualificado\n2. Documentar quando os sintomas ocorrem\n3. Verificar registros de manutenção\n4. Comparar com recomendações do fabricante\n5. Considerar implicações da garantia",
+            'es' => "1. Hacer inspeccionar el vehículo por técnico calificado\n2. Documentar cuándo ocurren los síntomas\n3. Revisar registros de mantenimiento\n4. Comparar con recomendaciones del fabricante\n5. Considerar implicaciones de garantía"
+        ];
+        return $recommendations[$language] ?? $recommendations['en'];
+    }
+
+    private function generateFallbackCost(string $language): string
+    {
+        $costs = [
+            'en' => "Repair costs vary significantly based on specific diagnosis and parts needed. Typical range: €75-€1200+. Get quotes from certified mechanics for accurate estimates.",
+            'sq' => "Kostot e riparimit ndryshojnë ndjeshëm bazuar në diagnozën specifike dhe pjesët e nevojshme. Diapazoni tipik: €75-€1200+. Merrni oferta nga mekanikë të certifikuar për vlerësime të sakta.",
+            'de' => "Reparaturkosten variieren erheblich je nach spezifischer Diagnose und benötigten Teilen. Typischer Bereich: €75-€1200+. Angebote von zertifizierten Mechanikern für genaue Schätzungen einholen.",
+            'fr' => "Les coûts de réparation varient considérablement selon le diagnostic spécifique et les pièces nécessaires. Fourchette typique: €75-€1200+. Obtenez des devis de mécaniciens certifiés pour des estimations précises.",
+            'pt' => "Os custos de reparo variam significativamente com base no diagnóstico específico e peças necessárias. Faixa típica: €75-€1200+. Obtenha orçamentos de mecânicos certificados para estimativas precisas.",
+            'es' => "Los costos de reparación varían significativamente según el diagnóstico específico y las piezas necesarias. Rango típico: €75-€1200+. Obtenga cotizaciones de mecánicos certificados para estimaciones precisas."
+        ];
+        return $costs[$language] ?? $costs['en'];
+    }
+
+    private function generateAIInsights(string $language): string
+    {
+        $insights = [
+            'en' => "Cohere AI Analysis: This diagnosis leverages large-scale automotive knowledge to identify patterns and provide contextual repair guidance.",
+            'sq' => "Analiza Cohere AI: Kjo diagnozë përdor njohuri të gjera të automjeteve për të identifikuar modelet dhe për të dhënë udhëzim kontekstual riparimi.",
+            'de' => "Cohere KI-Analyse: Diese Diagnose nutzt umfassendes Automobilwissen zur Mustererkennung und kontextuellen Reparaturberatung.",
+            'fr' => "Analyse Cohere IA : Ce diagnostic exploite des connaissances automobiles étendues pour identifier les modèles et fournir des conseils de réparation contextuels.",
+            'pt' => "Análise Cohere AI: Este diagnóstico aproveita conhecimento automotivo extenso para identificar padrões e fornecer orientação contextual de reparo.",
+            'es' => "Análisis Cohere AI: Este diagnóstico aprovecha el conocimiento automotriz extenso para identificar patrones y proporcionar orientación contextual de reparación."
+        ];
+        return $insights[$language] ?? $insights['en'];
+    }
+
+    private function calculateConfidenceScore(array $response): float
+    {
+        $confidence = 0.8;
+
+        // Check finish reason
+        if (isset($response['generations'][0]['finish_reason'])) {
+            $finishReason = $response['generations'][0]['finish_reason'];
+            if ($finishReason === 'COMPLETE') {
+                $confidence += 0.1;
+            } elseif ($finishReason === 'MAX_TOKENS') {
+                $confidence -= 0.1;
+            }
+        }
+
+        // Check content length
+        $contentLength = strlen($response['generations'][0]['text']);
+        if ($contentLength > 1000) {
+            $confidence += 0.05;
+        } elseif ($contentLength < 200) {
+            $confidence -= 0.15;
+        }
+
+        // Check likelihood scores if available
+        if (isset($response['generations'][0]['likelihood'])) {
+            $likelihood = $response['generations'][0]['likelihood'];
+            if ($likelihood > 0.8) {
+                $confidence += 0.05;
+            } elseif ($likelihood < 0.5) {
+                $confidence -= 0.1;
+            }
+        }
+
+        return max(0.0, min(1.0, $confidence));
+    }
+
+    public function getProviderName(): string
+    {
+        return 'Cohere';
+    }
+
+    public function getEstimatedCost(array $data): float
+    {
+        // Cohere has free tier - return 0 for basic estimation
+        return 0.0;
     }
 }

@@ -9,10 +9,10 @@
           </svg>
         </div>
         <h1 class="text-4xl font-bold text-secondary-900 dark:text-white mb-4">
-          {{ t('ai_powered_car_diagnosis') }}
+          AI-Powered Car Diagnosis
         </h1>
         <p class="text-xl text-secondary-600 dark:text-secondary-400 max-w-3xl mx-auto">
-          {{ t('get_instant_accurate_diagnosis') }}
+          Get instant, accurate diagnosis for your vehicle
         </p>
       </div>
 
@@ -51,7 +51,7 @@
               {{ steps[currentStep] }}
             </h3>
             <p class="text-sm text-secondary-600 dark:text-secondary-400">
-              {{ t('step') }} {{ currentStep + 1 }} {{ t('of') }} {{ steps.length }}
+              Step {{ currentStep + 1 }} of {{ steps.length }}
             </p>
           </div>
 
@@ -79,36 +79,36 @@
         <!-- Diagnosis Form -->
         <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 order-2 xl:order-1">
           <h2 class="text-2xl font-semibold text-secondary-900 dark:text-white mb-6">
-            {{ t('vehicle_information_symptoms') }}
+            Vehicle Information & Symptoms
           </h2>
           
           <div class="space-y-6">
             <!-- Vehicle Information -->
             <div class="space-y-4">
               <div class="flex items-center justify-between">
-                <h3 class="text-lg font-medium text-secondary-900 dark:text-white">{{ t('vehicle_details') }}</h3>
+                <h3 class="text-lg font-medium text-secondary-900 dark:text-white">Vehicle Details</h3>
                 <div v-if="selectedCar" class="flex items-center text-sm text-green-600 dark:text-green-400">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
-                  {{ t('pre_filled_from_your_car') }}
+                  Pre-filled from your car profile
                 </div>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-                    {{ t('make') }} *
+                    Make *
                   </label>
                   <select v-model="diagnosisForm.make" class="input" :disabled="selectedCar" required @change="onMakeChange">
-                    <option value="">{{ t('select_make') }}</option>
+                    <option value="">Select Make</option>
                     <option v-for="brand in carBrands" :key="brand.id" :value="brand.name">
-                      {{ brand.name }} ({{ brand.country }})
+                      {{ brand.name }}
                     </option>
                   </select>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-                    {{ t('model') }} *
+                    Model *
                   </label>
                   <select 
                     v-model="diagnosisForm.model" 
@@ -116,13 +116,13 @@
                     :disabled="selectedCar || !diagnosisForm.make" 
                     required
                   >
-                    <option value="">{{ t('select_model') }}</option>
+                    <option value="">Select Model</option>
                     <option v-for="model in carModels" :key="model.id" :value="model.name">
-                      {{ model.name }} {{ model.generation ? `(${model.generation})` : '' }}
+                      {{ model.name }}
                     </option>
                   </select>
                   <div v-if="!diagnosisForm.make" class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
-                    {{ t('please_select_make_first') }}
+                    Please select make first
                   </div>
                 </div>
                 <div>
@@ -198,7 +198,7 @@
             <!-- Problem Description -->
             <div>
               <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-                {{ t('problem_description') }} *
+                Problem Description *
               </label>
               
               <!-- Description Input Tabs -->
@@ -236,7 +236,7 @@
                 <textarea
                   v-model="diagnosisForm.description"
                   rows="4"
-                  :placeholder="t('describe_symptoms_placeholder')"
+                  placeholder="Describe the symptoms or issues you're experiencing..."
                   class="input"
                   required
                 ></textarea>
@@ -266,55 +266,138 @@
 
                 <!-- Recording Controls -->
                 <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 p-6 bg-secondary-50 dark:bg-secondary-700 rounded-lg">
-                  <button
-                    type="button"
-                    @click="toggleRecording"
-                    :disabled="isProcessingAudio"
-                    class="flex items-center justify-center w-16 h-16 rounded-full transition-all duration-200"
-                    :class="isRecording 
-                      ? 'bg-danger-500 hover:bg-danger-600 text-white animate-pulse' 
-                      : 'bg-primary-500 hover:bg-primary-600 text-white'"
-                  >
-                    <svg v-if="!isRecording" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
-                    </svg>
-                    <svg v-else class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                      <rect x="6" y="6" width="12" height="12" rx="2"></rect>
-                    </svg>
-                  </button>
-                  
-                  <div class="text-center">
-                    <p class="text-sm font-medium text-secondary-700 dark:text-secondary-300">
-                      {{ isRecording ? 'Recording...' : 'Click to record' }}
+                  <!-- Microphone Permission Button (if not granted) -->
+                  <div v-if="!microphonePermissionGranted" class="text-center">
+                    <button
+                      type="button"
+                      @click="requestMicrophonePermission"
+                      class="btn-primary mb-2"
+                    >
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                      </svg>
+                      Allow Microphone Access
+                    </button>
+                    <p class="text-xs text-secondary-500 dark:text-secondary-400">
+                      Click to enable microphone for voice recording
                     </p>
-                    <p v-if="recordingTime > 0" class="text-xs text-secondary-500 dark:text-secondary-500">
-                      {{ formatTime(recordingTime) }}
-                    </p>
-                    <p v-if="!isRecording && !recordedAudio" class="text-xs text-secondary-400 dark:text-secondary-500">
-                      Speak clearly into your microphone
-                    </p>
+                  </div>
+
+                  <!-- Recording Button (if permission granted) -->
+                  <div v-else>
+                    <!-- Debug: Show recording state -->
+                    <div class="text-xs text-gray-500 mb-2">
+                      Debug: microphonePermissionGranted={{ microphonePermissionGranted }}, isRecording={{ isRecording }}, isPaused={{ isPaused }}
+                    </div>
+                    <div class="flex items-center space-x-4">
+                      <!-- Main Record Button -->
+                      <button
+                        type="button"
+                        @click="toggleRecording"
+                        :disabled="isProcessingAudio"
+                        class="flex items-center justify-center w-16 h-16 rounded-full transition-all duration-200 border-2 border-white shadow-lg"
+                        :class="isRecording 
+                          ? (isPaused ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white animate-pulse')
+                          : 'bg-blue-500 hover:bg-blue-600 text-white'"
+                        style="z-index: 10; position: relative;"
+                      >
+                        <svg v-if="!isRecording" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                        </svg>
+                        <svg v-else-if="isPaused" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m-6-8h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2v-8a2 2 0 012-2z"></path>
+                        </svg>
+                        <svg v-else class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                        </svg>
+                      </button>
+
+                      <!-- Stop Button (only when recording) -->
+                      <button
+                        v-if="isRecording"
+                        type="button"
+                        @click="stopRecording"
+                        class="flex items-center justify-center w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200 border-2 border-white shadow-lg"
+                        style="z-index: 10; position: relative;"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h6v4H9z"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    <div class="text-center mt-2">
+                      <p class="text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                        <span v-if="!isRecording">Click to record</span>
+                        <span v-else-if="isPaused">Recording paused</span>
+                        <span v-else>Recording...</span>
+                      </p>
+                      <p v-if="recordingTime > 0" class="text-xs text-secondary-500 dark:text-secondary-500">
+                        {{ formatTime(recordingTime) }}
+                      </p>
+                      <p v-if="!isRecording && !recordedAudio" class="text-xs text-secondary-400 dark:text-secondary-500">
+                        Speak clearly into your microphone
+                      </p>
+                      <!-- Debug info -->
+                      <p class="text-xs text-gray-400 mt-1">
+                        Debug: isRecording={{ isRecording }}, isPaused={{ isPaused }}, recordingTime={{ recordingTime }}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 <!-- Audio Player (if recorded) -->
                 <div v-if="recordedAudio" class="p-4 bg-secondary-50 dark:bg-secondary-700 rounded-lg">
-                  <div class="flex items-center space-x-4">
-                    <audio :src="recordedAudio" controls class="flex-1"></audio>
-                    <button
-                      type="button"
-                      @click="transcribeAudio"
-                      :disabled="isProcessingAudio"
-                      class="btn-primary text-sm"
-                    >
-                      {{ isProcessingAudio ? 'Transcribing...' : 'Convert to Text' }}
-                    </button>
-                    <button
-                      type="button"
-                      @click="clearRecording"
-                      class="btn-secondary text-sm"
-                    >
-                      Clear
-                    </button>
+                  <div class="space-y-4">
+                    <!-- Audio Player -->
+                    <div class="flex items-center space-x-4">
+                      <audio :src="recordedAudio" controls class="flex-1"></audio>
+                    </div>
+                    
+                    <!-- Audio Info -->
+                    <div class="text-sm text-secondary-600 dark:text-secondary-400">
+                      <p>Recording duration: {{ formatTime(recordingTime) }}</p>
+                      <p>File size: {{ audioBlob ? (audioBlob.size / 1024).toFixed(1) + ' KB' : 'Unknown' }}</p>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        @click="transcribeAudio"
+                        :disabled="isProcessingAudio"
+                        class="btn-primary text-sm flex items-center"
+                      >
+                        <svg v-if="!isProcessingAudio" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        {{ isProcessingAudio ? 'Transcribing...' : 'Convert to Text' }}
+                      </button>
+                      
+                      <button
+                        type="button"
+                        @click="useTranscribedText"
+                        v-if="transcribedText"
+                        class="btn-secondary text-sm flex items-center"
+                      >
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Use Text
+                      </button>
+                      
+                      <button
+                        type="button"
+                        @click="clearRecording"
+                        class="btn-danger text-sm flex items-center"
+                      >
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Clear
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -343,7 +426,7 @@
             <!-- Symptoms Checklist -->
             <div>
               <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3">
-                {{ t('common_symptoms_select_all') }}
+                Common Symptoms (Select All That Apply)
               </label>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label v-for="symptom in commonSymptoms" :key="symptom" class="flex items-center">
@@ -376,7 +459,7 @@
             <!-- Media Upload Section -->
             <div>
               <label class="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-                {{ t('upload_media_optional') }}
+                Upload Media (Optional)
               </label>
               
               <!-- Upload Type Tabs -->
@@ -433,10 +516,10 @@
                   <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
                 <p class="mt-2 text-sm text-secondary-600 dark:text-secondary-400">
-                  {{ t('drag_drop_photos_here') }}
+                  Drag & drop photos here
                 </p>
                 <p class="text-xs text-secondary-500 dark:text-secondary-500 mt-1">
-                  {{ t('max_5_photos_10mb_each') }}
+                  Max 5 photos, 10MB each
                 </p>
               </div>
 
@@ -451,10 +534,10 @@
                   <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
                 <p class="mt-2 text-sm text-secondary-600 dark:text-secondary-400">
-                  {{ t('drag_drop_videos_here') }}
+                  Drag & drop videos here
                 </p>
                 <p class="text-xs text-secondary-500 dark:text-secondary-500 mt-1">
-                  {{ t('max_2_videos_50mb_each') }}
+                  Max 2 videos, 50MB each
                 </p>
               </div>
 
@@ -469,10 +552,10 @@
                   <path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
                 <p class="mt-2 text-sm text-secondary-600 dark:text-secondary-400">
-                  {{ t('drag_drop_audio_here') }}
+                  Drag & drop audio here
                 </p>
                 <p class="text-xs text-secondary-500 dark:text-secondary-500 mt-1">
-                  {{ t('max_3_audio_20mb_each') }}
+                  Max 3 audio files, 20MB each
                 </p>
               </div>
 
@@ -574,7 +657,7 @@
               <svg v-else class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
               </svg>
-              {{ isLoading ? t('analyzing') : t('start_ai_diagnosis') }}
+              {{ isLoading ? 'Analyzing...' : 'Start AI Diagnosis' }}
             </button>
           </div>
         </div>
@@ -582,7 +665,7 @@
         <!-- Results Panel -->
         <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 order-1 xl:order-2">
           <h2 class="text-2xl font-semibold text-secondary-900 dark:text-white mb-6">
-            {{ t('diagnosis_results') }}
+            Diagnosis Results
           </h2>
           
           <!-- Loading State -->
@@ -634,7 +717,7 @@
             <!-- Diagnosis Summary -->
             <div class="bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-lg p-6">
               <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-secondary-900 dark:text-white">{{ t('diagnosis_summary') }}</h3>
+                <h3 class="text-lg font-semibold text-secondary-900 dark:text-white">Diagnosis Summary</h3>
                 <div class="flex items-center space-x-4">
                   <div class="flex items-center">
                     <div class="w-3 h-3 rounded-full mr-2" :class="getSeverityColor(diagnosisResult.severity)"></div>
@@ -650,10 +733,106 @@
               <h4 class="text-xl font-semibold text-secondary-900 dark:text-white mb-2">
                 {{ diagnosisResult.problem_title || 'Vehicle Issue Detected' }}
               </h4>
-              <p class="text-secondary-700 dark:text-secondary-300">
-                {{ diagnosisResult.problem_description || diagnosisResult.summary }}
+              <p class="text-secondary-700 dark:text-secondary-300 mb-4">
+                {{ diagnosisResult.problem_summary || diagnosisResult.problem_description || diagnosisResult.summary }}
               </p>
+
+              <!-- Primary Diagnosis -->
+              <div v-if="diagnosisResult.primary_diagnosis" class="bg-white dark:bg-secondary-800 rounded-lg p-4 border border-primary-200 dark:border-primary-700 mb-4">
+                <h5 class="font-semibold text-primary-900 dark:text-primary-100 mb-2 flex items-center">
+                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Diagnoza Kryesore
+                </h5>
+                <h6 class="font-medium text-secondary-900 dark:text-white mb-2">
+                  {{ diagnosisResult.primary_diagnosis.title }}
+                </h6>
+                <p class="text-secondary-700 dark:text-secondary-300 mb-3">
+                  {{ diagnosisResult.primary_diagnosis.description }}
+                </p>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-4">
+                    <span class="text-sm text-secondary-600 dark:text-secondary-400">
+                      Probabiliteti: {{ diagnosisResult.primary_diagnosis.probability }}%
+                    </span>
+                    <div v-if="diagnosisResult.primary_diagnosis.affected_systems" class="flex flex-wrap gap-1">
+                      <span v-for="system in diagnosisResult.primary_diagnosis.affected_systems" :key="system" 
+                            class="px-2 py-1 bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-primary-200 text-xs rounded-full">
+                        {{ system }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
               
+              <!-- Diagnostic Steps -->
+              <div v-if="diagnosisResult.diagnostic_steps" class="bg-white dark:bg-secondary-800 rounded-lg p-4 border border-blue-200 dark:border-blue-700 mb-4">
+                <h5 class="font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center">
+                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                  </svg>
+                  Hapat Diagnostikë
+                </h5>
+                <div class="space-y-3">
+                  <div v-for="step in diagnosisResult.diagnostic_steps" :key="step.step" class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full flex items-center justify-center text-sm font-medium">
+                      {{ step.step }}
+                    </div>
+                    <div class="flex-1">
+                      <h6 class="font-medium text-secondary-900 dark:text-white">{{ step.action }}</h6>
+                      <p class="text-sm text-secondary-600 dark:text-secondary-400">{{ step.description }}</p>
+                      <span class="inline-block mt-1 px-2 py-1 text-xs rounded-full" 
+                            :class="step.difficulty === 'easy' ? 'bg-green-100 text-green-800' : 
+                                   step.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                                   'bg-red-100 text-red-800'">
+                        {{ step.difficulty === 'easy' ? 'Lehtë' : step.difficulty === 'medium' ? 'Mesatar' : 'I vështirë' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Immediate Actions -->
+              <div v-if="diagnosisResult.immediate_actions" class="bg-white dark:bg-secondary-800 rounded-lg p-4 border border-orange-200 dark:border-orange-700 mb-4">
+                <h5 class="font-semibold text-orange-900 dark:text-orange-100 mb-3 flex items-center">
+                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                  </svg>
+                  Veprimet e Menjëhershme
+                </h5>
+                <div class="space-y-3">
+                  <div v-for="(action, index) in diagnosisResult.immediate_actions" :key="index" class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium"
+                         :class="action.urgency === 'immediate' ? 'bg-red-100 text-red-800' : 
+                                action.urgency === 'within 1 week' ? 'bg-orange-100 text-orange-800' : 
+                                'bg-yellow-100 text-yellow-800'">
+                      <svg v-if="action.safety_important" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                      </svg>
+                      <span v-else>{{ index + 1 }}</span>
+                    </div>
+                    <div class="flex-1">
+                      <h6 class="font-medium text-secondary-900 dark:text-white">{{ action.action }}</h6>
+                      <p class="text-sm text-secondary-600 dark:text-secondary-400">{{ action.description }}</p>
+                      <div class="flex items-center space-x-2 mt-1">
+                        <span class="text-xs px-2 py-1 rounded-full"
+                              :class="action.urgency === 'immediate' ? 'bg-red-100 text-red-800' : 
+                                     action.urgency === 'within 1 week' ? 'bg-orange-100 text-orange-800' : 
+                                     'bg-yellow-100 text-yellow-800'">
+                          {{ action.urgency === 'immediate' ? 'Menjëherë' : 
+                             action.urgency === 'within 1 week' ? 'Brenda 1 javë' : 
+                             action.urgency === 'within 1 month' ? 'Brenda 1 muaj' : 'Rutinë' }}
+                        </span>
+                        <span v-if="action.safety_important" class="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full">
+                          ⚠️ Siguri
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- AI Insights -->
               <div v-if="diagnosisResult.ai_insights" class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-400">
                 <h5 class="font-medium text-blue-900 dark:text-blue-100 mb-2 flex items-center">
@@ -673,7 +852,7 @@
 
             <!-- Likely Causes -->
             <div>
-              <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-3">{{ t('likely_causes') }}</h3>
+              <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-3">Likely Causes</h3>
               <div class="space-y-3">
                 <div v-for="(cause, index) in (diagnosisResult.likely_causes || diagnosisResult.likelyCauses)" :key="index" class="flex items-start">
                   <div class="w-6 h-6 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-3 mt-0.5">
@@ -692,7 +871,7 @@
 
             <!-- Recommended Actions -->
             <div>
-              <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-3">{{ t('recommended_actions') }}</h3>
+              <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-3">Recommended Actions</h3>
               <div class="space-y-3">
                 <div v-for="(action, index) in (diagnosisResult.recommended_actions || diagnosisResult.recommendedActions)" :key="index" class="flex items-start">
                   <div class="w-6 h-6 bg-success-100 dark:bg-success-900 rounded-full flex items-center justify-center mr-3 mt-0.5">
@@ -747,15 +926,6 @@
               </div>
             </div>
 
-            <!-- Find Mechanics Button -->
-            <div class="pt-4 border-t border-secondary-200 dark:border-secondary-700">
-              <router-link to="/mechanics" class="btn-primary w-full flex items-center justify-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-                Find Certified Mechanics
-              </router-link>
-            </div>
           </div>
 
           <!-- Empty State -->
@@ -798,11 +968,10 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { diagnosisAPI, carsAPI } from '../services/api'
 import axios from 'axios'
-import { t } from '../utils/translations'
 
 export default {
   name: 'Diagnose',
@@ -827,6 +996,7 @@ export default {
     
     // Voice recording state
     const isRecording = ref(false)
+    const isPaused = ref(false)
     const isProcessingAudio = ref(false)
     const recordedAudio = ref(null)
     const transcribedText = ref('')
@@ -835,9 +1005,12 @@ export default {
     const audioChunks = ref([])
     const recordingInterval = ref(null)
     const microphonePermissionGranted = ref(false)
+    const audioBlob = ref(null)
+    const audioUrl = ref(null)
+    const recordingStartTime = ref(null)
     const formErrors = ref([])
 
-    const steps = [t('vehicle_info'), t('symptoms'), t('ai_analysis'), t('results')]
+    const steps = ['Vehicle Info', 'Symptoms', 'AI Analysis', 'Results']
 
     const diagnosisForm = reactive({
       make: '',
@@ -847,25 +1020,26 @@ export default {
       engineType: '',
       engineSize: '',
       description: '',
-      symptoms: []
+      symptoms: [],
+      selectedCarId: null
     })
 
     const commonSymptoms = [
-      t('engine_wont_start'),
-      t('rough_idle'),
-      t('stalling'),
-      t('poor_acceleration'),
-      t('strange_noises'),
-      t('warning_lights_on'),
-      t('smoke_from_exhaust'),
-      t('overheating'),
-      t('poor_fuel_economy'),
-      t('transmission_issues'),
-      t('brake_problems'),
-      t('steering_issues'),
-      t('electrical_problems'),
-      t('ac_not_working'),
-      t('suspension_problems')
+      'Engine won\'t start',
+      'Rough idle',
+      'Stalling',
+      'Poor acceleration',
+      'Strange noises',
+      'Warning lights on',
+      'Smoke from exhaust',
+      'Overheating',
+      'Poor fuel economy',
+      'Transmission issues',
+      'Brake problems',
+      'Steering issues',
+      'Electrical problems',
+      'AC not working',
+      'Suspension problems'
     ]
 
     const loadCarBrands = async () => {
@@ -927,7 +1101,6 @@ export default {
           // Load models for the car's brand
           loadCarModels(selectedCar.value.brand)
           
-          console.log('Car data loaded:', selectedCar.value)
         }
       } catch (error) {
         console.error('Error loading car data:', error)
@@ -1004,11 +1177,49 @@ export default {
 
     // Voice recording functions
     const toggleRecording = async () => {
+      console.log('toggleRecording called, isRecording:', isRecording.value, 'isPaused:', isPaused.value)
       if (isRecording.value) {
-        stopRecording()
+        if (isPaused.value) {
+          resumeRecording()
+        } else {
+          pauseRecording()
+        }
       } else {
         startRecording()
       }
+    }
+
+    const stopRecording = () => {
+      if (mediaRecorder.value && isRecording.value) {
+        mediaRecorder.value.stop()
+        isRecording.value = false
+        isPaused.value = false
+        clearInterval(recordingInterval.value)
+        recordingTime.value = 0
+      }
+    }
+
+    const pauseRecording = () => {
+      if (mediaRecorder.value && isRecording.value && !isPaused.value) {
+        mediaRecorder.value.pause()
+        isPaused.value = true
+        clearInterval(recordingInterval.value)
+      }
+    }
+
+    const resumeRecording = () => {
+      if (mediaRecorder.value && isRecording.value && isPaused.value) {
+        mediaRecorder.value.resume()
+        isPaused.value = false
+        startRecordingTimer()
+      }
+    }
+
+    const startRecordingTimer = () => {
+      recordingTime.value = 0
+      recordingInterval.value = setInterval(() => {
+        recordingTime.value++
+      }, 1000)
     }
 
     const startRecording = async () => {
@@ -1018,12 +1229,11 @@ export default {
           throw new Error('getUserMedia is not supported in this browser')
         }
 
-        // Check microphone permissions first
-        if (navigator.permissions) {
-          const permissionStatus = await navigator.permissions.query({ name: 'microphone' })
-          
-          if (permissionStatus.state === 'denied') {
-            throw new Error('Microphone permission denied. Please enable microphone access in your browser settings.')
+        // Check if microphone permission is already granted
+        if (!microphonePermissionGranted.value) {
+          const permissionGranted = await requestMicrophonePermission()
+          if (!permissionGranted) {
+            throw new Error('Microphone permission required. Please allow microphone access to record audio.')
           }
         }
 
@@ -1032,32 +1242,39 @@ export default {
           audio: {
             echoCancellation: true,
             noiseSuppression: true,
-            autoGainControl: true
+            autoGainControl: true,
+            sampleRate: 44100
           } 
         })
         
-        mediaRecorder.value = new MediaRecorder(stream)
+        mediaRecorder.value = new MediaRecorder(stream, {
+          mimeType: 'audio/webm;codecs=opus'
+        })
         audioChunks.value = []
         
         mediaRecorder.value.ondataavailable = (event) => {
-          audioChunks.value.push(event.data)
+          if (event.data.size > 0) {
+            audioChunks.value.push(event.data)
+          }
         }
         
         mediaRecorder.value.onstop = () => {
-          const audioBlob = new Blob(audioChunks.value, { type: 'audio/wav' })
-          recordedAudio.value = URL.createObjectURL(audioBlob)
+          audioBlob.value = new Blob(audioChunks.value, { type: 'audio/webm' })
+          audioUrl.value = URL.createObjectURL(audioBlob.value)
+          recordedAudio.value = audioUrl.value
           stream.getTracks().forEach(track => track.stop())
         }
         
-        mediaRecorder.value.start()
+        mediaRecorder.value.start(1000) // Collect data every second
         isRecording.value = true
-        recordingTime.value = 0
+        isPaused.value = false
+        recordingStartTime.value = Date.now()
         microphonePermissionGranted.value = true
         
+        console.log('Recording started, isRecording:', isRecording.value, 'isPaused:', isPaused.value)
+        
         // Start timer
-        recordingInterval.value = setInterval(() => {
-          recordingTime.value++
-        }, 1000)
+        startRecordingTimer()
         
       } catch (error) {
         console.error('Error starting recording:', error)
@@ -1072,8 +1289,11 @@ export default {
           errorMessage += 'Microphone access is not supported in this browser.'
         } else if (error.name === 'NotReadableError') {
           errorMessage += 'Microphone is being used by another application.'
-        } else if (error.message.includes('permission denied')) {
-          errorMessage += 'Microphone permission denied. Please enable microphone access in your browser settings.'
+        } else if (error.message.includes('permission denied') || error.message.includes('permission required')) {
+          errorMessage += 'Microphone permission required. Please allow microphone access when prompted by your browser.\n\n'
+          errorMessage += 'Chrome/Edge: Click the microphone icon in the address bar and select "Allow"\n'
+          errorMessage += 'Firefox: Click "Allow" when the permission dialog appears\n'
+          errorMessage += 'Safari: Go to Safari > Preferences > Websites > Microphone and allow access'
         } else {
           errorMessage += 'Please check your microphone permissions and try again.'
         }
@@ -1086,34 +1306,33 @@ export default {
       }
     }
 
-    const stopRecording = () => {
-      if (mediaRecorder.value && isRecording.value) {
-        mediaRecorder.value.stop()
-        isRecording.value = false
-        clearInterval(recordingInterval.value)
-      }
-    }
-
     const clearRecording = () => {
       recordedAudio.value = null
       transcribedText.value = ''
       recordingTime.value = 0
+      audioBlob.value = null
+      if (audioUrl.value) {
+        URL.revokeObjectURL(audioUrl.value)
+        audioUrl.value = null
+      }
+      if (mediaRecorder.value && mediaRecorder.value.state !== 'inactive') {
+        mediaRecorder.value.stop()
+      }
+      isRecording.value = false
+      isPaused.value = false
+      clearInterval(recordingInterval.value)
     }
 
     const transcribeAudio = async () => {
-      if (!recordedAudio.value) return
+      if (!audioBlob.value) return
       
       isProcessingAudio.value = true
       try {
-        // Convert audio URL to blob
-        const response = await fetch(recordedAudio.value)
-        const audioBlob = await response.blob()
-        
         // Create FormData for API call
         const formData = new FormData()
-        formData.append('audio', audioBlob, 'recording.wav')
+        formData.append('audio', audioBlob.value, 'recording.webm')
         
-        // Call transcription API (you'll need to implement this endpoint)
+        // Call transcription API
         const transcriptionResponse = await axios.post('/api/transcribe-audio', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -1122,6 +1341,8 @@ export default {
         
         if (transcriptionResponse.data.success) {
           transcribedText.value = transcriptionResponse.data.text
+          // Auto-fill the description field with transcribed text
+          diagnosisForm.description = transcribedText.value
         } else {
           throw new Error(transcriptionResponse.data.message || 'Transcription failed')
         }
@@ -1130,6 +1351,7 @@ export default {
         console.error('Transcription error:', error)
         // Fallback: show a placeholder text
         transcribedText.value = 'Transcription failed. Please try typing your description instead.'
+        alert('Error transcribing audio. Please try again or type your description manually.')
       } finally {
         isProcessingAudio.value = false
       }
@@ -1148,27 +1370,75 @@ export default {
 
     const checkMicrophonePermission = async () => {
       try {
-        if (!navigator.permissions) {
-          // Fallback for browsers that don't support permissions API
+        // Check if browser supports mediaDevices
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           microphonePermissionGranted.value = false
           return
         }
 
-        const permissionStatus = await navigator.permissions.query({ name: 'microphone' })
-        microphonePermissionGranted.value = permissionStatus.state === 'granted'
-        
-        // Listen for permission changes
-        permissionStatus.onchange = () => {
-          microphonePermissionGranted.value = permissionStatus.state === 'granted'
+        // Check if permissions API is supported
+        if (navigator.permissions) {
+          try {
+            const permissionStatus = await navigator.permissions.query({ name: 'microphone' })
+            microphonePermissionGranted.value = permissionStatus.state === 'granted'
+            
+            // Listen for permission changes
+            permissionStatus.onchange = () => {
+              microphonePermissionGranted.value = permissionStatus.state === 'granted'
+            }
+          } catch (permError) {
+            // Fallback: try to request permission directly
+            await requestMicrophonePermission()
+          }
+        } else {
+          // Fallback for browsers that don't support permissions API
+          microphonePermissionGranted.value = false
         }
       } catch (error) {
-        console.log('Permission check not supported:', error)
         microphonePermissionGranted.value = false
       }
     }
 
+    const requestMicrophonePermission = async () => {
+      try {
+        // Check if getUserMedia is supported
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('getUserMedia is not supported in this browser')
+        }
+
+        // Try to get microphone access to check permission
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } 
+        })
+        
+        // If successful, stop the stream and mark permission as granted
+        stream.getTracks().forEach(track => track.stop())
+        microphonePermissionGranted.value = true
+        return true
+      } catch (error) {
+        microphonePermissionGranted.value = false
+        return false
+      }
+    }
+
+    const refreshMicrophonePermission = async () => {
+      await checkMicrophonePermission()
+    }
+
     const validateForm = () => {
       formErrors.value = []
+      
+      console.log('🔍 Validating form with data:', {
+        make: diagnosisForm.make,
+        model: diagnosisForm.model,
+        year: diagnosisForm.year,
+        description: diagnosisForm.description,
+        descriptionLength: diagnosisForm.description?.length
+      })
       
       if (!diagnosisForm.make) {
         formErrors.value.push('Please select a car make')
@@ -1184,34 +1454,35 @@ export default {
         formErrors.value.push('Please enter a valid year (1990 - ' + (new Date().getFullYear() + 1) + ')')
       }
       
-      if (!diagnosisForm.description.trim()) {
+      if (!diagnosisForm.description || !diagnosisForm.description.trim()) {
         formErrors.value.push('Please describe the problem or symptoms')
       }
+      
+      console.log('✅ Form validation result:', {
+        isValid: formErrors.value.length === 0,
+        errors: formErrors.value
+      })
       
       return formErrors.value.length === 0
     }
 
     const submitDiagnosis = async () => {
-      console.log('=== SUBMIT DIAGNOSIS FUNCTION CALLED ===')
-      console.log('Form data:', diagnosisForm)
-      console.log('Uploaded files:', uploadedFiles.value)
+      // Prevent multiple submissions
+      if (isLoading.value) {
+        return
+      }
 
       // Validate form before submission
       if (!validateForm()) {
+        // Show validation errors
+        console.log('Form validation failed:', formErrors.value)
+        alert('Please fill in all required fields:\n' + formErrors.value.join('\n'))
         // Scroll to top to show validation errors
         window.scrollTo({ top: 0, behavior: 'smooth' })
         return
       }
-      console.log('Current step before:', currentStep.value)
-      
-      // Prevent multiple submissions
-      if (isLoading.value) {
-        console.log('⚠️ Already loading, preventing duplicate submission')
-        return
-      }
       
       // SMART CACHE CLEARING - Keep authentication data
-      console.log('🧹 CLEARING DIAGNOSIS CACHE (keeping auth)...')
       
       // Save authentication data before clearing
       const token = localStorage.getItem('token')
@@ -1242,44 +1513,36 @@ export default {
         })
       }
       
-      console.log('✅ DIAGNOSIS CACHE CLEARED (auth preserved)')
-      
-      // Check form validation
-      if (!diagnosisForm.make || !diagnosisForm.model || !diagnosisForm.year || !diagnosisForm.description) {
-        console.log('Form validation failed - missing required fields')
-        console.log('make:', diagnosisForm.make)
-        console.log('model:', diagnosisForm.model)
-        console.log('year:', diagnosisForm.year)
-        console.log('description:', diagnosisForm.description)
-        alert('Ju lutem plotësoni të gjitha fushat e detyrueshme!')
-        return
-      }
-      
       // Check if user is logged in
       const authToken = localStorage.getItem('token')
       const authUser = localStorage.getItem('user')
-      console.log('🔐 AUTHENTICATION CHECK:')
-      console.log('Token exists:', !!authToken)
-      console.log('User exists:', !!authUser)
-      console.log('Token value:', authToken ? authToken.substring(0, 20) + '...' : 'null')
-      console.log('User value:', authUser ? JSON.parse(authUser).name : 'null')
       
       if (!authToken) {
-        console.log('❌ No token found, redirecting to login')
-        alert('Ju duhet të hyni në llogari për të dërguar diagnozën!')
+        alert('You must be logged in to submit diagnosis!')
         router.push('/login')
         return
       }
-      
-      console.log('✅ User is authenticated, proceeding with diagnosis...')
 
-      console.log('Setting loading state...')
+      // Debug: Log form data before submission
+      console.log('🚀 Starting diagnosis submission...')
+      console.log('Form data:', {
+        make: diagnosisForm.make,
+        model: diagnosisForm.model,
+        year: diagnosisForm.year,
+        mileage: diagnosisForm.mileage,
+        engineType: diagnosisForm.engineType,
+        engineSize: diagnosisForm.engineSize,
+        description: diagnosisForm.description,
+        symptoms: diagnosisForm.symptoms,
+        selectedCarId: diagnosisForm.selectedCarId
+      })
+      console.log('User authenticated:', !!authToken)
+      console.log('Uploaded files:', uploadedFiles.value.length)
+
       isLoading.value = true
       currentStep.value = 2
-      console.log('Loading state set - isLoading:', isLoading.value, 'currentStep:', currentStep.value)
 
       try {
-        console.log('Creating FormData...')
         const formData = new FormData()
         formData.append('make', diagnosisForm.make)
         formData.append('model', diagnosisForm.model)
@@ -1293,11 +1556,6 @@ export default {
         diagnosisForm.symptoms.forEach((symptom, index) => {
           formData.append(`symptoms[${index}]`, symptom)
         })
-
-        console.log('FormData entries:')
-        for (let [key, value] of formData.entries()) {
-          console.log(key, value)
-        }
 
         // Add uploaded files
         uploadedFiles.value.forEach((fileObj, index) => {
@@ -1313,7 +1571,8 @@ export default {
           engine_type: diagnosisForm.engineType,
           engine_size: diagnosisForm.engineSize,
           description: diagnosisForm.description,
-          symptoms: diagnosisForm.symptoms || []
+          symptoms: diagnosisForm.symptoms || [],
+          car_id: diagnosisForm.selectedCarId || null
         }
         const response = await diagnosisAPI.startDiagnosis(requestData)
         console.log('Submit response:', response.data)
@@ -1392,12 +1651,12 @@ export default {
 
     const getSeverityText = (severity) => {
       const severityMap = {
-        'low': t('low_priority'),
-        'medium': t('medium_priority'),
-        'high': t('high_priority'),
-        'critical': t('critical_priority')
+        'low': 'Low Priority',
+        'medium': 'Medium Priority',
+        'high': 'High Priority',
+        'critical': 'Critical Priority'
       }
-      return severityMap[severity?.toLowerCase()] || t('medium_priority')
+      return severityMap[severity?.toLowerCase()] || 'Medium Priority'
     }
 
     // Computed properties for debug info
@@ -1530,6 +1789,59 @@ export default {
       loadCarBrands()
       checkMicrophonePermission()
       
+      // Check if car data is stored in localStorage (from My Cars page)
+      const selectedCarData = localStorage.getItem('selectedCarForDiagnosis')
+      console.log('Raw localStorage data:', selectedCarData)
+      
+      if (selectedCarData) {
+        try {
+          const carData = JSON.parse(selectedCarData)
+          console.log('Parsed car data:', carData)
+          console.log('Pre-filling form with car data:', carData)
+          
+          // Pre-fill the form with car data
+          diagnosisForm.make = carData.brand
+          diagnosisForm.model = carData.model
+          diagnosisForm.year = carData.year
+          diagnosisForm.mileage = carData.mileage
+          diagnosisForm.engineType = carData.engine_type
+          diagnosisForm.engineSize = carData.engine_size
+          diagnosisForm.selectedCarId = carData.id
+          
+          console.log('Form pre-filled with:', {
+            make: diagnosisForm.make,
+            model: diagnosisForm.model,
+            year: diagnosisForm.year,
+            mileage: diagnosisForm.mileage,
+            engineType: diagnosisForm.engineType,
+            engineSize: diagnosisForm.engineSize,
+            selectedCarId: diagnosisForm.selectedCarId
+          })
+          
+          // Force reactivity update
+          nextTick(() => {
+            console.log('Form after nextTick:', {
+              make: diagnosisForm.make,
+              model: diagnosisForm.model,
+              year: diagnosisForm.year,
+              mileage: diagnosisForm.mileage,
+              engineType: diagnosisForm.engineType,
+              engineSize: diagnosisForm.engineSize,
+              selectedCarId: diagnosisForm.selectedCarId
+            })
+          })
+          
+          // Clear the stored data
+          localStorage.removeItem('selectedCarForDiagnosis')
+          
+          // Load car models for the selected brand
+          loadCarModels(carData.brand)
+        } catch (error) {
+          console.error('Error parsing car data:', error)
+        }
+      }
+      
+      // Also check for car ID in query params (fallback)
       const carId = route.query.car
       if (carId) {
         console.log('Loading car data for ID:', carId)
@@ -1566,11 +1878,19 @@ export default {
       handleFileDrop,
       removeFile,
       toggleRecording,
+      stopRecording,
+      pauseRecording,
+      resumeRecording,
       clearRecording,
       transcribeAudio,
       useTranscribedText,
       formatTime,
+      isPaused,
+      audioBlob,
+      audioUrl,
       checkMicrophonePermission,
+      requestMicrophonePermission,
+      refreshMicrophonePermission,
       validateForm,
       submitDiagnosis,
       getSeverityColor,
@@ -1580,8 +1900,7 @@ export default {
       forceRefreshResults,
       quickLogin,
       onMakeChange,
-      debugInfo,
-      t
+      debugInfo
     }
   }
 }

@@ -66,21 +66,20 @@ export const throttle = (func, limit) => {
  * Preload critical resources
  */
 export const preloadCriticalResources = () => {
-  // Preload critical CSS
-  const criticalCSS = document.createElement('link')
-  criticalCSS.rel = 'preload'
-  criticalCSS.as = 'style'
-  criticalCSS.href = '/css/critical.css'
-  document.head.appendChild(criticalCSS)
+  // Only preload if resources exist and haven't been loaded yet
+  if (!document.querySelector('link[href="/css/critical.css"]')) {
+    const criticalCSS = document.createElement('link')
+    criticalCSS.rel = 'preload'
+    criticalCSS.as = 'style'
+    criticalCSS.href = '/css/critical.css'
+    criticalCSS.onload = function() {
+      this.rel = 'stylesheet'
+    }
+    document.head.appendChild(criticalCSS)
+  }
 
-  // Preload critical fonts
-  const fontPreload = document.createElement('link')
-  fontPreload.rel = 'preload'
-  fontPreload.as = 'font'
-  fontPreload.type = 'font/woff2'
-  fontPreload.href = '/fonts/inter.woff2'
-  fontPreload.crossOrigin = 'anonymous'
-  document.head.appendChild(fontPreload)
+  // Font preloading is handled by the main HTML template
+  // No need to preload fonts here to avoid duplicate preload warnings
 }
 
 /**
@@ -105,18 +104,12 @@ export const optimizeScroll = () => {
 }
 
 /**
- * Service Worker registration for caching
+ * Service Worker registration for caching - DISABLED
  */
 export const registerServiceWorker = async () => {
-  if ('serviceWorker' in navigator) {
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js')
-      console.log('Service Worker registered:', registration)
-      return registration
-    } catch (error) {
-      console.log('Service Worker registration failed:', error)
-    }
-  }
+  // Service Worker registration disabled to prevent caching issues
+  console.log('Service Worker registration disabled')
+  return null
 }
 
 /**

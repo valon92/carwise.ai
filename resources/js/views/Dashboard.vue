@@ -10,10 +10,10 @@
             </div>
             <div>
               <h1 class="text-2xl font-bold text-secondary-900 dark:text-white">
-                {{ t('welcome_back_user') }}, {{ user?.first_name || user?.name }}!
+                Welcome back, {{ user?.first_name || user?.name }}!
               </h1>
               <p class="text-secondary-600 dark:text-secondary-400">
-                {{ user?.role === 'mechanic' ? t('certified_mechanic') : t('car_owner') }} • {{ user?.location || t('no_location_set') }}
+                {{ user?.role === 'mechanic' ? 'Certified Mechanic' : 'Car Owner' }} • {{ user?.location || 'No location set' }}
               </p>
             </div>
           </div>
@@ -35,7 +35,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
-              {{ t('settings') }}
+              Settings
             </button>
             <button @click="handleLogout" class="btn-outline">
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,17 +81,6 @@
                 </div>
               </router-link>
 
-              <router-link to="/mechanics" class="group p-6 bg-gradient-to-br from-accent-500 to-accent-600 rounded-xl text-white hover:from-accent-600 hover:to-accent-700 transition-all duration-200 transform hover:scale-105">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h3 class="text-lg font-semibold mb-2">Find Mechanics</h3>
-                    <p class="text-accent-100 text-sm">Connect with experts</p>
-                  </div>
-                  <svg class="w-8 h-8 text-accent-200 group-hover:text-white transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                  </svg>
-                </div>
-              </router-link>
 
               <div @click="handleHistory" class="group p-6 bg-gradient-to-br from-success-500 to-success-600 rounded-xl text-white hover:from-success-600 hover:to-success-700 transition-all duration-200 transform hover:scale-105 cursor-pointer">
                 <div class="flex items-center justify-between">
@@ -434,7 +423,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI, carsAPI, diagnosisAPI, dashboardAPI } from '../services/api'
-import { t } from '../utils/translations'
 
 export default {
   name: 'Dashboard',
@@ -718,8 +706,7 @@ export default {
       handleLogout,
       formatDate,
       getDiagnosisStatusColor,
-      getDiagnosisStatusTextColor,
-      t
+      getDiagnosisStatusTextColor
     }
   }
 }

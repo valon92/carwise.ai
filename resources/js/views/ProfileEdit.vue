@@ -293,7 +293,6 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI } from '../services/api'
-import { t } from '../utils/translations'
 
 export default {
   name: 'ProfileEdit',

@@ -13,14 +13,31 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Seed car brands first (required for other data)
+        $this->call(GlobalCarBrandsSeeder::class);
+        
+        // Seed car models (depends on brands)
+        $this->call(CarModelsSeeder::class);
+        
+        // Seed car parts
+        $this->call(CarPartsSeeder::class);
+        
+        // Seed authorized companies
+        $this->call(AuthorizedCompaniesSeeder::class);
 
+        // Seed mechanics from major cities worldwide
+        $this->call(MechanicSeeder::class);
+        
+        // Seed currencies
+        $this->call(CurrencySeeder::class);
+
+        // Create test user
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
 
-        // Seed mechanics from major cities worldwide
-        $this->call(MechanicSeeder::class);
+        // Seed demo data
+        $this->call(CarWiseSeeder::class);
     }
 }

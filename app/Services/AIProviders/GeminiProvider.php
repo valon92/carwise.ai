@@ -5,206 +5,197 @@ namespace App\Services\AIProviders;
 use App\Contracts\AIProviderInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 class GeminiProvider implements AIProviderInterface
 {
     private string $apiKey;
-    private string $apiUrl;
+    private string $baseUrl;
     private string $model;
-    private float $temperature;
-    private int $maxTokens;
 
     public function __construct()
     {
-        $this->apiKey = config('services.gemini.api_key');
-        $this->apiUrl = config('services.gemini.api_url');
-        $this->model = config('services.gemini.model');
-        $this->temperature = config('services.gemini.temperature');
-        $this->maxTokens = config('services.gemini.max_tokens');
-    }
+        $this->apiKey = Config::get('services.gemini.api_key') ?? '';
+        $this->baseUrl = Config::get('services.gemini.base_url') ?? 'https://generativelanguage.googleapis.com/v1beta';
+        $this->model = Config::get('services.gemini.model') ?? 'gemini-1.5-flash';
 
-    public function analyzeDiagnosis(array $data): array
-    {
-        if (!$this->isAvailable()) {
-            throw new \Exception('Gemini API is not available');
+        if (empty($this->apiKey)) {
+            Log::warning('Gemini API key is not configured');
         }
-
-        $prompt = $this->buildPrompt($data);
-        
-        try {
-            $response = Http::timeout(30)->post(
-                "{$this->apiUrl}/models/{$this->model}:generateContent?key={$this->apiKey}",
-                [
-                    'contents' => [
-                        [
-                            'parts' => [
-                                ['text' => $prompt]
-                            ]
-                        ]
-                    ],
-                    'generationConfig' => [
-                        'temperature' => $this->temperature,
-                        'maxOutputTokens' => $this->maxTokens,
-                        'topP' => 0.8,
-                        'topK' => 10
-                    ],
-                    'safetySettings' => [
-                        [
-                            'category' => 'HARM_CATEGORY_HARASSMENT',
-                            'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
-                        ],
-                        [
-                            'category' => 'HARM_CATEGORY_HATE_SPEECH',
-                            'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
-                        ]
-                    ]
-                ]
-            );
-
-            if (!$response->successful()) {
-                Log::error('Gemini API request failed', [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
-                throw new \Exception('Gemini API request failed: ' . $response->body());
-            }
-
-            $responseData = $response->json();
-            
-            if (!isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
-                throw new \Exception('Invalid Gemini API response format');
-            }
-
-            $aiResponse = $responseData['candidates'][0]['content']['parts'][0]['text'];
-            
-            return $this->parseResponse($aiResponse, $data);
-
-        } catch (\Exception $e) {
-            Log::error('Gemini API error', [
-                'error' => $e->getMessage(),
-                'data' => $data
-            ]);
-            throw $e;
-        }
-    }
-
-    public function getProviderName(): string
-    {
-        return 'gemini';
     }
 
     public function isAvailable(): bool
     {
-        return !empty($this->apiKey) && 
-               $this->apiKey !== 'your_gemini_api_key_here';
+        if (empty($this->apiKey)) {
+            return false;
+        }
+
+        try {
+            $response = Http::timeout(5)->get($this->baseUrl . '/models', ['key' => $this->apiKey]);
+            return $response->successful();
+        } catch (\Exception $e) {
+            Log::warning('Gemini provider availability check failed', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public function getProviderInfo(): array
+    {
+        return [
+            'name' => 'Google Gemini',
+            'provider' => 'gemini',
+            'model' => $this->model,
+            'available' => $this->isAvailable(),
+            'features' => ['text_generation', 'multimodal', 'code_generation', 'multilingual'],
+            'limits' => [
+                'max_tokens' => 1048576,
+                'rate_limit' => '60 requests/minute',
+                'context_window' => '1M tokens'
+            ]
+        ];
+    }
+
+    public function analyzeDiagnosis(array $data): array
+    {
+        try {
+            Log::info('Starting Gemini diagnosis analysis');
+            $prompt = $this->buildDiagnosisPrompt($data);
+            $response = $this->makeRequest($prompt);
+            $analysis = $this->parseResponse($response, $data['user_language'] ?? 'en');
+            Log::info('Gemini diagnosis completed');
+            return $analysis;
+        } catch (\Exception $e) {
+            Log::error('Gemini diagnosis failed', ['error' => $e->getMessage()]);
+            throw new \Exception('Gemini analysis failed: ' . $e->getMessage());
+        }
+    }
+
+    private function buildDiagnosisPrompt(array $data): string
+    {
+        $language = $data['user_language'] ?? 'en';
+        $make = $data['make'] ?? $data['car_brand'] ?? 'Unknown';
+        $model = $data['model'] ?? $data['car_model'] ?? 'Unknown';
+        $year = $data['year'] ?? $data['car_year'] ?? 'Unknown';
+        $description = $data['description'] ?? $data['problem_description'] ?? '';
+        
+        $symptoms = $data['symptoms'] ?? [];
+        if (is_string($symptoms)) {
+            $symptoms = json_decode($symptoms, true) ?? [$symptoms];
+        }
+        $symptomsList = implode(', ', $symptoms);
+
+        $languageNames = [
+            'sq' => 'Albanian', 'en' => 'English', 'de' => 'German', 'fr' => 'French',
+            'es' => 'Spanish', 'it' => 'Italian', 'pt' => 'Portuguese', 'ru' => 'Russian',
+            'zh' => 'Chinese', 'ja' => 'Japanese', 'ko' => 'Korean', 'ar' => 'Arabic',
+            'hi' => 'Hindi', 'tr' => 'Turkish', 'nl' => 'Dutch', 'pl' => 'Polish',
+            'sv' => 'Swedish', 'no' => 'Norwegian', 'da' => 'Danish', 'fi' => 'Finnish',
+            'el' => 'Greek', 'he' => 'Hebrew', 'th' => 'Thai', 'vi' => 'Vietnamese'
+        ];
+        $languageName = $languageNames[$language] ?? 'English';
+
+        return "You are an automotive diagnostic expert. Analyze this vehicle issue and respond in {$languageName}:
+
+Vehicle: {$make} {$model} {$year}
+Symptoms: {$symptomsList}
+Description: {$description}
+
+Provide structured analysis with:
+1. Diagnosis
+2. Recommendations
+3. Urgency level (critical/high/medium/low)
+4. Estimated cost
+5. Prevention tips
+
+Respond entirely in {$languageName}.";
+    }
+
+    private function makeRequest(string $prompt, array $parameters = []): array
+    {
+        $payload = [
+            'contents' => [['parts' => [['text' => $prompt]]]],
+            'generationConfig' => array_merge([
+                'temperature' => 0.3,
+                'maxOutputTokens' => 2048,
+                'topK' => 40,
+                'topP' => 0.95
+            ], $parameters)
+        ];
+
+        $response = Http::timeout(60)
+            ->post($this->baseUrl . "/models/{$this->model}:generateContent?key={$this->apiKey}", $payload);
+
+        if (!$response->successful()) {
+            $error = $response->json()['error'] ?? ['message' => 'Unknown error'];
+            throw new \Exception('Gemini API error: ' . $error['message']);
+        }
+
+        $responseData = $response->json();
+        if (!isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
+            throw new \Exception('Invalid response format from Gemini API');
+        }
+
+        return $responseData;
+    }
+
+    private function parseResponse(array $response, string $language): array
+    {
+        $content = $response['candidates'][0]['content']['parts'][0]['text'];
+        
+        // Basic parsing - extract sections or use full content
+        $diagnosis = $content;
+        $recommendations = $this->generateFallbackRecommendations($language);
+        $urgency = 'medium';
+        $estimatedCost = $this->generateFallbackCost($language);
+        
+        // Try to extract urgency level
+        if (preg_match('/urgency[:\s]*([a-z]+)/i', $content, $matches)) {
+            $urgencyText = strtolower($matches[1]);
+            if (in_array($urgencyText, ['critical', 'high', 'medium', 'low'])) {
+                $urgency = $urgencyText;
+            }
+        }
+
+        return [
+            'diagnosis' => $diagnosis,
+            'recommendations' => $recommendations,
+            'urgency' => $urgency,
+            'estimated_cost' => $estimatedCost,
+            'ai_insights' => "Analysis powered by Google Gemini AI",
+            'confidence_score' => 0.85,
+            'provider' => 'gemini',
+            'model' => $this->model
+        ];
+    }
+
+    private function generateFallbackRecommendations(string $language): string
+    {
+        $recommendations = [
+            'en' => "1. Consult with a qualified mechanic\n2. Keep record of symptoms\n3. Check warranty status",
+            'sq' => "1. Konsultohuni me mekanik të kualifikuar\n2. Mbani shënim simptomat\n3. Kontrolloni statusin e garancisë",
+            'de' => "1. Konsultieren Sie einen Mechaniker\n2. Symptome dokumentieren\n3. Garantiestatus prüfen"
+        ];
+        return $recommendations[$language] ?? $recommendations['en'];
+    }
+
+    private function generateFallbackCost(string $language): string
+    {
+        $costs = [
+            'en' => "Cost varies depending on specific issue. Consult mechanic for accurate estimate.",
+            'sq' => "Kostoja ndryshon në varësi të problemit. Konsultohuni me mekanik për vlerësim të saktë.",
+            'de' => "Kosten variieren je nach Problem. Mechaniker für genaue Schätzung konsultieren."
+        ];
+        return $costs[$language] ?? $costs['en'];
+    }
+
+    public function getProviderName(): string
+    {
+        return 'Google Gemini';
     }
 
     public function getEstimatedCost(array $data): float
     {
-        // Gemini is free for most use cases
+        // Gemini has free tier - return 0 for cost estimation
         return 0.0;
-    }
-
-    private function buildPrompt(array $data): string
-    {
-        $symptoms = $data['symptoms'] ?? [];
-        $description = $data['description'] ?? '';
-        $language = $data['user_language'] ?? 'en';
-        $currency = $data['currency_code'] ?? 'USD';
-
-        $prompt = "You are a professional automotive diagnostic expert. Analyze the following vehicle information and provide a detailed diagnosis in {$language} language.
-
-Vehicle Information:
-- Make: {$data['make']}
-- Model: {$data['model']}
-- Year: {$data['year']}
-- Mileage: {$data['mileage']} km
-- Engine Type: {$data['engine_type']}
-- Engine Size: {$data['engine_size']}
-
-Symptoms: " . implode(', ', $symptoms) . "
-Description: {$description}
-
-Please provide a comprehensive diagnosis in JSON format with the following structure:
-{
-    \"problem_title\": \"Brief title of the problem\",
-    \"problem_description\": \"Detailed description of the problem\",
-    \"severity\": \"low|medium|high|critical\",
-    \"confidence_score\": 85,
-    \"likely_causes\": [
-        {
-            \"title\": \"Cause title\",
-            \"description\": \"Detailed explanation\",
-            \"probability\": 80
-        }
-    ],
-    \"recommended_actions\": [
-        {
-            \"title\": \"Action title\",
-            \"description\": \"Detailed steps\",
-            \"urgency\": \"Immediate|Within 24 hours|Within 1 week|Within 2 weeks\"
-        }
-    ],
-    \"estimated_costs\": [
-        {
-            \"service\": \"Service name\",
-            \"min\": 100,
-            \"max\": 300,
-            \"currency\": \"{$currency}\"
-        }
-    ],
-    \"requires_immediate_attention\": true,
-    \"ai_insights\": \"Additional insights and recommendations\"
-}
-
-Respond ONLY with valid JSON, no additional text.";
-
-        return $prompt;
-    }
-
-    private function parseResponse(string $aiResponse, array $data): array
-    {
-        try {
-            // Clean the response - remove any markdown formatting
-            $cleanResponse = preg_replace('/```json\s*/', '', $aiResponse);
-            $cleanResponse = preg_replace('/```\s*$/', '', $cleanResponse);
-            $cleanResponse = trim($cleanResponse);
-
-            $parsed = json_decode($cleanResponse, true);
-            
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('Invalid JSON response from Gemini: ' . json_last_error_msg());
-            }
-
-            // Validate required fields
-            $requiredFields = ['problem_title', 'problem_description', 'severity', 'confidence_score'];
-            foreach ($requiredFields as $field) {
-                if (!isset($parsed[$field])) {
-                    throw new \Exception("Missing required field: {$field}");
-                }
-            }
-
-            // Ensure severity is valid
-            $validSeverities = ['low', 'medium', 'high', 'critical'];
-            if (!in_array($parsed['severity'], $validSeverities)) {
-                $parsed['severity'] = 'medium';
-            }
-
-            // Ensure confidence score is valid
-            $parsed['confidence_score'] = max(0, min(100, (int)$parsed['confidence_score']));
-
-            // Add model version
-            $parsed['model_version'] = '1.0';
-            $parsed['ai_provider'] = 'gemini';
-
-            return $parsed;
-
-        } catch (\Exception $e) {
-            Log::error('Failed to parse Gemini response', [
-                'response' => $aiResponse,
-                'error' => $e->getMessage()
-            ]);
-            throw new \Exception('Failed to parse AI response: ' . $e->getMessage());
-        }
     }
 }

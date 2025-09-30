@@ -7,7 +7,7 @@ import './assets/main.css'
 const Home = () => import('./views/Home.vue')
 const Diagnose = () => import('./views/Diagnose.vue')
 const MyCars = () => import('./views/MyCars.vue')
-const Mechanics = () => import('./views/Mechanics.vue')
+const CarParts = () => import('./views/CarParts.vue')
 const Login = () => import('./views/Login.vue')
 const Register = () => import('./views/Register.vue')
 const Dashboard = () => import('./views/Dashboard.vue')
@@ -75,12 +75,12 @@ const routes = [
     }
   },
   { 
-    path: '/mechanics', 
-    name: 'Mechanics', 
-    component: Mechanics,
+    path: '/car-parts', 
+    name: 'CarParts', 
+    component: CarParts,
     meta: { 
-      title: 'Find Mechanics - CarWise AI',
-      description: 'Connect with certified mechanics'
+      title: 'Car Parts - CarWise AI',
+      description: 'Find authorized car parts for your vehicle'
     }
   },
   { 

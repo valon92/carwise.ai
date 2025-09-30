@@ -13,7 +13,7 @@
             <span class="ml-3 text-xl font-bold text-white">CarWise.ai</span>
           </div>
           <p class="text-secondary-300 mb-6 leading-relaxed">
-            {{ t('smart_car_diagnosis_platform') }}
+            Smart car diagnosis platform powered by AI. Get instant, accurate vehicle diagnostics and find quality car parts.
           </p>
           <div class="flex space-x-4">
             <a href="#" class="social-link" title="Facebook">
@@ -65,14 +65,6 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
                 My Cars
-              </router-link>
-            </li>
-            <li>
-              <router-link to="/mechanics" class="footer-link">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-                Mechanics
               </router-link>
             </li>
           </ul>
@@ -209,7 +201,6 @@
 
 <script>
 import { computed } from 'vue'
-import { t } from '../utils/translations'
 
 export default {
   name: 'Footer',
@@ -217,8 +208,7 @@ export default {
     const currentYear = computed(() => new Date().getFullYear())
 
     return {
-      currentYear,
-      t
+      currentYear
     }
   }
 }

@@ -5,12 +5,14 @@ namespace App\Services;
 use App\Contracts\AIProviderInterface;
 use App\Models\Currency;
 use App\Services\AIProviders\GeminiProvider;
+use App\Services\AIProviderManager;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class AIDiagnosisService
 {
     protected AIProviderInterface $aiProvider;
+    protected AIProviderManager $providerManager;
     protected $fallbackEnabled;
 
     public function __construct()
@@ -25,16 +27,15 @@ class AIDiagnosisService
     private function initializeAIProvider(): void
     {
         try {
-            // Use AIProviderManager to get the best available provider
-            $manager = new \App\Services\AIProviderManager();
-            $this->aiProvider = $manager->getBestProvider();
+            // Use AIProviderManager for intelligent provider selection
+            $this->providerManager = new AIProviderManager();
+            $this->aiProvider = $this->providerManager->getBestProvider();
         } catch (\Exception $e) {
             // If no providers are available, create a dummy provider that will use fallback
             $this->aiProvider = new class implements AIProviderInterface {
                 public function analyzeDiagnosis(array $data): array { throw new \Exception('No AI provider available'); }
-                public function getProviderName(): string { return 'none'; }
+                public function getProviderInfo(): array { return ['name' => 'none', 'available' => false]; }
                 public function isAvailable(): bool { return false; }
-                public function getEstimatedCost(array $data): float { return 0.0; }
             };
         }
     }

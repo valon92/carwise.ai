@@ -6,7 +6,7 @@ return [
         'home' => 'Home',
         'diagnose' => 'Diagnose',
         'my_cars' => 'My Cars',
-        'mechanics' => 'Mechanics',
+        'car_parts' => 'Car Parts',
         'dashboard' => 'Dashboard',
         'login' => 'Login',
         'register' => 'Register',
@@ -109,7 +109,6 @@ return [
             'estimated_costs' => 'Estimated Costs',
             'ai_insights' => 'AI Insights',
             'immediate_attention' => 'Immediate Attention Required',
-            'find_mechanics' => 'Find Certified Mechanics',
             'cost_note' => '* Cost estimates are approximate and may vary based on location and specific vehicle requirements.'
         ]
     ],
@@ -158,22 +157,6 @@ return [
         ]
     ],
 
-    // Mechanics
-    'mechanics' => [
-        'title' => 'Find Certified Mechanics',
-        'subtitle' => 'Connect with professional mechanics in your area for expert car repair and maintenance services',
-        'search_placeholder' => 'Search mechanics by name, location, or specialty...',
-        'filter_by' => 'Filter by',
-        'specialty' => 'Specialty',
-        'location' => 'Location',
-        'rating' => 'Rating',
-        'all_specialties' => 'All Specialties',
-        'all_locations' => 'All Locations',
-        'contact' => 'Contact',
-        'view_profile' => 'View Profile',
-        'no_mechanics' => 'No mechanics found',
-        'no_mechanics_description' => 'Try adjusting your search criteria or check back later for new mechanics in your area.'
-    ],
 
     // Authentication
     'auth' => [
@@ -263,4 +246,63 @@ return [
     'smart_car' => 'Smart Car',
     'powered_by_ai' => 'Powered by AI',
     'start_diagnosis' => 'Start Diagnosis',
+    'smart_car_diagnosis_platform' => 'Smart car diagnosis platform powered by AI. Get instant, accurate vehicle diagnostics and find quality car parts.',
+
+    // Car Parts
+    'car_parts' => [
+        'title' => 'Authorized Car Parts',
+        'subtitle' => 'Find high-quality, certified car parts for your vehicle. All parts are manufacturer-authorized and come with warranty.',
+        'search_placeholder' => 'Search for parts...',
+        'all_categories' => 'All Categories',
+        'all_manufacturers' => 'All Manufacturers',
+        'featured_parts' => 'Featured Parts',
+        'all_parts' => 'All Parts',
+        'sort_by_name' => 'Sort by Name',
+        'sort_by_price' => 'Sort by Price',
+        'sort_by_rating' => 'Sort by Rating',
+        'sort_by_newest' => 'Sort by Newest',
+        'previous' => 'Previous',
+        'next' => 'Next',
+        'no_parts_found' => 'No Parts Found',
+        'no_parts_description' => 'Try adjusting your search criteria or filters to find the parts you need.',
+        'clear_filters' => 'Clear Filters',
+        'category' => 'Category',
+        'manufacturer' => 'Manufacturer',
+        'difficulty' => 'Difficulty',
+        'in_stock' => 'In Stock',
+        'out_of_stock' => 'Out of Stock',
+        'description' => 'Description',
+        'part_number' => 'Part Number',
+        'quality' => 'Quality',
+        'installation_info' => 'Installation Information',
+        'installation_time' => 'Installation Time',
+        'warranty' => 'Warranty',
+        'weight' => 'Weight',
+        'compatibility' => 'Compatibility',
+        'compatible_brands' => 'Compatible Brands',
+        'compatible_models' => 'Compatible Models',
+        'not_specified' => 'Not specified',
+        'close' => 'Close',
+        'add_to_cart' => 'Add to Cart',
+        'categories' => [
+            'engine' => 'Engine',
+            'brakes' => 'Brakes',
+            'electrical' => 'Electrical',
+            'suspension' => 'Suspension',
+            'transmission' => 'Transmission',
+            'exhaust' => 'Exhaust',
+            'cooling' => 'Cooling',
+            'fuel' => 'Fuel System',
+            'body' => 'Body Parts',
+            'interior' => 'Interior',
+            'exterior' => 'Exterior',
+            'lighting' => 'Lighting',
+        ],
+        'difficulty_levels' => [
+            'easy' => 'Easy',
+            'medium' => 'Medium',
+            'hard' => 'Hard',
+            'professional' => 'Professional Only',
+        ],
+    ],
 ];

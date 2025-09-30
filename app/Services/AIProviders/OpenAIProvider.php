@@ -17,10 +17,10 @@ class OpenAIProvider implements AIProviderInterface
     public function __construct()
     {
         $this->apiKey = config('services.openai.api_key') ?? '';
-        $this->apiUrl = config('services.openai.api_url');
-        $this->model = config('services.openai.model');
-        $this->temperature = config('services.openai.temperature');
-        $this->maxTokens = config('services.openai.max_tokens');
+        $this->apiUrl = config('services.openai.api_url') ?? 'https://api.openai.com/v1';
+        $this->model = config('services.openai.model') ?? 'gpt-4o';
+        $this->temperature = config('services.openai.temperature') ?? 0.3;
+        $this->maxTokens = config('services.openai.max_tokens') ?? 2048;
     }
 
     public function getProviderName(): string
@@ -117,18 +117,42 @@ class OpenAIProvider implements AIProviderInterface
 
         $symptomsList = implode(', ', $data['symptoms'] ?? []);
 
-        return "Analyze the following vehicle diagnosis request and provide a comprehensive response in {$language} language.
+        $make = $data['make'] ?? $data['car_brand'] ?? 'Unknown';
+        $model = $data['model'] ?? $data['car_model'] ?? 'Unknown';
+        $year = $data['year'] ?? $data['car_year'] ?? 'Unknown';
+        $mileage = $data['mileage'] ?? 'Unknown';
+        $engineType = $data['engine_type'] ?? 'Unknown';
+        $engineSize = $data['engine_size'] ?? 'Unknown';
+        $description = $data['description'] ?? $data['problem_description'] ?? '';
+
+        // Map language codes to language names
+        $languageNames = [
+            'sq' => 'Albanian (Shqip)', 'en' => 'English', 'de' => 'German (Deutsch)',
+            'fr' => 'French (Français)', 'es' => 'Spanish (Español)', 'it' => 'Italian (Italiano)',
+            'pt' => 'Portuguese (Português)', 'ru' => 'Russian (Русский)', 'zh' => 'Chinese (中文)',
+            'ja' => 'Japanese (日本語)', 'ko' => 'Korean (한국어)', 'ar' => 'Arabic (العربية)',
+            'hi' => 'Hindi (हिन्दी)', 'tr' => 'Turkish (Türkçe)', 'nl' => 'Dutch (Nederlands)',
+            'pl' => 'Polish (Polski)', 'sv' => 'Swedish (Svenska)', 'no' => 'Norwegian (Norsk)',
+            'da' => 'Danish (Dansk)', 'fi' => 'Finnish (Suomi)', 'el' => 'Greek (Ελληνικά)',
+            'he' => 'Hebrew (עברית)', 'th' => 'Thai (ไทย)', 'vi' => 'Vietnamese (Tiếng Việt)'
+        ];
+        
+        $languageName = $languageNames[$language] ?? 'English';
+        
+        return "Analyze the following vehicle diagnosis request and provide a comprehensive response STRICTLY in {$languageName} language. 
+
+IMPORTANT: Your entire response must be in {$languageName}. Do not mix languages.
 
 Vehicle Information:
-- Make: {$data['make']}
-- Model: {$data['model']}
-- Year: {$data['year']}
-- Mileage: {$data['mileage']} km
-- Engine Type: {$data['engine_type']}
-- Engine Size: {$data['engine_size']}
+- Make: {$make}
+- Model: {$model}
+- Year: {$year}
+- Mileage: {$mileage} km
+- Engine Type: {$engineType}
+- Engine Size: {$engineSize}
 
 Symptoms: {$symptomsList}
-Description: {$data['description']}
+Description: {$description}
 
 Please provide a detailed diagnosis in JSON format with the following structure:
 {

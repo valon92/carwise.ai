@@ -7,14 +7,14 @@
         <div class="text-center">
           <div class="animate-fade-in">
             <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-              {{ t('smart_car') }}
+              Smart Car
               <span class="block bg-gradient-to-r from-primary-300 to-primary-100 bg-clip-text text-transparent">
-                {{ t('diagnosis') }}
+                Diagnosis
               </span>
-              <span class="block">{{ t('powered_by_ai') }}</span>
+              <span class="block">Powered by AI</span>
             </h1>
             <p class="text-xl md:text-2xl text-primary-100 mb-12 max-w-3xl mx-auto leading-relaxed">
-              {{ t('get_instant_accurate_diagnosis') }}
+              Get instant, accurate vehicle diagnostics powered by advanced AI technology
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <router-link 
@@ -24,13 +24,13 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
-                {{ t('start_diagnosis') }}
+                Start Diagnosis
               </router-link>
               <router-link 
                 to="/register" 
                 class="btn-outline text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-primary-600"
               >
-                {{ t('get_started_free') }}
+                Get Started Free
               </router-link>
             </div>
           </div>
@@ -48,10 +48,10 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-secondary-900 dark:text-white mb-4">
-            {{ t('how_carwise_works') }}
+            How CarWise Works
           </h2>
           <p class="text-xl text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto">
-            {{ t('get_instant_diagnosis_steps') }}
+            Get instant diagnosis in three simple steps
           </p>
         </div>
 
@@ -63,9 +63,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-secondary-900 dark:text-white mb-4">{{ t('upload_media') }}</h3>
+            <h3 class="text-xl font-semibold text-secondary-900 dark:text-white mb-4">Upload Media</h3>
             <p class="text-secondary-600 dark:text-secondary-400">
-              {{ t('upload_media_description') }}
+              Upload photos or videos of your vehicle issues for AI analysis
             </p>
           </div>
 
@@ -75,9 +75,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-secondary-900 dark:text-white mb-4">{{ t('ai_analysis') }}</h3>
+            <h3 class="text-xl font-semibold text-secondary-900 dark:text-white mb-4">AI Analysis</h3>
             <p class="text-secondary-600 dark:text-secondary-400">
-              {{ t('ai_analysis_description') }}
+              Our advanced AI analyzes your vehicle data to identify issues
             </p>
           </div>
 
@@ -87,9 +87,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-secondary-900 dark:text-white mb-4">{{ t('get_results') }}</h3>
+            <h3 class="text-xl font-semibold text-secondary-900 dark:text-white mb-4">Get Results</h3>
             <p class="text-secondary-600 dark:text-secondary-400">
-              {{ t('get_results_description') }}
+              Receive detailed diagnosis reports with recommended solutions
             </p>
           </div>
         </div>
@@ -101,10 +101,10 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-secondary-900 dark:text-white mb-4">
-            {{ t('why_choose_carwise') }}
+            Why Choose CarWise
           </h2>
           <p class="text-xl text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto">
-            {{ t('advanced_ai_technology') }}
+            Advanced AI technology for accurate vehicle diagnostics
           </p>
         </div>
 
@@ -115,8 +115,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-2">{{ t('save_money') }}</h3>
-            <p class="text-secondary-600 dark:text-secondary-400 text-sm">{{ t('save_money_description') }}</p>
+            <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-2">Save Money</h3>
+            <p class="text-secondary-600 dark:text-secondary-400 text-sm">Avoid expensive mechanic visits with accurate self-diagnosis</p>
           </div>
 
           <div class="card-hover p-6 text-center group">
@@ -125,8 +125,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-2">{{ t('save_time') }}</h3>
-            <p class="text-secondary-600 dark:text-secondary-400 text-sm">{{ t('save_time_description') }}</p>
+            <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-2">Save Time</h3>
+            <p class="text-secondary-600 dark:text-secondary-400 text-sm">Get instant results without waiting for appointments</p>
           </div>
 
           <div class="card-hover p-6 text-center group">
@@ -135,8 +135,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-2">{{ t('accurate_diagnosis') }}</h3>
-            <p class="text-secondary-600 dark:text-secondary-400 text-sm">{{ t('accurate_diagnosis_description') }}</p>
+            <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-2">Accurate Diagnosis</h3>
+            <p class="text-secondary-600 dark:text-secondary-400 text-sm">Get precise diagnosis with detailed explanations</p>
           </div>
 
           <div class="card-hover p-6 text-center group">
@@ -145,8 +145,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-2">{{ t('expert_support') }}</h3>
-            <p class="text-secondary-600 dark:text-secondary-400 text-sm">{{ t('expert_support_description') }}</p>
+            <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-2">Expert Support</h3>
+            <p class="text-secondary-600 dark:text-secondary-400 text-sm">Access to professional mechanics and support team</p>
           </div>
         </div>
       </div>
@@ -156,23 +156,23 @@
     <section class="py-24 gradient-primary">
       <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-          {{ t('ready_to_diagnose') }}
+          Ready to Diagnose Your Vehicle?
         </h2>
         <p class="text-xl text-primary-100 mb-8">
-          {{ t('join_thousands_owners') }}
+          Join thousands of car owners who trust CarWise for accurate diagnostics
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <router-link 
             to="/register" 
             class="btn-primary bg-white text-primary-600 hover:bg-primary-50 text-lg px-8 py-4"
           >
-            {{ t('start_free_trial') }}
+            Start Free Trial
           </router-link>
           <router-link 
             to="/diagnose" 
             class="btn-outline border-white text-white hover:bg-white hover:text-primary-600 text-lg px-8 py-4"
           >
-            {{ t('try_demo') }}
+            Try Demo
           </router-link>
         </div>
       </div>
@@ -181,13 +181,11 @@
 </template>
 
 <script>
-import { t } from '../utils/translations'
 
 export default {
   name: 'Home',
   setup() {
     return {
-      t
     }
   }
 }

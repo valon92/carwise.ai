@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class DiagnosisResult extends Model
 {
@@ -104,5 +105,84 @@ class DiagnosisResult extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Get the suggested parts for this diagnosis result.
+     */
+    public function suggestedParts(): BelongsToMany
+    {
+        return $this->belongsToMany(CarPart::class, 'diagnosis_suggested_parts')
+                    ->withPivot([
+                        'suggestion_reason',
+                        'priority',
+                        'relevance_score',
+                        'is_required',
+                        'is_recommended',
+                        'is_alternative',
+                        'quantity_needed',
+                        'usage_notes',
+                        'estimated_cost',
+                        'cost_currency',
+                        'cost_breakdown',
+                        'estimated_installation_time',
+                        'installation_difficulty',
+                        'installation_notes',
+                        'user_selected',
+                        'user_purchased',
+                        'purchased_at',
+                        'user_notes'
+                    ])
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get the diagnosis suggested parts pivot records.
+     */
+    public function diagnosisSuggestedParts()
+    {
+        return $this->hasMany(DiagnosisSuggestedPart::class);
+    }
+
+    /**
+     * Get required parts only.
+     */
+    public function getRequiredParts()
+    {
+        return $this->suggestedParts()->wherePivot('is_required', true)->get();
+    }
+
+    /**
+     * Get recommended parts only.
+     */
+    public function getRecommendedParts()
+    {
+        return $this->suggestedParts()->wherePivot('is_recommended', true)->get();
+    }
+
+    /**
+     * Get alternative parts only.
+     */
+    public function getAlternativeParts()
+    {
+        return $this->suggestedParts()->wherePivot('is_alternative', true)->get();
+    }
+
+    /**
+     * Get total estimated cost for all suggested parts.
+     */
+    public function getTotalPartsCost(): float
+    {
+        return $this->diagnosisSuggestedParts()
+                    ->sum('estimated_cost') ?? 0.0;
+    }
+
+    /**
+     * Get formatted total parts cost.
+     */
+    public function getFormattedTotalPartsCost(): string
+    {
+        $total = $this->getTotalPartsCost();
+        return $total > 0 ? '$' . number_format($total, 2) : 'Not specified';
     }
 }

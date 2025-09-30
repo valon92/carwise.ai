@@ -88,6 +88,8 @@ export const diagnosisAPI = {
     }
   }),
   getHistory: (params = {}) => api.get('/diagnosis/history', { params }),
+  getCarDiagnosisHistory: (carId, params = {}) => api.get(`/diagnosis/car/${carId}/history`, { params }),
+  transcribeAudio: (audioData) => api.post('/transcribe-audio', audioData, { headers: { 'Content-Type': 'multipart/form-data' } })
 }
 
 export const dashboardAPI = {
@@ -95,12 +97,36 @@ export const dashboardAPI = {
   getNotifications: () => api.get('/dashboard/notifications'),
 }
 
-// Mechanics API
-export const mechanicsAPI = {
-  getAll: (params = {}) => api.get('/mechanics', { params }),
-  getById: (id) => api.get(`/mechanics/${id}`),
-  create: (formData) => api.post('/mechanics', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  update: (id, formData) => api.post(`/mechanics/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+
+// Car Images API
+export const carImagesAPI = {
+  getPrimaryImage: (brand, model, year = null, color = null) => {
+    const params = { brand, model }
+    if (year) params.year = year
+    if (color) params.color = color
+    return api.get('/car-images/primary', { params })
+  },
+  getCarImages: (brand, model, year = null, color = null) => {
+    const params = { brand, model }
+    if (year) params.year = year
+    if (color) params.color = color
+    return api.get('/car-images/car', { params })
+  },
+  getBrandFallback: (brand) => api.get('/car-images/brand-fallback', { params: { brand } }),
+  getDefaultImage: () => api.get('/car-images/default')
 }
+
+// AI Image Generation API // New API service
+export const aiImageAPI = {
+  getAvailableProviders: () => api.get('/ai-image/providers'),
+  generateCarImage: (carId, provider = 'openai', forceRegenerate = false) => 
+    api.post('/ai-image/generate', { car_id: carId, provider, force_regenerate: forceRegenerate }),
+  generateImageIfNeeded: (carId, provider = 'openai') => 
+    api.post('/ai-image/generate-if-needed', { car_id: carId, provider }),
+  generateImagesForAllCars: (provider = 'openai', limit = 5) => 
+    api.post('/ai-image/generate-all', { provider, limit }),
+  getGenerationStatus: (carId) => api.get(`/ai-image/status/${carId}`)
+}
+
 
 export default api

@@ -26,34 +26,48 @@
     <link rel="preload" href="https://fonts.bunny.net/css?family=inter:400,500,600,700" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet"></noscript>
     
-    <!-- Performance optimizations -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="//fonts.googleapis.com">
-    
-    <!-- Critical CSS preload -->
-    <link rel="preload" href="{{ asset('build/assets/app.css') }}" as="style">
-    
     <!-- Resource hints for better performance -->
     <link rel="dns-prefetch" href="//127.0.0.1:8000">
     <link rel="preconnect" href="//127.0.0.1:8000" crossorigin>
-    
-    <!-- Preload critical resources -->
-    <link rel="modulepreload" href="{{ asset('build/assets/app.js') }}">
 
     <!-- Styles / Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <!-- Service Worker Registration -->
+    <!-- Service Worker - Cleanup without reload -->
     <script>
+        console.log('SW Cleanup: Starting cleanup...');
+        
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch((registrationError) => {
-                        console.log('SW registration failed: ', registrationError);
+            // Unregister service workers without reload
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                console.log('SW Cleanup: Found', registrations.length, 'registrations');
+                
+                const unregisterPromises = registrations.map(function(registration) {
+                    console.log('SW Cleanup: Unregistering', registration.scope);
+                    return registration.unregister();
+                });
+                
+                return Promise.all(unregisterPromises);
+            }).then(function() {
+                console.log('SW Cleanup: All service workers unregistered');
+                
+                // Clear caches without reload
+                if ('caches' in window) {
+                    return caches.keys().then(function(cacheNames) {
+                        console.log('SW Cleanup: Found caches:', cacheNames);
+                        
+                        const deletePromises = cacheNames.map(function(cacheName) {
+                            console.log('SW Cleanup: Deleting cache:', cacheName);
+                            return caches.delete(cacheName);
+                        });
+                        
+                        return Promise.all(deletePromises);
                     });
+                }
+            }).then(function() {
+                console.log('SW Cleanup: All caches cleared - cleanup complete');
+            }).catch(function(error) {
+                console.error('SW Cleanup: Error during cleanup:', error);
             });
         }
     </script>

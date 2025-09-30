@@ -197,7 +197,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { diagnosisAPI } from '../services/api'
-import { t } from '../utils/translations'
 import DiagnosisDetail from '../components/DiagnosisDetail.vue'
 
 export default {

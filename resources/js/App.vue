@@ -22,7 +22,6 @@
 <script>
 import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { initPerformanceOptimizations } from './utils/performance'
-import { getLanguageInstance } from './composables/useLanguage'
 
 // Lazy load components for better performance
 const Navbar = defineAsyncComponent({
@@ -87,11 +86,9 @@ export default {
         isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
       }
 
-      // Initialize performance optimizations
-      initPerformanceOptimizations()
+      // Initialize performance optimizations - DISABLED
+      // initPerformanceOptimizations()
       
-      // Initialize language system
-      getLanguageInstance()
     })
 
     return {

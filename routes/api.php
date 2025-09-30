@@ -6,12 +6,18 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\CarBrandController;
 use App\Http\Controllers\Api\CarModelController;
-use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\DiagnosisController;
 use App\Http\Controllers\Api\DashboardController;
-use App\Http\Controllers\Api\MechanicController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\CarMaintenanceController;
+use App\Http\Controllers\Api\CarImageController;
+use App\Http\Controllers\Api\AIImageController;
+use App\Http\Controllers\Api\PerformanceController;
+use App\Http\Controllers\Api\LogMonitoringController;
+use App\Http\Controllers\Api\BackupController;
+use App\Http\Controllers\Api\CarPartController;
+use App\Http\Controllers\Api\AuthorizedCompanyController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -20,12 +26,7 @@ Route::post('/login', [AuthController::class, 'login']);
 // Car brands routes (public)
 Route::get('/car-brands', [CarBrandController::class, 'index']);
 Route::get('/car-brands/popular', [CarBrandController::class, 'popular']);
-Route::get('/car-brands/countries', [CarBrandController::class, 'countries']);
-Route::get('/car-brands/specialties', [CarBrandController::class, 'specialties']);
-Route::get('/car-brands/search', [CarBrandController::class, 'search']);
-Route::get('/car-brands/country/{country}', [CarBrandController::class, 'byCountry']);
-Route::get('/car-brands/specialty/{specialty}', [CarBrandController::class, 'bySpecialty']);
-Route::get('/car-brands/{id}', [CarBrandController::class, 'show']);
+Route::get('/car-brands/{brandId}/models', [CarBrandController::class, 'models']);
 
 // Car models routes (public)
 Route::get('/car-models', [CarModelController::class, 'index']);
@@ -42,13 +43,20 @@ Route::get('/car-models/fuel-type/{fuelType}', [CarModelController::class, 'byFu
 Route::get('/car-models/{id}', [CarModelController::class, 'show']);
 Route::get('/car-models/slug/{slug}', [CarModelController::class, 'showBySlug']);
 
-// Language routes (public)
-Route::get('/languages', [LanguageController::class, 'index']);
-Route::get('/languages/current', [LanguageController::class, 'current']);
-Route::get('/languages/translations', [LanguageController::class, 'translations']);
-Route::get('/languages/detect', [LanguageController::class, 'detect']);
-Route::get('/languages/{code}', [LanguageController::class, 'info']);
-Route::post('/languages/set', [LanguageController::class, 'setLanguage']);
+// Car parts routes (public)
+Route::get('/car-parts', [CarPartController::class, 'index']);
+Route::get('/car-parts/featured', [CarPartController::class, 'getFeatured']);
+Route::get('/car-parts/search', [CarPartController::class, 'search']);
+Route::get('/car-parts/category/{category}', [CarPartController::class, 'getByCategory']);
+Route::get('/car-parts/{id}', [CarPartController::class, 'show']);
+
+// Authorized companies routes (public)
+Route::get('/authorized-companies', [AuthorizedCompanyController::class, 'index']);
+Route::get('/authorized-companies/featured', [AuthorizedCompanyController::class, 'getFeatured']);
+Route::get('/authorized-companies/search', [AuthorizedCompanyController::class, 'search']);
+Route::get('/authorized-companies/{id}', [AuthorizedCompanyController::class, 'show']);
+Route::get('/authorized-companies/{id}/car-parts', [AuthorizedCompanyController::class, 'getCarParts']);
+
 
 // Currency routes (public)
 Route::get('/currencies', [CurrencyController::class, 'index']);
@@ -57,6 +65,16 @@ Route::get('/currencies/popular', [CurrencyController::class, 'popular']);
 Route::get('/currencies/search', [CurrencyController::class, 'search']);
 Route::get('/currencies/{code}', [CurrencyController::class, 'show']);
 Route::post('/currencies/convert', [CurrencyController::class, 'convert']);
+
+// Car image routes (public)
+Route::get('/car-images/primary', [CarImageController::class, 'getPrimaryImage']);
+Route::get('/car-images/car', [CarImageController::class, 'getCarImages']);
+Route::get('/car-images/brand-fallback', [CarImageController::class, 'getBrandFallback']);
+Route::get('/car-images/default', [CarImageController::class, 'getDefaultImage']);
+
+// AI image generation routes (public)
+Route::get('/ai-image/providers', [AIImageController::class, 'getAvailableProviders']);
+
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -69,29 +87,86 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('cars', CarController::class);
     Route::get('/cars/statistics', [CarController::class, 'statistics']);
     
-// Diagnosis routes
-Route::post('/diagnosis/start', [DiagnosisController::class, 'startDiagnosis']);
-Route::post('/diagnosis/submit', [DiagnosisController::class, 'submitDiagnosis']);
-Route::get('/diagnosis/result/{sessionId}', [DiagnosisController::class, 'getResult']);
-Route::get('/diagnosis/history', [DiagnosisController::class, 'getHistory']);
-Route::post('/transcribe-audio', [DiagnosisController::class, 'transcribeAudio']);
+            // Diagnosis routes
+            Route::post('/diagnosis/start', [DiagnosisController::class, 'startDiagnosis']);
+            Route::post('/diagnosis/submit', [DiagnosisController::class, 'submitDiagnosis']);
+            Route::get('/diagnosis/result/{sessionId}', [DiagnosisController::class, 'getResult']);
+            Route::get('/diagnosis/history', [DiagnosisController::class, 'getHistory']);
+            Route::get('/diagnosis/car/{carId}/history', [DiagnosisController::class, 'getCarDiagnosisHistory']);
+            Route::post('/transcribe-audio', [DiagnosisController::class, 'transcribeAudio']);
+            
+            // Car parts routes (protected)
+            Route::get('/diagnosis/{diagnosisResultId}/suggested-parts', [CarPartController::class, 'getSuggestedParts']);
 
-// Dashboard routes
-Route::get('/dashboard/statistics', [DashboardController::class, 'statistics']);
-Route::get('/dashboard/notifications', [DashboardController::class, 'notifications']);
-    
-    // Mechanic routes
-            Route::get('/mechanics', [MechanicController::class, 'index']);
-            Route::get('/mechanics/{id}', [MechanicController::class, 'show']);
-            Route::post('/mechanics', [MechanicController::class, 'store']);
-            Route::post('/mechanics/{id}', [MechanicController::class, 'update']);
-            Route::put('/mechanics/{id}', [MechanicController::class, 'update']);
-    
+    // Dashboard routes
+    Route::get('/dashboard/statistics', [DashboardController::class, 'statistics']);
+    Route::get('/dashboard/notifications', [DashboardController::class, 'notifications']);
+
+
+            // Car maintenance routes
+            Route::prefix('cars/{carId}/maintenance')->group(function () {
+                Route::get('/history', [CarMaintenanceController::class, 'getMaintenanceHistory']);
+                Route::post('/records', [CarMaintenanceController::class, 'addMaintenanceRecord']);
+                Route::get('/notifications', [CarMaintenanceController::class, 'getMaintenanceNotifications']);
+                Route::put('/mileage', [CarMaintenanceController::class, 'updateMileage']);
+                Route::get('/stats', [CarMaintenanceController::class, 'getMaintenanceStats']);
+            });
+
+            // AI image generation routes (protected)
+            Route::prefix('ai-image')->group(function () {
+                Route::post('/generate', [AIImageController::class, 'generateCarImage']);
+                Route::post('/generate-if-needed', [AIImageController::class, 'generateImageIfNeeded']);
+                Route::post('/generate-all', [AIImageController::class, 'generateImagesForAllCars']);
+                Route::get('/status/{carId}', [AIImageController::class, 'getGenerationStatus']);
+            });
+
     // Admin routes
     Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/analytics', [AdminController::class, 'analytics']);
+        Route::get('/system-health', [AdminController::class, 'systemHealth']);
+        
+        // Performance monitoring routes
+        Route::prefix('performance')->group(function () {
+            Route::get('/dashboard', [PerformanceController::class, 'dashboard']);
+            Route::get('/metrics', [PerformanceController::class, 'metrics']);
+            Route::get('/slow-queries', [PerformanceController::class, 'slowQueries']);
+            Route::get('/endpoints', [PerformanceController::class, 'endpoints']);
+            Route::post('/cache/clear', [PerformanceController::class, 'clearCache']);
+            Route::post('/cache/warmup', [PerformanceController::class, 'warmupCache']);
+        });
+
+            // Log monitoring routes
+            Route::prefix('logs')->group(function () {
+                Route::get('/dashboard', [LogMonitoringController::class, 'dashboard']);
+                Route::get('/recent', [LogMonitoringController::class, 'recentLogs']);
+                Route::get('/trends', [LogMonitoringController::class, 'errorTrends']);
+                Route::get('/patterns', [LogMonitoringController::class, 'criticalPatterns']);
+                Route::get('/health', [LogMonitoringController::class, 'systemHealth']);
+                Route::get('/statistics', [LogMonitoringController::class, 'statistics']);
+                Route::get('/alerts', [LogMonitoringController::class, 'alerts']);
+                Route::get('/search', [LogMonitoringController::class, 'searchLogs']);
+                Route::post('/archive', [LogMonitoringController::class, 'archiveLogs']);
+                Route::post('/export', [LogMonitoringController::class, 'exportLogs']);
+                Route::post('/clear-cache', [LogMonitoringController::class, 'clearCache']);
+            });
+
+            // Database backup routes
+            Route::prefix('backups')->group(function () {
+                Route::get('/dashboard', [BackupController::class, 'dashboard']);
+                Route::get('/', [BackupController::class, 'index']);
+                Route::post('/', [BackupController::class, 'store']);
+                Route::get('/statistics', [BackupController::class, 'statistics']);
+                Route::get('/{filename}/download', [BackupController::class, 'download']);
+                Route::get('/{filename}/verify', [BackupController::class, 'verify']);
+                Route::delete('/{filename}', [BackupController::class, 'destroy']);
+            });
+        
+        // User management
         Route::get('/users', [AdminController::class, 'users']);
         Route::put('/users/{id}/status', [AdminController::class, 'updateUserStatus']);
+        
+        // Content management
         Route::get('/cars', [AdminController::class, 'cars']);
         Route::get('/diagnoses', [AdminController::class, 'diagnoses']);
         Route::get('/car-brands', [AdminController::class, 'carBrands']);
@@ -100,6 +175,13 @@ Route::get('/dashboard/notifications', [DashboardController::class, 'notificatio
         Route::put('/car-models/{id}/status', [AdminController::class, 'updateCarModelStatus']);
         Route::get('/currencies', [AdminController::class, 'currencies']);
         Route::put('/currencies/{id}/rate', [AdminController::class, 'updateCurrencyRate']);
+        
+        // Review moderation
+        Route::get('/reviews/pending', [AdminController::class, 'pendingReviews']);
+        Route::post('/reviews/{id}/moderate', [AdminController::class, 'moderateReview']);
+        Route::get('/content/flagged', [AdminController::class, 'flaggedContent']);
+        
+        // System monitoring
         Route::get('/system-logs', [AdminController::class, 'systemLogs']);
     });
 });

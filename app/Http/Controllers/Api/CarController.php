@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Car;
+use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -18,9 +19,9 @@ class CarController extends Controller
     {
         try {
             $user = Auth::user();
-            $cars = Car::where('user_id', $user->id)
-                ->orderBy('created_at', 'desc')
-                ->get()
+            
+            // Direct database query (cache disabled due to Redis configuration issues)
+            $cars = Car::where('user_id', $user->id)->orderBy('created_at', 'desc')->get()
                 ->map(function($car) {
                     return [
                         'id' => $car->id,
@@ -28,6 +29,8 @@ class CarController extends Controller
                         'model' => $car->model,
                         'year' => $car->year,
                         'vin' => $car->vin,
+                        'image_url' => $car->getImageUrl(),
+                        'thumbnail_url' => $car->getThumbnailUrl(),
                         'license_plate' => $car->license_plate,
                         'color' => $car->color,
                         'fuel_type' => $car->fuel_type,
@@ -41,9 +44,21 @@ class CarController extends Controller
                         'full_name' => $car->full_name,
                         'display_name' => $car->display_name,
                         'age' => $car->age,
-                        'diagnosis_count' => 0, // TODO: Implement when diagnosis_sessions has car_id
-                        'last_diagnosis' => 'Never', // TODO: Implement when diagnosis_sessions has car_id
-                        'recent_diagnoses' => [], // TODO: Implement when diagnosis_sessions has car_id
+                        'diagnosis_count' => $car->diagnosisSessions()->count(),
+                        'last_diagnosis' => $car->diagnosisSessions()->latest()->first()?->created_at?->format('Y-m-d') ?? 'Never',
+                        'recent_diagnoses' => $car->diagnosisSessions()->latest()->limit(3)->get()->map(function($session) {
+                            return [
+                                'id' => $session->id,
+                                'session_id' => $session->session_id,
+                                'status' => $session->status,
+                                'created_at' => $session->created_at->format('Y-m-d H:i'),
+                                'vehicle_info' => $session->vehicle_info
+                            ];
+                        }),
+                        // Maintenance data
+                        'current_mileage' => $car->current_mileage,
+                        'maintenance_status' => $car->getMaintenanceStatusColor(),
+                        'next_maintenance_due' => $car->getNextMaintenanceDue(),
                         'created_at' => $car->created_at->format('Y-m-d H:i:s'),
                         'updated_at' => $car->updated_at->format('Y-m-d H:i:s'),
                     ];
@@ -95,7 +110,18 @@ class CarController extends Controller
                     'full_name' => $car->full_name,
                     'display_name' => $car->display_name,
                     'age' => $car->age,
-                    'diagnosis_sessions' => [], // TODO: Implement when diagnosis_sessions has car_id
+                    'diagnosis_sessions' => $car->diagnosisSessions()->with('result')->orderBy('created_at', 'desc')->get()->map(function($session) {
+                        return [
+                            'id' => $session->id,
+                            'session_id' => $session->session_id,
+                            'status' => $session->status,
+                            'description' => $session->description,
+                            'symptoms' => $session->symptoms,
+                            'vehicle_info' => $session->vehicle_info,
+                            'created_at' => $session->created_at->format('Y-m-d H:i'),
+                            'has_result' => $session->result !== null
+                        ];
+                    }),
                     'created_at' => $car->created_at->format('Y-m-d H:i:s'),
                     'updated_at' => $car->updated_at->format('Y-m-d H:i:s'),
                 ],
@@ -125,11 +151,15 @@ class CarController extends Controller
                 'fuel_type' => 'nullable|string|in:gasoline,diesel,electric,hybrid',
                 'transmission' => 'nullable|string|in:manual,automatic,cvt',
                 'mileage' => 'nullable|integer|min:0',
+                'current_mileage' => 'nullable|integer|min:0',
                 'purchase_date' => 'nullable|date|before_or_equal:today',
                 'purchase_price' => 'nullable|numeric|min:0',
                 'notes' => 'nullable|string|max:1000',
                 'specifications' => 'nullable|array',
                 'status' => 'nullable|string|in:active,sold,scrapped',
+                // Maintenance preferences
+                'oil_change_interval' => 'nullable|integer|min:5000|max:50000',
+                'notification_advance_days' => 'nullable|integer|min:1|max:365',
             ]);
 
             if ($validator->fails()) {
@@ -143,13 +173,17 @@ class CarController extends Controller
             $user = Auth::user();
             $carData = $request->only([
                 'brand', 'model', 'year', 'vin', 'license_plate', 'color',
-                'fuel_type', 'transmission', 'mileage', 'purchase_date',
-                'purchase_price', 'notes', 'specifications', 'status'
+                'fuel_type', 'transmission', 'mileage', 'current_mileage', 'purchase_date',
+                'purchase_price', 'notes', 'specifications', 'status',
+                'oil_change_interval', 'notification_advance_days'
             ]);
             $carData['user_id'] = $user->id;
             $carData['status'] = $carData['status'] ?? 'active';
 
             $car = Car::create($carData);
+
+            // Note: Cache clearing disabled due to Redis configuration issues
+            // CacheService::clearUserCache($user->id);
 
             return response()->json([
                 'success' => true,
@@ -208,11 +242,15 @@ class CarController extends Controller
                 'fuel_type' => 'nullable|string|in:gasoline,diesel,electric,hybrid',
                 'transmission' => 'nullable|string|in:manual,automatic,cvt',
                 'mileage' => 'nullable|integer|min:0',
+                'current_mileage' => 'nullable|integer|min:0',
                 'purchase_date' => 'nullable|date|before_or_equal:today',
                 'purchase_price' => 'nullable|numeric|min:0',
                 'notes' => 'nullable|string|max:1000',
                 'specifications' => 'nullable|array',
                 'status' => 'nullable|string|in:active,sold,scrapped',
+                // Maintenance preferences
+                'oil_change_interval' => 'nullable|integer|min:5000|max:50000',
+                'notification_advance_days' => 'nullable|integer|min:1|max:365',
             ]);
 
             if ($validator->fails()) {
@@ -225,11 +263,15 @@ class CarController extends Controller
 
             $carData = $request->only([
                 'brand', 'model', 'year', 'vin', 'license_plate', 'color',
-                'fuel_type', 'transmission', 'mileage', 'purchase_date',
-                'purchase_price', 'notes', 'specifications', 'status'
+                'fuel_type', 'transmission', 'mileage', 'current_mileage', 'purchase_date',
+                'purchase_price', 'notes', 'specifications', 'status',
+                'oil_change_interval', 'notification_advance_days'
             ]);
 
             $car->update($carData);
+
+            // Note: Cache clearing disabled due to Redis configuration issues
+            // CacheService::clearUserCache($user->id);
 
             return response()->json([
                 'success' => true,
@@ -253,9 +295,17 @@ class CarController extends Controller
                     'full_name' => $car->full_name,
                     'display_name' => $car->display_name,
                     'age' => $car->age,
-                    'diagnosis_count' => 0, // TODO: Implement when diagnosis_sessions has car_id
-                    'last_diagnosis' => 'Never', // TODO: Implement when diagnosis_sessions has car_id
-                    'recent_diagnoses' => [], // TODO: Implement when diagnosis_sessions has car_id
+                    'diagnosis_count' => $car->diagnosisSessions()->count(),
+                    'last_diagnosis' => $car->diagnosisSessions()->latest()->first()?->created_at?->format('Y-m-d') ?? 'Never',
+                    'recent_diagnoses' => $car->diagnosisSessions()->latest()->limit(3)->get()->map(function($session) {
+                        return [
+                            'id' => $session->id,
+                            'session_id' => $session->session_id,
+                            'status' => $session->status,
+                            'created_at' => $session->created_at->format('Y-m-d H:i'),
+                            'vehicle_info' => $session->vehicle_info
+                        ];
+                    }),
                     'created_at' => $car->created_at->format('Y-m-d H:i:s'),
                     'updated_at' => $car->updated_at->format('Y-m-d H:i:s'),
                 ],
@@ -278,15 +328,18 @@ class CarController extends Controller
             $user = Auth::user();
             $car = Car::where('user_id', $user->id)->findOrFail($id);
 
-            // TODO: Check if car has diagnosis sessions when diagnosis_sessions has car_id
-            // if ($car->diagnosisSessions()->count() > 0) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => 'Cannot delete car with existing diagnosis sessions. Please contact support.',
-            //     ], 422);
-            // }
+            // Check if car has diagnosis sessions
+            if ($car->diagnosisSessions()->count() > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete car with existing diagnosis sessions. Please contact support.',
+                ], 422);
+            }
 
             $car->delete();
+
+            // Note: Cache clearing disabled due to Redis configuration issues  
+            // CacheService::clearUserCache($user->id);
 
             return response()->json([
                 'success' => true,
@@ -310,10 +363,13 @@ class CarController extends Controller
             $user = Auth::user();
             $cars = Car::where('user_id', $user->id);
 
+            // Get cached basic statistics
+            $baseStats = CacheService::getUserStatistics($user->id);
+            
             $stats = [
-                'total_cars' => $cars->count(),
+                'total_cars' => $baseStats['total_cars'],
                 'active_cars' => $cars->where('status', 'active')->count(),
-                'total_diagnoses' => 0, // TODO: Implement when diagnosis_sessions has car_id
+                'total_diagnoses' => $baseStats['total_diagnoses'],
                 'brands' => $cars->selectRaw('brand, COUNT(*) as count')
                     ->groupBy('brand')
                     ->orderBy('count', 'desc')

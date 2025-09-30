@@ -1,0 +1,27 @@
+{
+    "filename": "backup_database_structure_2025-09-29_16-03-44",
+    "created_at": "2025-09-29T16:03:44.462255Z",
+    "type": "structure",
+    "compression": "none",
+    "size": 33993,
+    "duration": 19.83785629272461,
+    "database_driver": "sqlite",
+    "database_name": "\/Users\/valonsylejmani\/Projekte\/carwise.ai\/database\/database.sqlite",
+    "verification": {
+        "status": "valid",
+        "checks": {
+            "contains_sql": true,
+            "contains_sqlite_headers": false
+        },
+        "file_size": 33993
+    },
+    "options": {
+        "type": "structure",
+        "compression": "none",
+        "include_logs": false,
+        "verify": true,
+        "cleanup_old": false,
+        "retention_days": 30,
+        "storage_disk": "local"
+    }
+}
