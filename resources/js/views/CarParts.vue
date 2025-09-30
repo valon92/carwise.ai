@@ -100,6 +100,28 @@
             </select>
           </div>
         </div>
+        
+        <!-- Partner Search Actions -->
+        <div class="mt-4 flex flex-wrap gap-3">
+          <button 
+            @click="searchPartnerParts(searchQuery)"
+            class="btn-primary bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+          >
+            🔍 Search Partner APIs
+          </button>
+          <button 
+            @click="comparePrices(searchQuery, selectedManufacturer)"
+            class="btn-secondary border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium"
+          >
+            💰 Compare Prices
+          </button>
+          <button 
+            @click="syncPartnerParts"
+            class="btn-secondary border-green-600 text-green-600 hover:bg-green-50 px-4 py-2 rounded-lg text-sm font-medium"
+          >
+            🔄 Sync Partner Data
+          </button>
+        </div>
       </div>
 
       <!-- Categories Section -->
@@ -266,6 +288,219 @@
                 <span class="font-medium">AI Recommended</span>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Partner Results -->
+      <div v-if="showPartnerResults && Object.keys(partnerParts).length > 0" class="mb-12">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-bold text-secondary-900 dark:text-white mb-4">Partner Results</h2>
+          <p class="text-lg text-secondary-600 dark:text-secondary-400">Parts from authorized global partners</p>
+        </div>
+        
+        <div v-for="(partnerData, partnerId) in partnerParts" :key="partnerId" class="mb-8">
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white dark:bg-secondary-800 rounded-xl flex items-center justify-center shadow-lg">
+                  <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {{ partnerData.partner.name.charAt(0) }}
+                  </span>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-secondary-900 dark:text-white">{{ partnerData.partner.name }}</h3>
+                  <p class="text-sm text-secondary-600 dark:text-secondary-400">
+                    {{ partnerData.count }} parts found • {{ partnerData.partner.commission_rate }}% commission
+                  </p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm text-green-600 dark:text-green-400 font-medium">Authorized Partner</div>
+                <div class="text-xs text-secondary-500 dark:text-secondary-500">Global Shipping</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div 
+              v-for="part in partnerData.parts.slice(0, 8)" 
+              :key="`${partnerId}-${part.partner_part_id}`"
+              class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden border border-gray-100 dark:border-secondary-700"
+            >
+              <!-- Image Container -->
+              <div class="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-secondary-700 dark:to-secondary-800">
+                <div class="aspect-w-16 aspect-h-12 relative">
+                  <img 
+                    :src="part.image_url || getBrandImage(part.brand)" 
+                    :alt="part.name"
+                    class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700"
+                    loading="lazy"
+                  />
+                  <!-- Gradient Overlay -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                  
+                  <!-- Partner Badge -->
+                  <div class="absolute top-3 left-3 bg-blue-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-md">
+                    {{ partnerData.partner.name }}
+                  </div>
+                  
+                  <!-- Stock Status -->
+                  <div class="absolute bottom-3 right-3">
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold shadow-md"
+                          :class="part.stock_quantity > 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
+                      {{ part.stock_quantity > 0 ? 'In Stock' : 'Out of Stock' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Content Section -->
+              <div class="p-4 space-y-3">
+                <!-- Title and Category -->
+                <div>
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full">
+                      {{ part.category.charAt(0).toUpperCase() + part.category.slice(1) }}
+                    </span>
+                  </div>
+                  <h3 class="text-lg font-bold text-secondary-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                    {{ part.name }}
+                  </h3>
+                  <p class="text-secondary-600 dark:text-secondary-400 text-sm line-clamp-2">
+                    {{ part.description }}
+                  </p>
+                </div>
+                
+                <!-- Rating and Price -->
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1">
+                    <div class="flex text-yellow-400">
+                      <svg v-for="i in 5" :key="i" class="w-3 h-3" :class="i <= Math.floor(parseFloat(part.rating)) ? 'text-yellow-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                      </svg>
+                    </div>
+                    <span class="text-xs font-medium text-secondary-600 dark:text-secondary-400">
+                      {{ parseFloat(part.rating).toFixed(1) }}
+                    </span>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      ${{ parseFloat(part.price).toFixed(2) }}
+                    </div>
+                    <div class="text-xs text-green-600 dark:text-green-400 font-medium">
+                      Free Shipping
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex gap-2">
+                  <button 
+                    @click="buyFromPartner(partnerId, part.partner_part_id)"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 hover:shadow-lg text-sm"
+                  >
+                    Buy Now
+                  </button>
+                  <button 
+                    @click="viewPart(part)"
+                    class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-all duration-300 hover:shadow-lg"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Show More Button -->
+          <div v-if="partnerData.parts.length > 8" class="text-center mt-6">
+            <button class="btn-secondary border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium">
+              View All {{ partnerData.count }} Parts from {{ partnerData.partner.name }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Comparison -->
+      <div v-if="priceComparison.length > 0" class="mb-12">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-bold text-secondary-900 dark:text-white mb-4">Price Comparison</h2>
+          <p class="text-lg text-secondary-600 dark:text-secondary-400">Compare prices across all partners</p>
+        </div>
+        
+        <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-lg overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 dark:bg-secondary-700">
+                <tr>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Partner</th>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Part Name</th>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Brand</th>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Price</th>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stock</th>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rating</th>
+                  <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-secondary-700">
+                <tr v-for="(part, index) in priceComparison" :key="index" class="hover:bg-gray-50 dark:hover:bg-secondary-700">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-sm font-bold text-blue-600 dark:text-blue-400">
+                          {{ part.partner_name.charAt(0) }}
+                        </span>
+                      </div>
+                      <div class="text-sm font-medium text-gray-900 dark:text-white">
+                        {{ part.partner_name }}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="text-sm text-gray-900 dark:text-white">{{ part.part_name }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ part.part_number }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    {{ part.brand }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-lg font-bold text-green-600 dark:text-green-400">
+                      ${{ parseFloat(part.price).toFixed(2) }}
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ part.currency }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                          :class="part.stock > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'">
+                      {{ part.stock > 0 ? 'In Stock' : 'Out of Stock' }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="flex text-yellow-400 mr-1">
+                        <svg v-for="i in 5" :key="i" class="w-3 h-3" :class="i <= Math.floor(part.rating) ? 'text-yellow-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                        </svg>
+                      </div>
+                      <span class="text-sm text-gray-600 dark:text-gray-400">{{ part.rating.toFixed(1) }}</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button 
+                      @click="buyFromPartner(part.partner_id, part.part_id)"
+                      :disabled="part.stock === 0"
+                      class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                    >
+                      Buy Now
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -601,6 +836,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 // Reactive data
 const parts = ref([])
 const featuredParts = ref([])
+const partnerParts = ref([])
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const selectedManufacturer = ref('')
@@ -609,6 +845,9 @@ const currentPage = ref(1)
 const totalPages = ref(1)
 const totalParts = ref(0)
 const selectedPart = ref(null)
+const showPartnerResults = ref(false)
+const partnerStats = ref({})
+const priceComparison = ref([])
 
 // Filters
 const categories = ref([])
@@ -850,6 +1089,108 @@ const trackAffiliateClick = async (part) => {
     })
   } catch (error) {
     console.error('Error tracking affiliate click:', error)
+  }
+}
+
+// Partner integration methods
+const searchPartnerParts = async (query) => {
+  try {
+    const response = await fetch('/api/partners/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: query,
+        category: selectedCategory.value,
+        brand: selectedManufacturer.value,
+        in_stock: true
+      })
+    })
+    
+    const data = await response.json()
+    if (data.success) {
+      partnerParts.value = data.data
+      showPartnerResults.value = true
+    }
+  } catch (error) {
+    console.error('Error searching partner parts:', error)
+  }
+}
+
+const comparePrices = async (partName, brand = null, partNumber = null) => {
+  try {
+    const response = await fetch('/api/partners/compare-prices', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        part_name: partName,
+        brand: brand,
+        part_number: partNumber
+      })
+    })
+    
+    const data = await response.json()
+    if (data.success) {
+      priceComparison.value = data.data.price_comparison
+      return data.data
+    }
+  } catch (error) {
+    console.error('Error comparing prices:', error)
+  }
+}
+
+const getPartnerStats = async () => {
+  try {
+    const response = await fetch('/api/partners/stats')
+    const data = await response.json()
+    if (data.success) {
+      partnerStats.value = data.data
+    }
+  } catch (error) {
+    console.error('Error getting partner stats:', error)
+  }
+}
+
+const syncPartnerParts = async () => {
+  try {
+    const response = await fetch('/api/partners/sync', {
+      method: 'POST'
+    })
+    const data = await response.json()
+    if (data.success) {
+      console.log('Partner parts synced successfully:', data.data)
+      // Refresh parts after sync
+      await loadParts()
+    }
+  } catch (error) {
+    console.error('Error syncing partner parts:', error)
+  }
+}
+
+const getAffiliateLink = async (partnerId, partId) => {
+  try {
+    const response = await fetch(`/api/partners/${partnerId}/parts/${partId}/affiliate-link`)
+    const data = await response.json()
+    if (data.success) {
+      return data.data.affiliate_link
+    }
+  } catch (error) {
+    console.error('Error getting affiliate link:', error)
+  }
+  return null
+}
+
+const buyFromPartner = async (partnerId, partId) => {
+  try {
+    const affiliateLink = await getAffiliateLink(partnerId, partId)
+    if (affiliateLink) {
+      window.open(affiliateLink, '_blank')
+    }
+  } catch (error) {
+    console.error('Error opening partner link:', error)
   }
 }
 

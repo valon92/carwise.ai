@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\BackupController;
 use App\Http\Controllers\Api\CarPartController;
 use App\Http\Controllers\Api\AuthorizedCompanyController;
 use App\Http\Controllers\Api\AffiliateController;
+use App\Http\Controllers\Api\PartnerController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -55,6 +56,18 @@ Route::get('/car-parts/{id}', [CarPartController::class, 'show']);
 Route::post('/affiliate/track-click', [AffiliateController::class, 'trackClick']);
 Route::post('/affiliate/track-purchase', [AffiliateController::class, 'trackPurchase']);
 Route::get('/affiliate/stats', [AffiliateController::class, 'getStats']);
+
+// Partner API routes
+Route::get('/partners', [PartnerController::class, 'getPartners']);
+Route::get('/partners/stats', [PartnerController::class, 'getPartnerStats']);
+Route::post('/partners/search', [PartnerController::class, 'searchParts']);
+Route::post('/partners/compare-prices', [PartnerController::class, 'comparePrices']);
+Route::get('/partners/{partnerId}/parts/{partId}', [PartnerController::class, 'getPartDetails']);
+Route::get('/partners/{partnerId}/parts/{partId}/availability', [PartnerController::class, 'getPartAvailability']);
+Route::get('/partners/{partnerId}/parts/{partId}/pricing', [PartnerController::class, 'getPartPricing']);
+Route::get('/partners/{partnerId}/parts/{partId}/affiliate-link', [PartnerController::class, 'generateAffiliateLink']);
+Route::post('/partners/sync', [PartnerController::class, 'syncParts']);
+Route::post('/partners/{partnerId}/sync', [PartnerController::class, 'syncPartnerParts']);
 
 // Cart routes (public for now, will be protected later)
 Route::post('/cart/add', function(Request $request) {
