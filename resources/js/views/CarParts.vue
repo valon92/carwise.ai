@@ -177,23 +177,21 @@
           <div class="flex flex-col lg:flex-row gap-4">
             <!-- Search Input -->
             <div class="flex-1">
-            <div class="relative">
-              <input 
-                v-model="searchQuery"
-                @input="debouncedSearch"
-                type="text" 
+              <div class="relative">
+                <input 
+                  v-model="searchQuery"
+                  type="text" 
                   class="w-full h-12 pl-12 pr-4 border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                   placeholder="Search for car parts, brands, or part numbers..."
-              />
+                />
                 <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
             </div>
-          </div>
 
             <!-- Search Button -->
             <button 
-              @click="filterParts"
               class="h-12 px-8 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,9 +250,9 @@
                 <option value="rating">Rating</option>
                 <option value="newest">Newest</option>
               </select>
-            </div>
-          </div>
-          
+        </div>
+      </div>
+
           <!-- VIN Lookup -->
           <div class="mt-4 p-4 bg-gray-50 dark:bg-secondary-700 rounded-lg">
             <div class="flex items-center gap-3 mb-3">
@@ -262,7 +260,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
               <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Vehicle Lookup</h3>
-            </div>
+        </div>
             <div class="flex gap-3">
               <input 
                 v-model="vinInput"
@@ -317,12 +315,6 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
               Search Partners
-            </button>
-            <button 
-              @click="clearFilters"
-              class="px-4 py-2 border border-gray-300 dark:border-secondary-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-secondary-700 rounded-lg text-sm font-medium transition-colors duration-200"
-            >
-              Clear Filters
             </button>
             <button 
               @click="showMockProducts = !showMockProducts"
@@ -387,9 +379,9 @@
                   
                   <!-- Product Image -->
                   <div class="relative aspect-square overflow-hidden bg-gray-100 dark:bg-secondary-700">
-                    <img 
-                      :src="part.image_url || '/images/parts/placeholder.jpg'" 
-                      :alt="part.name"
+              <img 
+                :src="part.image_url || '/images/parts/placeholder.jpg'" 
+                :alt="part.name"
                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                       loading="lazy"
                     />
@@ -399,7 +391,7 @@
                       <span class="px-2 py-1 text-xs font-medium rounded-full shadow-sm bg-white/90 dark:bg-secondary-800/90 text-gray-700 dark:text-gray-300">
                         {{ part.condition || 'New' }}
                       </span>
-                    </div>
+            </div>
                     
                     <!-- AI Recommended Badge -->
                     <div v-if="part.ai_recommended" class="absolute bottom-2 right-2">
@@ -419,23 +411,23 @@
                   
                   <!-- Product Name -->
                   <h3 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                    {{ part.name }}
-                  </h3>
+                {{ part.name }}
+              </h3>
                   
                   <!-- Rating and Reviews -->
-                  <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between">
                     <div class="flex items-center gap-1">
                       <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                       </svg>
                       <span class="text-xs text-gray-600 dark:text-gray-400">
                         {{ part.rating.toFixed(1) }}
-                      </span>
-                    </div>
+                </span>
+              </div>
                     <div class="text-xs text-gray-500 dark:text-gray-400">
                       {{ part.review_count }} reviews
-                    </div>
-                  </div>
+            </div>
+          </div>
                   
                   <!-- Price -->
                   <div class="flex items-center justify-between">
@@ -452,9 +444,9 @@
                       <div v-else class="text-xs text-green-600 dark:text-green-400">
                         Free shipping
                       </div>
-                    </div>
-                  </div>
-                  
+        </div>
+      </div>
+
                   <!-- Action Button -->
                   <button 
                     @click.stop="handleAffiliateClick(part)"
@@ -470,8 +462,8 @@
             </div>
           </div>
         </div>
-      </div>
-
+          </div>
+          
 
           
       <!-- Partner Results -->
@@ -525,18 +517,18 @@
                   <!-- Partner Badge -->
                   <div class="absolute top-3 left-3 bg-blue-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-md">
                     {{ partnerData.partner.name }}
-            </div>
+                </div>
                   
                   <!-- Stock Status -->
                   <div class="absolute bottom-3 right-3">
                     <span class="px-2 py-1 rounded-full text-xs font-semibold shadow-md"
                           :class="part.stock_quantity > 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
                       {{ part.stock_quantity > 0 ? 'In Stock' : 'Out of Stock' }}
-                    </span>
+                  </span>
                   </div>
                 </div>
               </div>
-              
+
               <!-- Content Section -->
               <div class="p-4 space-y-3">
                 <!-- Title and Category -->
@@ -544,7 +536,7 @@
                   <div class="flex items-center gap-2 mb-2">
                     <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full">
                       {{ part.category.charAt(0).toUpperCase() + part.category.slice(1) }}
-                    </span>
+                </span>
                   </div>
                   <h3 class="text-lg font-bold text-secondary-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                 {{ part.name }}
@@ -552,52 +544,52 @@
                   <p class="text-secondary-600 dark:text-secondary-400 text-sm line-clamp-2">
                 {{ part.description }}
               </p>
-                </div>
-                
+              </div>
+
                 <!-- Rating and Price -->
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-1">
                     <div class="flex text-yellow-400">
                       <svg v-for="i in 5" :key="i" class="w-3 h-3" :class="i <= Math.floor(parseFloat(part.rating)) ? 'text-yellow-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                      </svg>
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                  </svg>
                 </div>
                     <span class="text-xs font-medium text-secondary-600 dark:text-secondary-400">
                       {{ parseFloat(part.rating).toFixed(1) }}
                   </span>
-                </div>
+              </div>
                   <div class="text-right">
                     <div class="text-xl font-bold text-blue-600 dark:text-blue-400">
                       ${{ parseFloat(part.price).toFixed(2) }}
                     </div>
                     <div class="text-xs text-green-600 dark:text-green-400 font-medium">
                       Free Shipping
-                    </div>
-                  </div>
-              </div>
+            </div>
+          </div>
+        </div>
 
                 <!-- Action Buttons -->
                 <div class="flex gap-2">
-                  <button 
+            <button 
                     @click="buyFromPartner(partnerId, part.partner_part_id)"
                     class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 hover:shadow-lg text-sm"
-                  >
+            >
                     Buy Now
-                  </button>
-                  <button 
+            </button>
+            <button 
                     @click="viewPart(part)"
                     class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-all duration-300 hover:shadow-lg"
-                  >
+            >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
-                  </button>
+            </button>
                 </div>
               </div>
-            </div>
-          </div>
-          
+        </div>
+      </div>
+
           <!-- Show More Button -->
           <div v-if="partnerData.parts.length > 8" class="text-center mt-6">
             <button class="btn-secondary border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium">
@@ -666,160 +658,26 @@
                       <div class="flex text-yellow-400 mr-1">
                         <svg v-for="i in 5" :key="i" class="w-3 h-3" :class="i <= Math.floor(part.rating) ? 'text-yellow-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                        </svg>
-                      </div>
+            </svg>
+          </div>
                       <span class="text-sm text-gray-600 dark:text-gray-400">{{ part.rating.toFixed(1) }}</span>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button 
+          <button 
                       @click="buyFromPartner(part.partner_id, part.part_id)"
                       :disabled="part.stock === 0"
                       class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
-                    >
+          >
                       Buy Now
-                    </button>
+          </button>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-              </div>
-
-
-      <!-- Products Grid - Alibaba Style -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        <div 
-          v-for="part in parts" 
-          :key="part.id"
-          class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-secondary-700 overflow-hidden"
-          @click="viewPart(part)"
-        >
-          <!-- Product Image -->
-          <div class="relative aspect-square overflow-hidden bg-gray-100 dark:bg-secondary-700">
-            <img 
-              :src="part.image_url || getBrandImage(part.brand)" 
-              :alt="part.name"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-              loading="lazy"
-            />
-            
-            <!-- Stock Badge -->
-            <div class="absolute top-2 right-2">
-              <span class="px-2 py-1 text-xs font-medium rounded-full shadow-sm"
-                    :class="part.stock_quantity > 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
-                {{ part.stock_quantity > 0 ? 'In Stock' : 'Out' }}
-              </span>
-            </div>
-            
-            <!-- Brand Logo -->
-            <div class="absolute bottom-2 left-2 bg-white/90 dark:bg-secondary-800/90 rounded p-1 shadow-sm">
-              <img 
-                :src="getBrandLogo(part.brand)" 
-                :alt="part.brand"
-                class="w-4 h-4 object-contain"
-                @error="handleImageError"
-              />
-            </div>
-          </div>
-          
-          <!-- Product Info -->
-          <div class="p-3 space-y-2">
-            <!-- Category -->
-            <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-              {{ part.category }}
-            </div>
-            
-            <!-- Product Name -->
-            <h3 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-              {{ part.name }}
-            </h3>
-            
-            <!-- Price -->
-            <div class="flex items-center justify-between">
-              <div class="text-lg font-bold text-primary-600 dark:text-primary-400">
-                {{ part.formatted_price }}
-              </div>
-              <div class="flex items-center gap-1">
-                <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                <span class="text-xs text-gray-600 dark:text-gray-400">
-                  {{ parseFloat(part.rating).toFixed(1) }}
-                </span>
-                </div>
-              </div>
-            
-            <!-- Action Button -->
-            <button 
-              @click.stop="viewPart(part)"
-              class="w-full bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200"
-            >
-              View Details
-            </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pagination -->
-        <div v-if="totalPages > 1" class="mt-8 flex justify-center">
-          <nav class="flex items-center space-x-2">
-            <button 
-              @click="changePage(currentPage - 1)"
-              :disabled="currentPage === 1"
-              class="px-3 py-2 text-sm font-medium text-secondary-500 bg-white border border-secondary-300 rounded-md hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Previous
-            </button>
-            
-            <span 
-              v-for="page in visiblePages" 
-              :key="page"
-              @click="changePage(page)"
-              class="px-3 py-2 text-sm font-medium rounded-md cursor-pointer"
-              :class="page === currentPage 
-                ? 'text-white bg-primary-600 border border-primary-600' 
-                : 'text-secondary-500 bg-white border border-secondary-300 hover:bg-secondary-50'"
-            >
-              {{ page }}
-            </span>
-            
-            <button 
-              @click="changePage(currentPage + 1)"
-              :disabled="currentPage === totalPages"
-              class="px-3 py-2 text-sm font-medium text-secondary-500 bg-white border border-secondary-300 rounded-md hover:bg-secondary-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next
-            </button>
-          </nav>
-        </div>
       </div>
-
-      <!-- Empty State -->
-      <div v-if="parts.length === 0" class="card glass text-center py-20">
-        <div class="max-w-md mx-auto">
-          <div class="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-full flex items-center justify-center">
-            <svg class="w-12 h-12 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-            </svg>
-          </div>
-          <h3 class="text-2xl font-bold text-secondary-900 dark:text-white mb-4">
-            No Parts Found
-          </h3>
-          <p class="text-secondary-600 dark:text-secondary-400 mb-8">
-            Try adjusting your search criteria or filters to find the parts you need.
-          </p>
-          <button 
-            @click="clearFilters"
-            class="btn-primary"
-          >
-            Clear Filters
-          </button>
-        </div>
-      </div>
-
-    </div>
 
     <!-- Part Detail Modal -->
     <div v-if="selectedPart" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
@@ -994,6 +852,8 @@
       </div>
     </div>
   </div>
+  </div>
+  </div>
 </template>
 
 <script setup>
@@ -1001,7 +861,6 @@ import { ref, onMounted, computed, watch } from 'vue'
 import publicAPI from '../services/publicAPI'
 
 // Reactive data
-const parts = ref([])
 const partnerParts = ref([])
 const searchQuery = ref('')
 const selectedCategory = ref('')
@@ -1021,30 +880,17 @@ const showPriceComparison = ref(false)
 const showMockProducts = ref(true)
 const recentDiagnoses = ref([])
 const showRecentDiagnoses = ref(false)
-const currentPage = ref(1)
-const totalPages = ref(1)
-const totalParts = ref(0)
 const selectedPart = ref(null)
 const showPartnerResults = ref(false)
 const partnerStats = ref({})
 const priceComparison = ref([])
+const totalParts = ref(0)
 
 // Filters
 const categories = ref([])
 const manufacturers = ref([])
 
 // Computed
-const visiblePages = computed(() => {
-  const pages = []
-  const start = Math.max(1, currentPage.value - 2)
-  const end = Math.min(totalPages.value, currentPage.value + 2)
-  
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-  
-  return pages
-})
 
 // Methods
 // Ranking system methods
@@ -1380,63 +1226,11 @@ const searchForDiagnosisParts = (diagnosis) => {
   filterParts()
 }
 
-const loadParts = async () => {
-  try {
-    const params = new URLSearchParams({
-      page: currentPage.value,
-      per_page: 12,
-      sort_by: sortBy.value,
-      sort_order: 'asc'
-    })
-
-    if (selectedCategory.value) {
-      params.append('category', selectedCategory.value)
-    }
-
-    if (selectedManufacturer.value) {
-      params.append('manufacturer', selectedManufacturer.value)
-    }
-
-    if (searchQuery.value) {
-      params.append('search', searchQuery.value)
-    }
-
-    const response = await fetch(`/api/car-parts?${params}`)
-    const data = await response.json()
-
-    if (data.success) {
-      parts.value = data.data
-      totalPages.value = data.pagination.last_page
-      totalParts.value = data.pagination.total
-      
-      if (data.filters) {
-        categories.value = data.filters.categories || []
-        manufacturers.value = data.filters.manufacturers || []
-      }
-    }
-  } catch (error) {
-    console.error('Error loading parts:', error)
-  }
-}
 
 
-const debouncedSearch = debounce(() => {
-  currentPage.value = 1
-  loadParts()
-}, 500)
-
-const filterParts = () => {
-  currentPage.value = 1
-  loadParts()
-}
 
 
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-    loadParts()
-  }
-}
+
 
 const viewPart = (part) => {
   selectedPart.value = part
@@ -1680,13 +1474,6 @@ const buyFromPartner = async (partnerId, partId) => {
   }
 }
 
-const clearFilters = () => {
-  searchQuery.value = ''
-  selectedCategory.value = ''
-  selectedManufacturer.value = ''
-  currentPage.value = 1
-  loadParts()
-}
 
 const getQualityColor = (quality) => {
   const colors = {
@@ -1723,16 +1510,11 @@ function debounce(func, wait) {
 
 // Lifecycle
 onMounted(async () => {
-  await loadParts()
   await getAPIStatus()
   await loadMockPublicAPIParts()
   await loadRecentDiagnoses()
 })
 
-// Watch for page changes
-watch(currentPage, () => {
-  loadParts()
-})
 </script>
 
 <style scoped>
