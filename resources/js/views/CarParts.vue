@@ -215,6 +215,15 @@
             >
               Clear Filters
             </button>
+            <button 
+              @click="showMockProducts = !showMockProducts"
+              class="px-4 py-2 border border-purple-600 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+              {{ showMockProducts ? 'Hide' : 'Show' }} Demo Products
+            </button>
           </div>
         </div>
       </div>
@@ -375,7 +384,7 @@
       </div>
 
       <!-- Public API Results Section -->
-      <div v-if="publicAPIParts.length > 0" class="mb-12">
+      <div v-if="publicAPIParts.length > 0 && showMockProducts" class="mb-12">
         <div class="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-gray-200 dark:border-secondary-700 overflow-hidden">
           <!-- Section Header -->
           <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 px-6 py-4 border-b border-gray-200 dark:border-secondary-700">
@@ -387,7 +396,12 @@
                   </svg>
                 </div>
                 <div>
-                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Public API Results</h2>
+                  <div class="flex items-center gap-2 mb-1">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Public API Results</h2>
+                    <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
+                      DEMO
+                    </span>
+                  </div>
                   <p class="text-sm text-gray-600 dark:text-gray-400">{{ publicAPIParts.length }} parts found from eBay & Amazon</p>
                 </div>
               </div>
@@ -431,6 +445,13 @@
                         {{ part.condition || 'New' }}
                       </span>
                     </div>
+                    
+                    <!-- AI Recommended Badge -->
+                    <div v-if="part.ai_recommended" class="absolute bottom-2 right-2">
+                      <span class="px-2 py-1 text-xs font-medium rounded-full shadow-sm bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                        AI Recommended
+                      </span>
+                    </div>
                   </div>
                 </div>
                 
@@ -466,8 +487,16 @@
                     <div class="text-lg font-bold text-primary-600 dark:text-primary-400">
                       {{ part.formatted_price }}
                     </div>
-                    <div v-if="part.shipping_cost" class="text-xs text-gray-500 dark:text-gray-400">
-                      +{{ part.shipping_cost }} shipping
+                    <div class="text-right">
+                      <div v-if="part.prime_eligible" class="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                        Prime ✓
+                      </div>
+                      <div v-else-if="part.shipping_cost" class="text-xs text-gray-500 dark:text-gray-400">
+                        +${{ part.shipping_cost }} shipping
+                      </div>
+                      <div v-else class="text-xs text-green-600 dark:text-green-400">
+                        Free shipping
+                      </div>
                     </div>
                   </div>
                   
@@ -1228,6 +1257,7 @@ const showVINLookup = ref(false)
 const apiStatus = ref({})
 const publicAPIPriceComparison = ref(null)
 const showPriceComparison = ref(false)
+const showMockProducts = ref(true)
 const currentPage = ref(1)
 const totalPages = ref(1)
 const totalParts = ref(0)
@@ -1395,6 +1425,211 @@ const getAPIStatus = async () => {
 const handleAffiliateClick = async (part) => {
   await publicAPI.trackAffiliateClick(part.id, part.source, part)
   window.open(part.affiliate_url, '_blank')
+}
+
+// Load mock public API parts for demonstration
+const loadMockPublicAPIParts = async () => {
+  const mockParts = [
+    // eBay Parts
+    {
+      id: 'ebay-123456789',
+      name: 'Bosch Premium Air Filter for BMW 3 Series 2012-2018',
+      description: 'High-quality air filter for improved engine performance and fuel efficiency',
+      price: 24.99,
+      formatted_price: '$24.99',
+      currency: 'USD',
+      image_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop',
+      condition: 'New',
+      brand: 'Bosch',
+      part_number: 'F026400123',
+      rating: 4.5,
+      review_count: 127,
+      stock_quantity: 15,
+      source: 'ebay',
+      affiliate_url: 'https://ebay.com/itm/bosch-air-filter-bmw',
+      category: 'engine',
+      ai_recommended: true,
+      shipping_cost: 5.99,
+      estimated_delivery: '2-3 days',
+      seller: 'AutoPartsPro',
+      prime_eligible: false,
+      availability: 'In Stock'
+    },
+    {
+      id: 'ebay-987654321',
+      name: 'Brembo Brake Pads Front Set for Audi A4 2016-2020',
+      description: 'Premium ceramic brake pads for superior stopping power and reduced noise',
+      price: 89.99,
+      formatted_price: '$89.99',
+      currency: 'USD',
+      image_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
+      condition: 'New',
+      brand: 'Brembo',
+      part_number: 'P85070',
+      rating: 4.8,
+      review_count: 89,
+      stock_quantity: 8,
+      source: 'ebay',
+      affiliate_url: 'https://ebay.com/itm/brembo-brake-pads-audi',
+      category: 'brakes',
+      ai_recommended: true,
+      shipping_cost: 0,
+      estimated_delivery: '1-2 days',
+      seller: 'BrakeSpecialist',
+      prime_eligible: false,
+      availability: 'In Stock'
+    },
+    {
+      id: 'ebay-456789123',
+      name: 'NGK Laser Iridium Spark Plugs Set of 4 for Honda Civic 2016-2021',
+      description: 'Advanced iridium spark plugs for better fuel economy and smoother engine performance',
+      price: 45.50,
+      formatted_price: '$45.50',
+      currency: 'USD',
+      image_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
+      condition: 'New',
+      brand: 'NGK',
+      part_number: 'ILZKR7B-11S',
+      rating: 4.6,
+      review_count: 203,
+      stock_quantity: 25,
+      source: 'ebay',
+      affiliate_url: 'https://ebay.com/itm/ngk-spark-plugs-honda',
+      category: 'engine',
+      ai_recommended: false,
+      shipping_cost: 3.99,
+      estimated_delivery: '3-5 days',
+      seller: 'SparkPlugKing',
+      prime_eligible: false,
+      availability: 'In Stock'
+    },
+    // Amazon Parts
+    {
+      id: 'amazon-B08XYZ123',
+      name: 'ACDelco Professional Oil Filter for Chevrolet Silverado 2014-2018',
+      description: 'Professional grade oil filter with superior filtration and extended service life',
+      price: 12.99,
+      formatted_price: '$12.99',
+      currency: 'USD',
+      image_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
+      condition: 'New',
+      brand: 'ACDelco',
+      part_number: 'PF63',
+      rating: 4.4,
+      review_count: 156,
+      stock_quantity: 50,
+      source: 'amazon',
+      affiliate_url: 'https://amazon.com/dp/B08XYZ123',
+      category: 'engine',
+      ai_recommended: true,
+      shipping_cost: 0,
+      estimated_delivery: '1 day',
+      seller: 'Amazon',
+      prime_eligible: true,
+      availability: 'In Stock'
+    },
+    {
+      id: 'amazon-B09ABC456',
+      name: 'Michelin Defender T+H All-Season Tire 225/60R16 98H',
+      description: 'All-season tire with excellent traction and long-lasting tread life',
+      price: 145.99,
+      formatted_price: '$145.99',
+      currency: 'USD',
+      image_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
+      condition: 'New',
+      brand: 'Michelin',
+      part_number: '225/60R16',
+      rating: 4.7,
+      review_count: 342,
+      stock_quantity: 12,
+      source: 'amazon',
+      affiliate_url: 'https://amazon.com/dp/B09ABC456',
+      category: 'tires',
+      ai_recommended: true,
+      shipping_cost: 0,
+      estimated_delivery: '2 days',
+      seller: 'Amazon',
+      prime_eligible: true,
+      availability: 'In Stock'
+    },
+    {
+      id: 'amazon-B10DEF789',
+      name: 'Denso Alternator for Toyota Camry 2012-2017',
+      description: 'High-output alternator for reliable electrical system performance',
+      price: 189.99,
+      formatted_price: '$189.99',
+      currency: 'USD',
+      image_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
+      condition: 'New',
+      brand: 'Denso',
+      part_number: '210-0100',
+      rating: 4.5,
+      review_count: 78,
+      stock_quantity: 6,
+      source: 'amazon',
+      affiliate_url: 'https://amazon.com/dp/B10DEF789',
+      category: 'electrical',
+      ai_recommended: false,
+      shipping_cost: 0,
+      estimated_delivery: '1-2 days',
+      seller: 'Amazon',
+      prime_eligible: true,
+      availability: 'In Stock'
+    },
+    {
+      id: 'ebay-789123456',
+      name: 'Monroe Sensa-Trac Strut Assembly for Ford Focus 2012-2018',
+      description: 'Complete strut assembly with coil spring for improved ride comfort',
+      price: 125.99,
+      formatted_price: '$125.99',
+      currency: 'USD',
+      image_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
+      condition: 'New',
+      brand: 'Monroe',
+      part_number: '171825',
+      rating: 4.3,
+      review_count: 94,
+      stock_quantity: 4,
+      source: 'ebay',
+      affiliate_url: 'https://ebay.com/itm/monroe-strut-ford',
+      category: 'suspension',
+      ai_recommended: true,
+      shipping_cost: 8.99,
+      estimated_delivery: '4-6 days',
+      seller: 'SuspensionPro',
+      prime_eligible: false,
+      availability: 'In Stock'
+    },
+    {
+      id: 'amazon-B11GHI012',
+      name: 'Gates Timing Belt Kit for Honda Accord 2013-2017',
+      description: 'Complete timing belt kit with water pump and tensioner for peace of mind',
+      price: 89.99,
+      formatted_price: '$89.99',
+      currency: 'USD',
+      image_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
+      condition: 'New',
+      brand: 'Gates',
+      part_number: 'TCKWP328',
+      rating: 4.6,
+      review_count: 127,
+      stock_quantity: 18,
+      source: 'amazon',
+      affiliate_url: 'https://amazon.com/dp/B11GHI012',
+      category: 'engine',
+      ai_recommended: true,
+      shipping_cost: 0,
+      estimated_delivery: '1 day',
+      seller: 'Amazon',
+      prime_eligible: true,
+      availability: 'In Stock'
+    }
+  ]
+
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500))
+  
+  publicAPIParts.value = mockParts
 }
 
 const loadParts = async () => {
@@ -1770,6 +2005,7 @@ onMounted(async () => {
   await loadFeaturedParts()
   await loadParts()
   await getAPIStatus()
+  await loadMockPublicAPIParts()
 })
 
 // Watch for page changes
