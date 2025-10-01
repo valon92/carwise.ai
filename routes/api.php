@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\CarPartController;
 use App\Http\Controllers\Api\AuthorizedCompanyController;
 use App\Http\Controllers\Api\AffiliateController;
 use App\Http\Controllers\Api\PartnerController;
+use App\Http\Controllers\Api\PublicAPIController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -68,6 +69,28 @@ Route::get('/partners/{partnerId}/parts/{partId}/pricing', [PartnerController::c
 Route::get('/partners/{partnerId}/parts/{partId}/affiliate-link', [PartnerController::class, 'generateAffiliateLink']);
 Route::post('/partners/sync', [PartnerController::class, 'syncParts']);
 Route::post('/partners/{partnerId}/sync', [PartnerController::class, 'syncPartnerParts']);
+
+// Public API routes (NHTSA, eBay, Amazon)
+Route::prefix('public')->group(function () {
+    // NHTSA Vehicle API
+    Route::get('/vehicle/vin/{vin}', [PublicAPIController::class, 'getVehicleByVIN']);
+    Route::get('/vehicle/make/{make}/model/{model}/year/{year}', [PublicAPIController::class, 'getVehicleByMakeModelYear']);
+    Route::get('/vehicle/makes', [PublicAPIController::class, 'getAllMakes']);
+    
+    // eBay Motors API
+    Route::post('/ebay/search', [PublicAPIController::class, 'searchEbayParts']);
+    Route::get('/ebay/item/{itemId}', [PublicAPIController::class, 'getEbayItemDetails']);
+    
+    // Amazon Product Advertising API
+    Route::post('/amazon/search', [PublicAPIController::class, 'searchAmazonParts']);
+    
+    // Multi-API search
+    Route::post('/search', [PublicAPIController::class, 'searchAllAPIs']);
+    
+    // API status and configuration
+    Route::get('/status', [PublicAPIController::class, 'getAPIStatus']);
+    Route::get('/categories', [PublicAPIController::class, 'getSupportedCategories']);
+});
 
 // Cart routes (public for now, will be protected later)
 Route::post('/cart/add', function(Request $request) {

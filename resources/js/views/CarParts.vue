@@ -146,8 +146,60 @@
             </div>
           </div>
           
+          <!-- VIN Lookup -->
+          <div class="mt-4 p-4 bg-gray-50 dark:bg-secondary-700 rounded-lg">
+            <div class="flex items-center gap-3 mb-3">
+              <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Vehicle Lookup</h3>
+            </div>
+            <div class="flex gap-3">
+              <input 
+                v-model="vinInput"
+                type="text" 
+                placeholder="Enter 17-character VIN (e.g., 1HGBH41JXMN109186)"
+                class="flex-1 h-10 px-3 border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                maxlength="17"
+              />
+              <button 
+                @click="lookupVehicleByVIN"
+                class="h-10 px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                Lookup
+              </button>
+            </div>
+            <div v-if="vehicleData" class="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div class="text-sm text-green-800 dark:text-green-200">
+                <strong>Vehicle Found:</strong> {{ vehicleData.displayName }}
+                <span v-if="vehicleData.engine" class="ml-2 text-green-600 dark:text-green-300">({{ vehicleData.engine }})</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Advanced Actions -->
           <div class="mt-4 flex flex-wrap gap-3">
+            <button 
+              @click="searchPublicAPIs"
+              class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              Search Public APIs
+            </button>
+            <button 
+              @click="comparePricesAcrossAPIs"
+              class="px-4 py-2 border border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+              Compare Prices
+            </button>
             <button 
               @click="searchPartnerParts(searchQuery)"
               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
@@ -155,16 +207,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
-              Search Global Partners
-            </button>
-            <button 
-              @click="comparePrices(searchQuery, selectedManufacturer)"
-              class="px-4 py-2 border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-              Compare Prices
+              Search Partners
             </button>
             <button 
               @click="clearFilters"
@@ -326,6 +369,120 @@
               >
                 View All Top Ranking Parts
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Public API Results Section -->
+      <div v-if="publicAPIParts.length > 0" class="mb-12">
+        <div class="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-gray-200 dark:border-secondary-700 overflow-hidden">
+          <!-- Section Header -->
+          <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 px-6 py-4 border-b border-gray-200 dark:border-secondary-700">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Public API Results</h2>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ publicAPIParts.length }} parts found from eBay & Amazon</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-500 dark:text-gray-400">Live data</span>
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Results Grid -->
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div 
+                v-for="part in publicAPIParts" 
+                :key="`${part.source}-${part.id}`"
+                class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-secondary-700 overflow-hidden"
+                @click="handleAffiliateClick(part)"
+              >
+                <!-- Source Badge -->
+                <div class="relative">
+                  <div class="absolute top-2 left-2 z-10">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full shadow-sm"
+                          :class="part.source === 'ebay' ? 'bg-blue-500 text-white' : 'bg-orange-500 text-white'">
+                      {{ part.source.toUpperCase() }}
+                    </span>
+                  </div>
+                  
+                  <!-- Product Image -->
+                  <div class="relative aspect-square overflow-hidden bg-gray-100 dark:bg-secondary-700">
+                    <img 
+                      :src="part.image_url || '/images/parts/placeholder.jpg'" 
+                      :alt="part.name"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      loading="lazy"
+                    />
+                    
+                    <!-- Condition Badge -->
+                    <div class="absolute top-2 right-2">
+                      <span class="px-2 py-1 text-xs font-medium rounded-full shadow-sm bg-white/90 dark:bg-secondary-800/90 text-gray-700 dark:text-gray-300">
+                        {{ part.condition || 'New' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Product Info -->
+                <div class="p-4 space-y-3">
+                  <!-- Brand -->
+                  <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    {{ part.brand || 'Unknown Brand' }}
+                  </div>
+                  
+                  <!-- Product Name -->
+                  <h3 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    {{ part.name }}
+                  </h3>
+                  
+                  <!-- Rating and Reviews -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1">
+                      <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                      </svg>
+                      <span class="text-xs text-gray-600 dark:text-gray-400">
+                        {{ part.rating.toFixed(1) }}
+                      </span>
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ part.review_count }} reviews
+                    </div>
+                  </div>
+                  
+                  <!-- Price -->
+                  <div class="flex items-center justify-between">
+                    <div class="text-lg font-bold text-primary-600 dark:text-primary-400">
+                      {{ part.formatted_price }}
+                    </div>
+                    <div v-if="part.shipping_cost" class="text-xs text-gray-500 dark:text-gray-400">
+                      +{{ part.shipping_cost }} shipping
+                    </div>
+                  </div>
+                  
+                  <!-- Action Button -->
+                  <button 
+                    @click.stop="handleAffiliateClick(part)"
+                    class="w-full bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    View on {{ part.source === 'ebay' ? 'eBay' : 'Amazon' }}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1042,6 +1199,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
+import publicAPI from '../services/publicAPI'
 
 // Reactive data
 const parts = ref([])
@@ -1061,6 +1219,15 @@ const rankingTabs = ref([
   { key: 'new_arrivals', label: 'New Arrivals' },
   { key: 'price_low', label: 'Best Value' }
 ])
+
+// Public API integration
+const publicAPIParts = ref([])
+const vehicleData = ref(null)
+const vinInput = ref('')
+const showVINLookup = ref(false)
+const apiStatus = ref({})
+const publicAPIPriceComparison = ref(null)
+const showPriceComparison = ref(false)
 const currentPage = ref(1)
 const totalPages = ref(1)
 const totalParts = ref(0)
@@ -1146,6 +1313,88 @@ const getSalesCount = (index) => {
 const getGrowthRate = (index) => {
   const growthRates = [25, 18, 15, 12, 10, 8, 6, 5]
   return growthRates[index] || Math.floor(Math.random() * 10) + 1
+}
+
+// Public API methods
+const lookupVehicleByVIN = async () => {
+  if (!publicAPI.validateVIN(vinInput.value)) {
+    alert('Please enter a valid 17-character VIN')
+    return
+  }
+
+  try {
+    const result = await publicAPI.getVehicleByVIN(vinInput.value)
+    
+    if (result.success) {
+      vehicleData.value = publicAPI.formatVehicleData(result.data)
+      searchQuery.value = vehicleData.value.searchQuery
+      await searchPublicAPIs()
+    } else {
+      alert('Vehicle not found. Please check your VIN.')
+    }
+  } catch (error) {
+    console.error('VIN lookup error:', error)
+    alert('Error looking up vehicle. Please try again.')
+  }
+}
+
+const searchPublicAPIs = async () => {
+  if (!searchQuery.value.trim()) return
+
+  try {
+    const result = await publicAPI.searchAllAPIs(searchQuery.value, vehicleData.value)
+    
+    if (result.success) {
+      const allParts = []
+      
+      // Combine eBay and Amazon results
+      if (result.data.ebay && result.data.ebay.success) {
+        const ebayParts = publicAPI.formatPartsData(result.data.ebay.data, 'ebay')
+        allParts.push(...ebayParts)
+      }
+      
+      if (result.data.amazon && result.data.amazon.success) {
+        const amazonParts = publicAPI.formatPartsData(result.data.amazon.data, 'amazon')
+        allParts.push(...amazonParts)
+      }
+      
+      publicAPIParts.value = allParts
+      showPartnerResults.value = true
+    }
+  } catch (error) {
+    console.error('Public API search error:', error)
+  }
+}
+
+const comparePricesAcrossAPIs = async () => {
+  if (!searchQuery.value.trim()) return
+
+  try {
+    const result = await publicAPI.comparePricesAcrossAPIs(searchQuery.value, vehicleData.value)
+    
+    if (result) {
+      publicAPIPriceComparison.value = result
+      showPriceComparison.value = true
+    }
+  } catch (error) {
+    console.error('Price comparison error:', error)
+  }
+}
+
+const getAPIStatus = async () => {
+  try {
+    const result = await publicAPI.getAPIStatus()
+    if (result.success) {
+      apiStatus.value = result.data
+    }
+  } catch (error) {
+    console.error('API status error:', error)
+  }
+}
+
+const handleAffiliateClick = async (part) => {
+  await publicAPI.trackAffiliateClick(part.id, part.source, part)
+  window.open(part.affiliate_url, '_blank')
 }
 
 const loadParts = async () => {
@@ -1517,9 +1766,10 @@ function debounce(func, wait) {
 }
 
 // Lifecycle
-onMounted(() => {
-  loadFeaturedParts()
-  loadParts()
+onMounted(async () => {
+  await loadFeaturedParts()
+  await loadParts()
+  await getAPIStatus()
 })
 
 // Watch for page changes

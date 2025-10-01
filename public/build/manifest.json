@@ -1,6 +1,6 @@
 {
-  "_api-CrWVQuGn.js": {
-    "file": "assets/api-CrWVQuGn.js",
+  "_api-BVJ8Bwme.js": {
+    "file": "assets/api-BVJ8Bwme.js",
     "name": "api",
     "imports": [
       "_utils-BruBI8_W.js"
@@ -22,7 +22,7 @@
     "name": "vendor"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CbFUbHXB.css",
+    "file": "assets/app-DVPTb644.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -30,7 +30,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-S89jq0GI.js",
+    "file": "assets/app-D81EDoSj.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -61,7 +61,7 @@
     ]
   },
   "resources/js/components/Footer.vue": {
-    "file": "assets/Footer-BvLb6Zcx.js",
+    "file": "assets/Footer-oKMmQ2o4.js",
     "name": "Footer",
     "src": "resources/js/components/Footer.vue",
     "isDynamicEntry": true,
@@ -74,13 +74,13 @@
     ]
   },
   "resources/js/components/Navbar.vue": {
-    "file": "assets/Navbar-DrRPOHOi.js",
+    "file": "assets/Navbar-DrKMCh7C.js",
     "name": "Navbar",
     "src": "resources/js/components/Navbar.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CkCPX7gN.js",
-      "_api-CrWVQuGn.js",
+      "_api-BVJ8Bwme.js",
       "resources/js/app.js",
       "_utils-BruBI8_W.js"
     ],
@@ -89,7 +89,7 @@
     ]
   },
   "resources/js/components/NotificationSystem.vue": {
-    "file": "assets/NotificationSystem-oJ_xzyOh.js",
+    "file": "assets/NotificationSystem-Nk4PlKyg.js",
     "name": "NotificationSystem",
     "src": "resources/js/components/NotificationSystem.vue",
     "isDynamicEntry": true,
@@ -102,32 +102,34 @@
     ]
   },
   "resources/js/views/Admin.vue": {
-    "file": "assets/Admin-CyOGoiRw.js",
+    "file": "assets/Admin-AR3JssnD.js",
     "name": "Admin",
     "src": "resources/js/views/Admin.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CkCPX7gN.js",
-      "_api-CrWVQuGn.js",
+      "_api-BVJ8Bwme.js",
       "resources/js/app.js",
       "_utils-BruBI8_W.js"
     ]
   },
   "resources/js/views/CarParts.vue": {
-    "file": "assets/CarParts-CmN7X7B8.js",
+    "file": "assets/CarParts-DfUhjU5B.js",
     "name": "CarParts",
     "src": "resources/js/views/CarParts.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CkCPX7gN.js",
-      "resources/js/app.js"
+      "_api-BVJ8Bwme.js",
+      "resources/js/app.js",
+      "_utils-BruBI8_W.js"
     ],
     "css": [
-      "assets/CarParts-G_PFv7Eb.css"
+      "assets/CarParts-CWYFEmck.css"
     ]
   },
   "resources/js/views/CookiePolicy.vue": {
-    "file": "assets/CookiePolicy-wwHuLGVf.js",
+    "file": "assets/CookiePolicy-DJa_tBHQ.js",
     "name": "CookiePolicy",
     "src": "resources/js/views/CookiePolicy.vue",
     "isDynamicEntry": true,
@@ -137,43 +139,43 @@
     ]
   },
   "resources/js/views/Dashboard.vue": {
-    "file": "assets/Dashboard-9iNXQzVp.js",
+    "file": "assets/Dashboard-k1kKcN0U.js",
     "name": "Dashboard",
     "src": "resources/js/views/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CkCPX7gN.js",
-      "_api-CrWVQuGn.js",
+      "_api-BVJ8Bwme.js",
       "resources/js/app.js",
       "_utils-BruBI8_W.js"
     ]
   },
   "resources/js/views/Diagnose.vue": {
-    "file": "assets/Diagnose-C1ZcsldN.js",
+    "file": "assets/Diagnose-BJv9-3Zw.js",
     "name": "Diagnose",
     "src": "resources/js/views/Diagnose.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CkCPX7gN.js",
-      "_api-CrWVQuGn.js",
+      "_api-BVJ8Bwme.js",
       "_utils-BruBI8_W.js",
       "resources/js/app.js"
     ]
   },
   "resources/js/views/DiagnosisHistory.vue": {
-    "file": "assets/DiagnosisHistory-DfQ31ZV0.js",
+    "file": "assets/DiagnosisHistory-DHH1Qg2r.js",
     "name": "DiagnosisHistory",
     "src": "resources/js/views/DiagnosisHistory.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CkCPX7gN.js",
-      "_api-CrWVQuGn.js",
+      "_api-BVJ8Bwme.js",
       "resources/js/app.js",
       "_utils-BruBI8_W.js"
     ]
   },
   "resources/js/views/Home.vue": {
-    "file": "assets/Home-BpyoUPou.js",
+    "file": "assets/Home-DfhFSakr.js",
     "name": "Home",
     "src": "resources/js/views/Home.vue",
     "isDynamicEntry": true,
@@ -183,13 +185,13 @@
     ]
   },
   "resources/js/views/Login.vue": {
-    "file": "assets/Login-BSl1WKVM.js",
+    "file": "assets/Login-SY0SGvRp.js",
     "name": "Login",
     "src": "resources/js/views/Login.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CkCPX7gN.js",
-      "_api-CrWVQuGn.js",
+      "_api-BVJ8Bwme.js",
       "resources/js/app.js",
       "_utils-BruBI8_W.js"
     ],
@@ -198,19 +200,19 @@
     ]
   },
   "resources/js/views/MyCars.vue": {
-    "file": "assets/MyCars-CA7XJ9t_.js",
+    "file": "assets/MyCars-B2QQwIdD.js",
     "name": "MyCars",
     "src": "resources/js/views/MyCars.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CkCPX7gN.js",
-      "_api-CrWVQuGn.js",
+      "_api-BVJ8Bwme.js",
       "resources/js/app.js",
       "_utils-BruBI8_W.js"
     ]
   },
   "resources/js/views/PrivacyPolicy.vue": {
-    "file": "assets/PrivacyPolicy-D6Zte-15.js",
+    "file": "assets/PrivacyPolicy-BrqVb8-r.js",
     "name": "PrivacyPolicy",
     "src": "resources/js/views/PrivacyPolicy.vue",
     "isDynamicEntry": true,
@@ -220,25 +222,25 @@
     ]
   },
   "resources/js/views/ProfileEdit.vue": {
-    "file": "assets/ProfileEdit-D3ADAR4p.js",
+    "file": "assets/ProfileEdit-kq6HkXYP.js",
     "name": "ProfileEdit",
     "src": "resources/js/views/ProfileEdit.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CkCPX7gN.js",
-      "_api-CrWVQuGn.js",
+      "_api-BVJ8Bwme.js",
       "resources/js/app.js",
       "_utils-BruBI8_W.js"
     ]
   },
   "resources/js/views/Register.vue": {
-    "file": "assets/Register-D4XFM4Rv.js",
+    "file": "assets/Register-C2irO0v9.js",
     "name": "Register",
     "src": "resources/js/views/Register.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CkCPX7gN.js",
-      "_api-CrWVQuGn.js",
+      "_api-BVJ8Bwme.js",
       "resources/js/app.js",
       "_utils-BruBI8_W.js"
     ],
@@ -247,7 +249,7 @@
     ]
   },
   "resources/js/views/TermsOfService.vue": {
-    "file": "assets/TermsOfService-CU3nmgYk.js",
+    "file": "assets/TermsOfService-BzUttxS5.js",
     "name": "TermsOfService",
     "src": "resources/js/views/TermsOfService.vue",
     "isDynamicEntry": true,
