@@ -473,110 +473,6 @@
       </div>
 
 
-      <!-- Featured Parts -->
-      <div v-if="featuredParts.length > 0 && !searchQuery" class="mb-12">
-        <div class="text-center mb-8">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4 shadow-lg">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-            </svg>
-        </div>
-          <h2 class="text-3xl font-bold text-secondary-900 dark:text-white mb-4">AI Recommended Parts</h2>
-          <p class="text-lg text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto">
-            Smart recommendations based on your vehicle and common issues. Get personalized suggestions with AI diagnosis.
-          </p>
-        </div>
-        
-        <!-- Compact Grid Layout -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-          <div 
-            v-for="part in featuredParts.slice(0, 12)" 
-            :key="part.id"
-            class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border border-gray-100 dark:border-secondary-700"
-            @click="viewPart(part)"
-          >
-            <!-- Compact Image Container -->
-            <div class="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-secondary-700 dark:to-secondary-800">
-              <img 
-                :src="part.image_url || getBrandImage(part.brand)" 
-                :alt="part.name"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                loading="lazy"
-              />
-              
-              <!-- Featured Badge -->
-              <div class="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-md">
-                ⭐
-            </div>
-              
-              <!-- Stock Indicator -->
-              <div class="absolute bottom-2 right-2">
-                <div class="w-3 h-3 rounded-full shadow-md"
-                     :class="part.stock_quantity > 0 ? 'bg-green-500' : 'bg-red-500'">
-                </div>
-              </div>
-              
-              <!-- Brand Logo Overlay -->
-              <div class="absolute bottom-2 left-2 bg-white/90 dark:bg-secondary-800/90 backdrop-blur-sm rounded-lg p-1 shadow-sm">
-                <img 
-                  :src="getBrandLogo(part.brand)" 
-                  :alt="part.brand"
-                  class="w-4 h-4 object-contain"
-                  @error="handleImageError"
-                />
-              </div>
-            </div>
-            
-            <!-- Compact Content -->
-            <div class="p-3 space-y-2">
-              <!-- Category Badge -->
-              <div class="flex justify-center">
-                <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full">
-                  {{ part.category.charAt(0).toUpperCase() + part.category.slice(1) }}
-                </span>
-              </div>
-              
-              <!-- Title -->
-              <h3 class="text-sm font-bold text-secondary-900 dark:text-white text-center line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                {{ part.name }}
-              </h3>
-              
-              <!-- Price and Rating -->
-              <div class="flex items-center justify-between">
-                <div class="text-lg font-bold text-primary-600 dark:text-primary-400">
-                  {{ part.formatted_price }}
-                </div>
-                <div class="flex items-center gap-1">
-                  <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <span class="text-xs font-medium text-secondary-600 dark:text-secondary-400">
-                    {{ parseFloat(part.rating).toFixed(1) }}
-                </span>
-              </div>
-            </div>
-              
-              <!-- Quick Action Button -->
-              <button 
-                @click.stop="viewPart(part)"
-                class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 hover:shadow-lg text-sm"
-              >
-                View Details
-              </button>
-          </div>
-        </div>
-      </div>
-
-        <!-- View All Button -->
-        <div class="text-center mt-8">
-          <router-link to="/diagnose" class="btn-primary bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg inline-flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-            </svg>
-            Get AI Diagnosis
-          </router-link>
-        </div>
-          </div>
           
       <!-- Partner Results -->
       <div v-if="showPartnerResults && Object.keys(partnerParts).length > 0" class="mb-12">
@@ -1106,7 +1002,6 @@ import publicAPI from '../services/publicAPI'
 
 // Reactive data
 const parts = ref([])
-const featuredParts = ref([])
 const partnerParts = ref([])
 const searchQuery = ref('')
 const selectedCategory = ref('')
@@ -1524,18 +1419,6 @@ const loadParts = async () => {
   }
 }
 
-const loadFeaturedParts = async () => {
-  try {
-    const response = await fetch('/api/car-parts/featured')
-    const data = await response.json()
-
-    if (data.success) {
-      featuredParts.value = data.data
-    }
-  } catch (error) {
-    console.error('Error loading featured parts:', error)
-  }
-}
 
 const debouncedSearch = debounce(() => {
   currentPage.value = 1
@@ -1840,7 +1723,6 @@ function debounce(func, wait) {
 
 // Lifecycle
 onMounted(async () => {
-  await loadFeaturedParts()
   await loadParts()
   await getAPIStatus()
   await loadMockPublicAPIParts()
