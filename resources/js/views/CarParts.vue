@@ -31,7 +31,7 @@
               Start AI Diagnosis
             </router-link>
             <button @click="scrollToSearch" class="btn-secondary border-white text-white hover:bg-white hover:text-primary-600 px-8 py-3 text-lg font-semibold">
-              Find Parts
+              Browse Parts
             </button>
           </div>
         </div>
@@ -472,47 +472,6 @@
         </div>
       </div>
 
-      <!-- Categories Section -->
-      <div id="categories-section" class="mb-12">
-        <div class="text-center mb-8">
-          <h2 class="text-3xl font-bold text-secondary-900 dark:text-white mb-4">Browse by Category</h2>
-          <p class="text-lg text-secondary-600 dark:text-secondary-400">Find the right parts for your vehicle</p>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div 
-            v-for="category in categories" 
-            :key="category"
-            @click="selectCategory(category)"
-            class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-            :class="selectedCategory === category ? 'ring-2 ring-primary-500 bg-primary-50 dark:bg-primary-900/20' : ''"
-          >
-            <div class="w-12 h-12 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
-              <svg v-if="category === 'engine'" class="w-full h-full text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-              <svg v-else-if="category === 'brakes'" class="w-full h-full text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-              </svg>
-              <svg v-else-if="category === 'electrical'" class="w-full h-full text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-              </svg>
-              <svg v-else-if="category === 'suspension'" class="w-full h-full text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-              </svg>
-              <svg v-else-if="category === 'transmission'" class="w-full h-full text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              <svg v-else class="w-full h-full text-secondary-600 dark:text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-              </svg>
-            </div>
-            <h3 class="font-semibold text-secondary-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-              {{ category.charAt(0).toUpperCase() + category.slice(1) }}
-            </h3>
-          </div>
-        </div>
-      </div>
 
       <!-- Featured Parts -->
       <div v-if="featuredParts.length > 0 && !searchQuery" class="mb-12">
@@ -1644,11 +1603,6 @@ const viewPart = (part) => {
   selectedPart.value = part
 }
 
-const selectCategory = (category) => {
-  selectedCategory.value = category
-  filterParts()
-  scrollToSearch()
-}
 
 const scrollToSearch = () => {
   const element = document.getElementById('search-section')
@@ -1657,12 +1611,6 @@ const scrollToSearch = () => {
   }
 }
 
-const scrollToCategories = () => {
-  const element = document.getElementById('categories-section')
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' })
-  }
-}
 
 // Brand integration methods
 const getBrandImage = (brand) => {
