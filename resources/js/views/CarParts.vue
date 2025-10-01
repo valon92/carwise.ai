@@ -791,46 +791,6 @@
         </div>
               </div>
 
-      <!-- Results Header - Alibaba Style -->
-      <div v-if="parts.length > 0" class="mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div class="flex items-center gap-4">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-              Car Parts
-            </h2>
-            <span class="text-sm text-gray-500 dark:text-gray-400">
-              {{ totalParts }} products found
-                </span>
-          </div>
-
-          <!-- View Options -->
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-gray-600 dark:text-gray-400">View:</span>
-              <button class="p-2 border border-gray-300 dark:border-secondary-600 rounded-lg hover:bg-gray-50 dark:hover:bg-secondary-700">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                </svg>
-              </button>
-              <button class="p-2 border border-gray-300 dark:border-secondary-600 rounded-lg hover:bg-gray-50 dark:hover:bg-secondary-700">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                </svg>
-              </button>
-            </div>
-            
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-gray-600 dark:text-gray-400">Sort by:</span>
-              <select v-model="sortBy" @change="sortParts" class="h-8 px-3 text-sm border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
-                <option value="name">Name</option>
-                <option value="price">Price: Low to High</option>
-                <option value="rating">Rating</option>
-                <option value="created_at">Newest</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Products Grid - Alibaba Style -->
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -1587,10 +1547,6 @@ const filterParts = () => {
   loadParts()
 }
 
-const sortParts = () => {
-  currentPage.value = 1
-  loadParts()
-}
 
 const changePage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
