@@ -18,17 +18,20 @@
             </svg>
           </div>
           <h1 class="text-5xl md:text-6xl font-bold mb-6">
-            Premium Car Parts
+            AI-Powered Parts Discovery
           </h1>
           <p class="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8">
-            Discover high-quality, certified car parts from authorized manufacturers. Get the right parts for your vehicle with AI-powered recommendations.
+            Get personalized car parts recommendations based on your AI diagnosis. Find the exact parts you need to fix your vehicle issues.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <button @click="scrollToSearch" class="btn-primary bg-white text-primary-600 hover:bg-white/90 px-8 py-3 text-lg font-semibold">
-              Browse Parts
-            </button>
-            <button @click="scrollToCategories" class="btn-secondary border-white text-white hover:bg-white hover:text-primary-600 px-8 py-3 text-lg font-semibold">
-              View Categories
+            <router-link to="/diagnose" class="btn-primary bg-white text-primary-600 hover:bg-white/90 px-8 py-3 text-lg font-semibold inline-flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+              Start AI Diagnosis
+            </router-link>
+            <button @click="scrollToSearch" class="btn-secondary border-white text-white hover:bg-white hover:text-primary-600 px-8 py-3 text-lg font-semibold">
+              Find Parts
             </button>
           </div>
         </div>
@@ -59,6 +62,112 @@
       </div>
     </div>
 
+    <!-- AI Diagnosis Integration Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800">
+        <div class="text-center mb-8">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-4">
+            <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+          </div>
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Get Personalized Parts Recommendations
+          </h2>
+          <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Upload photos of your car issues or describe symptoms to get AI-powered diagnosis and exact parts recommendations.
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Step 1 -->
+          <div class="text-center">
+            <div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">1</div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Upload Photos</h3>
+            <p class="text-gray-600 dark:text-gray-400">Take photos of your car issues or symptoms</p>
+          </div>
+          
+          <!-- Step 2 -->
+          <div class="text-center">
+            <div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">2</div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">AI Analysis</h3>
+            <p class="text-gray-600 dark:text-gray-400">Get instant diagnosis and problem identification</p>
+          </div>
+          
+          <!-- Step 3 -->
+          <div class="text-center">
+            <div class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">3</div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Find Parts</h3>
+            <p class="text-gray-600 dark:text-gray-400">Get exact parts recommendations with purchase links</p>
+          </div>
+        </div>
+        
+        <div class="text-center mt-8">
+          <router-link to="/diagnose" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors duration-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+            Start AI Diagnosis Now
+          </router-link>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Diagnoses Section -->
+    <div v-if="showRecentDiagnoses" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="bg-white dark:bg-secondary-800 rounded-2xl shadow-sm border border-gray-200 dark:border-secondary-700 p-8">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Your Recent Diagnoses</h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Find parts for your diagnosed issues</p>
+            </div>
+          </div>
+          <router-link to="/diagnose" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium">
+            View All Diagnoses →
+          </router-link>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div v-for="diagnosis in recentDiagnoses" :key="diagnosis.id" 
+               class="border border-gray-200 dark:border-secondary-700 rounded-lg p-6 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ diagnosis.vehicle }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ diagnosis.issue }}</p>
+              </div>
+              <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
+                {{ diagnosis.status }}
+              </span>
+            </div>
+            
+            <div class="mb-4">
+              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Suggested Parts:</h4>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="part in diagnosis.suggested_parts" :key="part" 
+                      class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full">
+                  {{ part }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-500 dark:text-gray-400">{{ diagnosis.diagnosis_date }}</span>
+              <button @click="searchForDiagnosisParts(diagnosis)" 
+                      class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                Find Parts
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
       <!-- Search and Filters - Alibaba Style -->
@@ -68,20 +177,20 @@
           <div class="flex flex-col lg:flex-row gap-4">
             <!-- Search Input -->
             <div class="flex-1">
-              <div class="relative">
-                <input 
-                  v-model="searchQuery"
-                  @input="debouncedSearch"
-                  type="text" 
+            <div class="relative">
+              <input 
+                v-model="searchQuery"
+                @input="debouncedSearch"
+                type="text" 
                   class="w-full h-12 pl-12 pr-4 border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                   placeholder="Search for car parts, brands, or part numbers..."
-                />
+              />
                 <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-              </div>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
             </div>
-            
+          </div>
+
             <!-- Search Button -->
             <button 
               @click="filterParts"
@@ -98,27 +207,27 @@
         <!-- Filters Row -->
         <div class="p-4">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Category Filter -->
-            <div>
+          <!-- Category Filter -->
+          <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
               <select v-model="selectedCategory" @change="filterParts" class="w-full h-10 px-3 border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                 <option value="">All Categories</option>
-                <option v-for="category in categories" :key="category" :value="category">
+              <option v-for="category in categories" :key="category" :value="category">
                   {{ category.charAt(0).toUpperCase() + category.slice(1) }}
-                </option>
-              </select>
-            </div>
+              </option>
+            </select>
+          </div>
 
             <!-- Brand Filter -->
-            <div>
+          <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brand</label>
               <select v-model="selectedManufacturer" @change="filterParts" class="w-full h-10 px-3 border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                 <option value="">All Brands</option>
-                <option v-for="manufacturer in manufacturers" :key="manufacturer" :value="manufacturer">
-                  {{ manufacturer }}
-                </option>
-              </select>
-            </div>
+              <option v-for="manufacturer in manufacturers" :key="manufacturer" :value="manufacturer">
+                {{ manufacturer }}
+              </option>
+            </select>
+          </div>
 
             <!-- Price Range -->
             <div>
@@ -228,160 +337,6 @@
         </div>
       </div>
 
-      <!-- Top Ranking Section - Alibaba Style -->
-      <div id="ranking-section" class="mb-12">
-        <div class="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-gray-200 dark:border-secondary-700 overflow-hidden">
-          <!-- Section Header -->
-          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-6 py-4 border-b border-gray-200 dark:border-secondary-700">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Top Ranking Car Parts</h2>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">Best selling and highest rated parts</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500 dark:text-gray-400">Updated daily</span>
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Ranking Tabs -->
-          <div class="px-6 py-4 border-b border-gray-200 dark:border-secondary-700">
-            <div class="flex flex-wrap gap-4">
-              <button 
-                v-for="(tab, index) in rankingTabs" 
-                :key="tab.key"
-                @click="activeRankingTab = tab.key"
-                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-                :class="activeRankingTab === tab.key 
-                  ? 'bg-primary-600 text-white' 
-                  : 'bg-gray-100 dark:bg-secondary-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-secondary-600'"
-              >
-                {{ tab.label }}
-              </button>
-            </div>
-          </div>
-          
-          <!-- Ranking Content -->
-          <div class="p-6">
-            <!-- Top Products Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              <div 
-                v-for="(part, index) in getRankedParts()" 
-                :key="part.id"
-                class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-secondary-700 overflow-hidden"
-                @click="viewPart(part)"
-              >
-                <!-- Ranking Badge -->
-                <div class="relative">
-                  <div class="absolute top-2 left-2 z-10">
-                    <div class="flex items-center gap-1">
-                      <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg"
-                           :class="getRankingBadgeColor(index + 1)">
-                        {{ index + 1 }}
-                      </div>
-                      <div v-if="index < 3" class="text-xs font-medium text-gray-600 dark:text-gray-400">
-                        {{ getRankingLabel(index + 1) }}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Product Image -->
-                  <div class="relative aspect-square overflow-hidden bg-gray-100 dark:bg-secondary-700">
-                    <img 
-                      :src="part.image_url || getBrandImage(part.brand)" 
-                      :alt="part.name"
-                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      loading="lazy"
-                    />
-                    
-                    <!-- Stock Badge -->
-                    <div class="absolute top-2 right-2">
-                      <span class="px-2 py-1 text-xs font-medium rounded-full shadow-sm"
-                            :class="part.stock_quantity > 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
-                        {{ part.stock_quantity > 0 ? 'In Stock' : 'Out' }}
-                      </span>
-                    </div>
-                    
-                    <!-- Brand Logo -->
-                    <div class="absolute bottom-2 left-2 bg-white/90 dark:bg-secondary-800/90 rounded p-1 shadow-sm">
-                      <img 
-                        :src="getBrandLogo(part.brand)" 
-                        :alt="part.brand"
-                        class="w-4 h-4 object-contain"
-                        @error="handleImageError"
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Product Info -->
-                <div class="p-4 space-y-3">
-                  <!-- Category -->
-                  <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    {{ part.category }}
-                  </div>
-                  
-                  <!-- Product Name -->
-                  <h3 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                    {{ part.name }}
-                  </h3>
-                  
-                  <!-- Rating and Sales -->
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-1">
-                      <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                      </svg>
-                      <span class="text-xs text-gray-600 dark:text-gray-400">
-                        {{ parseFloat(part.rating).toFixed(1) }}
-                      </span>
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ getSalesCount(index) }} sold
-                    </div>
-                  </div>
-                  
-                  <!-- Price -->
-                  <div class="flex items-center justify-between">
-                    <div class="text-lg font-bold text-primary-600 dark:text-primary-400">
-                      {{ part.formatted_price }}
-                    </div>
-                    <div class="text-xs text-green-600 dark:text-green-400 font-medium">
-                      {{ getGrowthRate(index) }}% ↗
-                    </div>
-                  </div>
-                  
-                  <!-- Action Button -->
-                  <button 
-                    @click.stop="viewPart(part)"
-                    class="w-full bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200"
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <!-- View All Button -->
-            <div class="text-center mt-8">
-              <button 
-                @click="scrollToSearch"
-                class="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-lg font-medium transition-all duration-300 hover:shadow-lg"
-              >
-                View All Top Ranking Parts
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Public API Results Section -->
       <div v-if="publicAPIParts.length > 0 && showMockProducts" class="mb-12">
@@ -562,14 +517,14 @@
       <!-- Featured Parts -->
       <div v-if="featuredParts.length > 0 && !searchQuery" class="mb-12">
         <div class="text-center mb-8">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4 shadow-lg">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4 shadow-lg">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
             </svg>
-          </div>
-          <h2 class="text-3xl font-bold text-secondary-900 dark:text-white mb-4">Featured Parts</h2>
+        </div>
+          <h2 class="text-3xl font-bold text-secondary-900 dark:text-white mb-4">AI Recommended Parts</h2>
           <p class="text-lg text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto">
-            Premium quality parts selected by our AI system for optimal performance and reliability
+            Smart recommendations based on your vehicle and common issues. Get personalized suggestions with AI diagnosis.
           </p>
         </div>
         
@@ -593,7 +548,7 @@
               <!-- Featured Badge -->
               <div class="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-md">
                 ⭐
-              </div>
+            </div>
               
               <!-- Stock Indicator -->
               <div class="absolute bottom-2 right-2">
@@ -638,9 +593,9 @@
                   </svg>
                   <span class="text-xs font-medium text-secondary-600 dark:text-secondary-400">
                     {{ parseFloat(part.rating).toFixed(1) }}
-                  </span>
-                </div>
+                </span>
               </div>
+            </div>
               
               <!-- Quick Action Button -->
               <button 
@@ -649,21 +604,21 @@
               >
                 View Details
               </button>
-            </div>
           </div>
-        </div>
-        
-        <!-- View All Button -->
-        <div class="text-center mt-8">
-          <button 
-            @click="scrollToSearch"
-            class="btn-primary bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg"
-          >
-            View All Featured Parts
-          </button>
         </div>
       </div>
 
+        <!-- View All Button -->
+        <div class="text-center mt-8">
+          <router-link to="/diagnose" class="btn-primary bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg inline-flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+            Get AI Diagnosis
+          </router-link>
+        </div>
+          </div>
+          
       <!-- Partner Results -->
       <div v-if="showPartnerResults && Object.keys(partnerParts).length > 0" class="mb-12">
         <div class="text-center mb-8">
@@ -691,11 +646,11 @@
                 <div class="text-sm text-green-600 dark:text-green-400 font-medium">Authorized Partner</div>
                 <div class="text-xs text-secondary-500 dark:text-secondary-500">Global Shipping</div>
               </div>
-            </div>
           </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div 
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div 
               v-for="part in partnerData.parts.slice(0, 8)" 
               :key="`${partnerId}-${part.partner_part_id}`"
               class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden border border-gray-100 dark:border-secondary-700"
@@ -705,7 +660,7 @@
                 <div class="aspect-w-16 aspect-h-12 relative">
                   <img 
                     :src="part.image_url || getBrandImage(part.brand)" 
-                    :alt="part.name"
+                :alt="part.name"
                     class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700"
                     loading="lazy"
                   />
@@ -715,7 +670,7 @@
                   <!-- Partner Badge -->
                   <div class="absolute top-3 left-3 bg-blue-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-md">
                     {{ partnerData.partner.name }}
-                  </div>
+            </div>
                   
                   <!-- Stock Status -->
                   <div class="absolute bottom-3 right-3">
@@ -737,11 +692,11 @@
                     </span>
                   </div>
                   <h3 class="text-lg font-bold text-secondary-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
-                    {{ part.name }}
-                  </h3>
+                {{ part.name }}
+              </h3>
                   <p class="text-secondary-600 dark:text-secondary-400 text-sm line-clamp-2">
-                    {{ part.description }}
-                  </p>
+                {{ part.description }}
+              </p>
                 </div>
                 
                 <!-- Rating and Price -->
@@ -751,11 +706,11 @@
                       <svg v-for="i in 5" :key="i" class="w-3 h-3" :class="i <= Math.floor(parseFloat(part.rating)) ? 'text-yellow-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                       </svg>
-                    </div>
+                </div>
                     <span class="text-xs font-medium text-secondary-600 dark:text-secondary-400">
                       {{ parseFloat(part.rating).toFixed(1) }}
-                    </span>
-                  </div>
+                  </span>
+                </div>
                   <div class="text-right">
                     <div class="text-xl font-bold text-blue-600 dark:text-blue-400">
                       ${{ parseFloat(part.price).toFixed(2) }}
@@ -764,8 +719,8 @@
                       Free Shipping
                     </div>
                   </div>
-                </div>
-                
+              </div>
+
                 <!-- Action Buttons -->
                 <div class="flex gap-2">
                   <button 
@@ -825,7 +780,7 @@
                       <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-3">
                         <span class="text-sm font-bold text-blue-600 dark:text-blue-400">
                           {{ part.partner_name.charAt(0) }}
-                        </span>
+                </span>
                       </div>
                       <div class="text-sm font-medium text-gray-900 dark:text-white">
                         {{ part.partner_name }}
@@ -849,7 +804,7 @@
                     <span class="px-2 py-1 text-xs font-semibold rounded-full"
                           :class="part.stock > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'">
                       {{ part.stock > 0 ? 'In Stock' : 'Out of Stock' }}
-                    </span>
+                </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
@@ -875,7 +830,7 @@
             </table>
           </div>
         </div>
-      </div>
+              </div>
 
       <!-- Results Header - Alibaba Style -->
       <div v-if="parts.length > 0" class="mb-6">
@@ -886,7 +841,7 @@
             </h2>
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{ totalParts }} products found
-            </span>
+                </span>
           </div>
 
           <!-- View Options -->
@@ -973,13 +928,13 @@
               </div>
               <div class="flex items-center gap-1">
                 <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                </svg>
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                  </svg>
                 <span class="text-xs text-gray-600 dark:text-gray-400">
                   {{ parseFloat(part.rating).toFixed(1) }}
                 </span>
+                </div>
               </div>
-            </div>
             
             <!-- Action Button -->
             <button 
@@ -988,9 +943,9 @@
             >
               View Details
             </button>
+            </div>
           </div>
         </div>
-      </div>
 
         <!-- Pagination -->
         <div v-if="totalPages > 1" class="mt-8 flex justify-center">
@@ -1220,10 +1175,10 @@
           <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
             <div class="text-2xl font-bold mb-2">Free</div>
             <div class="text-white/80">Diagnosis</div>
-          </div>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -1240,14 +1195,6 @@ const selectedManufacturer = ref('')
 const sortBy = ref('name')
 
 // Ranking system
-const activeRankingTab = ref('best_selling')
-const rankingTabs = ref([
-  { key: 'best_selling', label: 'Best Selling' },
-  { key: 'highest_rated', label: 'Highest Rated' },
-  { key: 'trending', label: 'Trending' },
-  { key: 'new_arrivals', label: 'New Arrivals' },
-  { key: 'price_low', label: 'Best Value' }
-])
 
 // Public API integration
 const publicAPIParts = ref([])
@@ -1258,6 +1205,8 @@ const apiStatus = ref({})
 const publicAPIPriceComparison = ref(null)
 const showPriceComparison = ref(false)
 const showMockProducts = ref(true)
+const recentDiagnoses = ref([])
+const showRecentDiagnoses = ref(false)
 const currentPage = ref(1)
 const totalPages = ref(1)
 const totalParts = ref(0)
@@ -1285,65 +1234,6 @@ const visiblePages = computed(() => {
 
 // Methods
 // Ranking system methods
-const getRankedParts = () => {
-  let rankedParts = [...parts.value]
-  
-  switch (activeRankingTab.value) {
-    case 'best_selling':
-      rankedParts = rankedParts.sort((a, b) => (b.sales_count || 0) - (a.sales_count || 0))
-      break
-    case 'highest_rated':
-      rankedParts = rankedParts.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating))
-      break
-    case 'trending':
-      rankedParts = rankedParts.sort((a, b) => (b.trending_score || 0) - (a.trending_score || 0))
-      break
-    case 'new_arrivals':
-      rankedParts = rankedParts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-      break
-    case 'price_low':
-      rankedParts = rankedParts.sort((a, b) => parseFloat(a.price) - parseFloat(b.price))
-      break
-  }
-  
-  return rankedParts.slice(0, 8) // Show top 8
-}
-
-const getRankingBadgeColor = (rank) => {
-  switch (rank) {
-    case 1:
-      return 'bg-gradient-to-r from-yellow-400 to-yellow-500'
-    case 2:
-      return 'bg-gradient-to-r from-gray-300 to-gray-400'
-    case 3:
-      return 'bg-gradient-to-r from-orange-400 to-orange-500'
-    default:
-      return 'bg-gradient-to-r from-blue-500 to-blue-600'
-  }
-}
-
-const getRankingLabel = (rank) => {
-  switch (rank) {
-    case 1:
-      return 'Best'
-    case 2:
-      return '2nd'
-    case 3:
-      return '3rd'
-    default:
-      return ''
-  }
-}
-
-const getSalesCount = (index) => {
-  const baseSales = [1250, 980, 850, 720, 650, 580, 520, 480]
-  return baseSales[index] || Math.floor(Math.random() * 500) + 100
-}
-
-const getGrowthRate = (index) => {
-  const growthRates = [25, 18, 15, 12, 10, 8, 6, 5]
-  return growthRates[index] || Math.floor(Math.random() * 10) + 1
-}
 
 // Public API methods
 const lookupVehicleByVIN = async () => {
@@ -1630,6 +1520,50 @@ const loadMockPublicAPIParts = async () => {
   await new Promise(resolve => setTimeout(resolve, 500))
   
   publicAPIParts.value = mockParts
+}
+
+// Load recent diagnoses for personalized recommendations
+const loadRecentDiagnoses = async () => {
+  try {
+    // Mock recent diagnoses data
+    const mockDiagnoses = [
+      {
+        id: 1,
+        vehicle: '2018 BMW 3 Series',
+        issue: 'Engine knocking sound',
+        diagnosis_date: '2024-01-15',
+        suggested_parts: ['Engine Oil Filter', 'Spark Plugs', 'Air Filter'],
+        status: 'completed'
+      },
+      {
+        id: 2,
+        vehicle: '2018 BMW 3 Series',
+        issue: 'Brake squeaking',
+        diagnosis_date: '2024-01-10',
+        suggested_parts: ['Brake Pads', 'Brake Rotors'],
+        status: 'completed'
+      }
+    ]
+    
+    recentDiagnoses.value = mockDiagnoses
+    showRecentDiagnoses.value = mockDiagnoses.length > 0
+  } catch (error) {
+    console.error('Error loading recent diagnoses:', error)
+  }
+}
+
+// Search for parts based on diagnosis
+const searchForDiagnosisParts = (diagnosis) => {
+  // Set search query based on diagnosis
+  searchQuery.value = diagnosis.issue
+  selectedCategory.value = ''
+  selectedBrand.value = ''
+  
+  // Scroll to search section
+  scrollToSearch()
+  
+  // Trigger search
+  filterParts()
 }
 
 const loadParts = async () => {
@@ -2006,6 +1940,7 @@ onMounted(async () => {
   await loadParts()
   await getAPIStatus()
   await loadMockPublicAPIParts()
+  await loadRecentDiagnoses()
 })
 
 // Watch for page changes
