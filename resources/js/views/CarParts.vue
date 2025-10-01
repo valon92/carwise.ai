@@ -61,66 +61,273 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-      <!-- Search and Filters -->
-      <div id="search-section" class="card glass mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <!-- Search -->
-          <div class="md:col-span-2">
-            <div class="relative">
-              <input 
-                v-model="searchQuery"
-                @input="debouncedSearch"
-                type="text" 
-                class="input pl-10" 
-                placeholder="Search for parts, brands, or part numbers..."
-              />
-              <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- Search and Filters - Alibaba Style -->
+      <div id="search-section" class="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-gray-200 dark:border-secondary-700 mb-6">
+        <!-- Main Search Bar -->
+        <div class="p-4 border-b border-gray-200 dark:border-secondary-700">
+          <div class="flex flex-col lg:flex-row gap-4">
+            <!-- Search Input -->
+            <div class="flex-1">
+              <div class="relative">
+                <input 
+                  v-model="searchQuery"
+                  @input="debouncedSearch"
+                  type="text" 
+                  class="w-full h-12 pl-12 pr-4 border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  placeholder="Search for car parts, brands, or part numbers..."
+                />
+                <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+            </div>
+            
+            <!-- Search Button -->
+            <button 
+              @click="filterParts"
+              class="h-12 px-8 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
-            </div>
-          </div>
-
-          <!-- Category Filter -->
-          <div>
-            <select v-model="selectedCategory" @change="filterParts" class="input">
-              <option value="">All Categories</option>
-              <option v-for="category in categories" :key="category" :value="category">
-                {{ category.charAt(0).toUpperCase() + category.slice(1) }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Manufacturer Filter -->
-          <div>
-            <select v-model="selectedManufacturer" @change="filterParts" class="input">
-              <option value="">All Manufacturers</option>
-              <option v-for="manufacturer in manufacturers" :key="manufacturer" :value="manufacturer">
-                {{ manufacturer }}
-              </option>
-            </select>
+              Search
+            </button>
           </div>
         </div>
         
-        <!-- Partner Search Actions -->
-        <div class="mt-4 flex flex-wrap gap-3">
-          <button 
-            @click="searchPartnerParts(searchQuery)"
-            class="btn-primary bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-          >
-            🔍 Search Partner APIs
-          </button>
-          <button 
-            @click="comparePrices(searchQuery, selectedManufacturer)"
-            class="btn-secondary border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium"
-          >
-            💰 Compare Prices
-          </button>
-          <button 
-            @click="syncPartnerParts"
-            class="btn-secondary border-green-600 text-green-600 hover:bg-green-50 px-4 py-2 rounded-lg text-sm font-medium"
-          >
-            🔄 Sync Partner Data
-          </button>
+        <!-- Filters Row -->
+        <div class="p-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Category Filter -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+              <select v-model="selectedCategory" @change="filterParts" class="w-full h-10 px-3 border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                <option value="">All Categories</option>
+                <option v-for="category in categories" :key="category" :value="category">
+                  {{ category.charAt(0).toUpperCase() + category.slice(1) }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Brand Filter -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brand</label>
+              <select v-model="selectedManufacturer" @change="filterParts" class="w-full h-10 px-3 border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                <option value="">All Brands</option>
+                <option v-for="manufacturer in manufacturers" :key="manufacturer" :value="manufacturer">
+                  {{ manufacturer }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Price Range -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Price Range</label>
+              <select class="w-full h-10 px-3 border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                <option value="">Any Price</option>
+                <option value="0-50">$0 - $50</option>
+                <option value="50-100">$50 - $100</option>
+                <option value="100-200">$100 - $200</option>
+                <option value="200-500">$200 - $500</option>
+                <option value="500+">$500+</option>
+              </select>
+            </div>
+
+            <!-- Sort By -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort By</label>
+              <select v-model="sortBy" @change="filterParts" class="w-full h-10 px-3 border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                <option value="name">Name</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+                <option value="rating">Rating</option>
+                <option value="newest">Newest</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Advanced Actions -->
+          <div class="mt-4 flex flex-wrap gap-3">
+            <button 
+              @click="searchPartnerParts(searchQuery)"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              Search Global Partners
+            </button>
+            <button 
+              @click="comparePrices(searchQuery, selectedManufacturer)"
+              class="px-4 py-2 border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+              Compare Prices
+            </button>
+            <button 
+              @click="clearFilters"
+              class="px-4 py-2 border border-gray-300 dark:border-secondary-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-secondary-700 rounded-lg text-sm font-medium transition-colors duration-200"
+            >
+              Clear Filters
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Ranking Section - Alibaba Style -->
+      <div id="ranking-section" class="mb-12">
+        <div class="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-gray-200 dark:border-secondary-700 overflow-hidden">
+          <!-- Section Header -->
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-6 py-4 border-b border-gray-200 dark:border-secondary-700">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Top Ranking Car Parts</h2>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Best selling and highest rated parts</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-500 dark:text-gray-400">Updated daily</span>
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Ranking Tabs -->
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-secondary-700">
+            <div class="flex flex-wrap gap-4">
+              <button 
+                v-for="(tab, index) in rankingTabs" 
+                :key="tab.key"
+                @click="activeRankingTab = tab.key"
+                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                :class="activeRankingTab === tab.key 
+                  ? 'bg-primary-600 text-white' 
+                  : 'bg-gray-100 dark:bg-secondary-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-secondary-600'"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
+          </div>
+          
+          <!-- Ranking Content -->
+          <div class="p-6">
+            <!-- Top Products Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div 
+                v-for="(part, index) in getRankedParts()" 
+                :key="part.id"
+                class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-secondary-700 overflow-hidden"
+                @click="viewPart(part)"
+              >
+                <!-- Ranking Badge -->
+                <div class="relative">
+                  <div class="absolute top-2 left-2 z-10">
+                    <div class="flex items-center gap-1">
+                      <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg"
+                           :class="getRankingBadgeColor(index + 1)">
+                        {{ index + 1 }}
+                      </div>
+                      <div v-if="index < 3" class="text-xs font-medium text-gray-600 dark:text-gray-400">
+                        {{ getRankingLabel(index + 1) }}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Image -->
+                  <div class="relative aspect-square overflow-hidden bg-gray-100 dark:bg-secondary-700">
+                    <img 
+                      :src="part.image_url || getBrandImage(part.brand)" 
+                      :alt="part.name"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      loading="lazy"
+                    />
+                    
+                    <!-- Stock Badge -->
+                    <div class="absolute top-2 right-2">
+                      <span class="px-2 py-1 text-xs font-medium rounded-full shadow-sm"
+                            :class="part.stock_quantity > 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
+                        {{ part.stock_quantity > 0 ? 'In Stock' : 'Out' }}
+                      </span>
+                    </div>
+                    
+                    <!-- Brand Logo -->
+                    <div class="absolute bottom-2 left-2 bg-white/90 dark:bg-secondary-800/90 rounded p-1 shadow-sm">
+                      <img 
+                        :src="getBrandLogo(part.brand)" 
+                        :alt="part.brand"
+                        class="w-4 h-4 object-contain"
+                        @error="handleImageError"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Product Info -->
+                <div class="p-4 space-y-3">
+                  <!-- Category -->
+                  <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    {{ part.category }}
+                  </div>
+                  
+                  <!-- Product Name -->
+                  <h3 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    {{ part.name }}
+                  </h3>
+                  
+                  <!-- Rating and Sales -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1">
+                      <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                      </svg>
+                      <span class="text-xs text-gray-600 dark:text-gray-400">
+                        {{ parseFloat(part.rating).toFixed(1) }}
+                      </span>
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ getSalesCount(index) }} sold
+                    </div>
+                  </div>
+                  
+                  <!-- Price -->
+                  <div class="flex items-center justify-between">
+                    <div class="text-lg font-bold text-primary-600 dark:text-primary-400">
+                      {{ part.formatted_price }}
+                    </div>
+                    <div class="text-xs text-green-600 dark:text-green-400 font-medium">
+                      {{ getGrowthRate(index) }}% ↗
+                    </div>
+                  </div>
+                  
+                  <!-- Action Button -->
+                  <button 
+                    @click.stop="viewPart(part)"
+                    class="w-full bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200"
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- View All Button -->
+            <div class="text-center mt-8">
+              <button 
+                @click="scrollToSearch"
+                class="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-lg font-medium transition-all duration-300 hover:shadow-lg"
+              >
+                View All Top Ranking Parts
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -169,126 +376,105 @@
       <!-- Featured Parts -->
       <div v-if="featuredParts.length > 0 && !searchQuery" class="mb-12">
         <div class="text-center mb-8">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mb-4 shadow-lg">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+            </svg>
+          </div>
           <h2 class="text-3xl font-bold text-secondary-900 dark:text-white mb-4">Featured Parts</h2>
-          <p class="text-lg text-secondary-600 dark:text-secondary-400">Handpicked premium parts for your vehicle</p>
+          <p class="text-lg text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto">
+            Premium quality parts selected by our AI system for optimal performance and reliability
+          </p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <!-- Compact Grid Layout -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
           <div 
-            v-for="part in featuredParts" 
+            v-for="part in featuredParts.slice(0, 12)" 
             :key="part.id"
-            class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 overflow-hidden border border-gray-100 dark:border-secondary-700"
+            class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border border-gray-100 dark:border-secondary-700"
             @click="viewPart(part)"
           >
-            <!-- Image Container with Modern Design -->
-            <div class="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-secondary-700 dark:to-secondary-800">
-              <div class="aspect-w-16 aspect-h-12 relative">
+            <!-- Compact Image Container -->
+            <div class="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-secondary-700 dark:to-secondary-800">
+              <img 
+                :src="part.image_url || getBrandImage(part.brand)" 
+                :alt="part.name"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+              />
+              
+              <!-- Featured Badge -->
+              <div class="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-md">
+                ⭐
+              </div>
+              
+              <!-- Stock Indicator -->
+              <div class="absolute bottom-2 right-2">
+                <div class="w-3 h-3 rounded-full shadow-md"
+                     :class="part.stock_quantity > 0 ? 'bg-green-500' : 'bg-red-500'">
+                </div>
+              </div>
+              
+              <!-- Brand Logo Overlay -->
+              <div class="absolute bottom-2 left-2 bg-white/90 dark:bg-secondary-800/90 backdrop-blur-sm rounded-lg p-1 shadow-sm">
                 <img 
-                  :src="part.image_url || getBrandImage(part.brand)" 
-                  :alt="part.name"
-                  class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700"
-                  loading="lazy"
+                  :src="getBrandLogo(part.brand)" 
+                  :alt="part.brand"
+                  class="w-4 h-4 object-contain"
+                  @error="handleImageError"
                 />
-                <!-- Gradient Overlay -->
-                <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
-                
-                <!-- Brand Logo -->
-                <div class="absolute top-4 left-4 bg-white/95 dark:bg-secondary-800/95 backdrop-blur-sm rounded-xl p-2 shadow-lg">
-                  <img 
-                    :src="getBrandLogo(part.brand)" 
-                    :alt="part.brand"
-                    class="w-8 h-8 object-contain"
-                    @error="handleImageError"
-                  />
-                </div>
-                
-                <!-- Featured Badge -->
-                <div class="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-pulse">
-                  ⭐ FEATURED
-                </div>
-                
-                <!-- Stock Status -->
-                <div class="absolute bottom-4 right-4">
-                  <span class="px-3 py-1 rounded-full text-xs font-semibold shadow-lg"
-                        :class="part.stock_quantity > 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
-                    {{ part.stock_quantity > 0 ? 'In Stock' : 'Out of Stock' }}
-                  </span>
-                </div>
               </div>
             </div>
             
-            <!-- Content Section -->
-            <div class="p-6 space-y-4">
-              <!-- Title and Category -->
-              <div>
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full">
-                    {{ part.category.charAt(0).toUpperCase() + part.category.slice(1) }}
-                  </span>
-                  <span class="px-2 py-1 bg-gray-100 dark:bg-secondary-700 text-gray-600 dark:text-gray-400 text-xs font-medium rounded-full">
-                    {{ part.part_number }}
-                  </span>
-                </div>
-                <h3 class="text-xl font-bold text-secondary-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
-                  {{ part.name }}
-                </h3>
-                <p class="text-secondary-600 dark:text-secondary-400 text-sm line-clamp-2">
-                  {{ part.description }}
-                </p>
+            <!-- Compact Content -->
+            <div class="p-3 space-y-2">
+              <!-- Category Badge -->
+              <div class="flex justify-center">
+                <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full">
+                  {{ part.category.charAt(0).toUpperCase() + part.category.slice(1) }}
+                </span>
               </div>
               
-              <!-- Rating and Reviews -->
+              <!-- Title -->
+              <h3 class="text-sm font-bold text-secondary-900 dark:text-white text-center line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                {{ part.name }}
+              </h3>
+              
+              <!-- Price and Rating -->
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <div class="flex text-yellow-400">
-                    <svg v-for="i in 5" :key="i" class="w-4 h-4" :class="i <= Math.floor(parseFloat(part.rating)) ? 'text-yellow-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                    </svg>
-                  </div>
-                  <span class="text-sm font-medium text-secondary-600 dark:text-secondary-400">
+                <div class="text-lg font-bold text-primary-600 dark:text-primary-400">
+                  {{ part.formatted_price }}
+                </div>
+                <div class="flex items-center gap-1">
+                  <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                  </svg>
+                  <span class="text-xs font-medium text-secondary-600 dark:text-secondary-400">
                     {{ parseFloat(part.rating).toFixed(1) }}
                   </span>
-                  <span class="text-xs text-secondary-500 dark:text-secondary-500">
-                    ({{ part.review_count }} reviews)
-                  </span>
-                </div>
-                <div class="text-right">
-                  <div class="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                    {{ part.formatted_price }}
-                  </div>
-                  <div class="text-xs text-green-600 dark:text-green-400 font-medium">
-                    Free Shipping
-                  </div>
                 </div>
               </div>
               
-              <!-- Action Buttons -->
-              <div class="flex gap-3">
-                <button 
-                  @click.stop="viewPart(part)"
-                  class="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:shadow-lg"
-                >
-                  View Details
-                </button>
-                <button 
-                  @click.stop="addToCart(part)"
-                  :disabled="part.stock_quantity === 0"
-                  class="px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-xl transition-all duration-300 hover:shadow-lg disabled:cursor-not-allowed"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-                  </svg>
-                </button>
-              </div>
-              
-              <!-- AI Recommendation Badge -->
-              <div v-if="part.ai_recommended" class="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                </svg>
-                <span class="font-medium">AI Recommended</span>
-              </div>
+              <!-- Quick Action Button -->
+              <button 
+                @click.stop="viewPart(part)"
+                class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-3 rounded-lg transition-all duration-300 hover:shadow-lg text-sm"
+              >
+                View Details
+              </button>
             </div>
           </div>
+        </div>
+        
+        <!-- View All Button -->
+        <div class="text-center mt-8">
+          <button 
+            @click="scrollToSearch"
+            class="btn-primary bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg"
+          >
+            View All Featured Parts
+          </button>
         </div>
       </div>
 
@@ -505,95 +691,120 @@
         </div>
       </div>
 
-      <!-- Parts Grid -->
-      <div v-if="parts.length > 0">
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <div class="flex items-center">
-            <h2 class="text-2xl md:text-3xl font-bold text-secondary-900 dark:text-white">
-              All Parts
+      <!-- Results Header - Alibaba Style -->
+      <div v-if="parts.length > 0" class="mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+              Car Parts
             </h2>
-            <span class="ml-3 text-lg font-normal text-secondary-600 dark:text-secondary-400">
-              ({{ totalParts }})
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+              {{ totalParts }} products found
             </span>
-            <div class="h-1 flex-1 ml-4 bg-gradient-to-r from-primary-600 to-transparent rounded hidden md:block"></div>
           </div>
-          
-          <!-- Sort Options -->
-          <div class="flex items-center space-x-4">
-            <select v-model="sortBy" @change="sortParts" class="input">
-              <option value="name">Sort by Name</option>
-              <option value="price">Sort by Price</option>
-              <option value="rating">Sort by Rating</option>
-              <option value="created_at">Sort by Newest</option>
-            </select>
+
+          <!-- View Options -->
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-600 dark:text-gray-400">View:</span>
+              <button class="p-2 border border-gray-300 dark:border-secondary-600 rounded-lg hover:bg-gray-50 dark:hover:bg-secondary-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+              </button>
+              <button class="p-2 border border-gray-300 dark:border-secondary-600 rounded-lg hover:bg-gray-50 dark:hover:bg-secondary-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                </svg>
+              </button>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Sort by:</span>
+              <select v-model="sortBy" @change="sortParts" class="h-8 px-3 text-sm border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                <option value="name">Name</option>
+                <option value="price">Price: Low to High</option>
+                <option value="rating">Rating</option>
+                <option value="created_at">Newest</option>
+              </select>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <div 
-            v-for="part in parts" 
-            :key="part.id"
-            class="card glass cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-            @click="viewPart(part)"
-          >
-            <div class="aspect-w-16 aspect-h-9 mb-4">
+      <!-- Products Grid - Alibaba Style -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div 
+          v-for="part in parts" 
+          :key="part.id"
+          class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-secondary-700 overflow-hidden"
+          @click="viewPart(part)"
+        >
+          <!-- Product Image -->
+          <div class="relative aspect-square overflow-hidden bg-gray-100 dark:bg-secondary-700">
+            <img 
+              :src="part.image_url || getBrandImage(part.brand)" 
+              :alt="part.name"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              loading="lazy"
+            />
+            
+            <!-- Stock Badge -->
+            <div class="absolute top-2 right-2">
+              <span class="px-2 py-1 text-xs font-medium rounded-full shadow-sm"
+                    :class="part.stock_quantity > 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
+                {{ part.stock_quantity > 0 ? 'In Stock' : 'Out' }}
+              </span>
+            </div>
+            
+            <!-- Brand Logo -->
+            <div class="absolute bottom-2 left-2 bg-white/90 dark:bg-secondary-800/90 rounded p-1 shadow-sm">
               <img 
-                :src="part.image_url || '/images/parts/placeholder.jpg'" 
-                :alt="part.name"
-                class="w-full h-48 object-cover rounded-lg"
+                :src="getBrandLogo(part.brand)" 
+                :alt="part.brand"
+                class="w-4 h-4 object-contain"
+                @error="handleImageError"
               />
             </div>
-            <div class="p-4">
-              <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
-                {{ part.name }}
-              </h3>
-              <p class="text-secondary-600 dark:text-secondary-400 text-sm mb-3 line-clamp-2">
-                {{ part.description }}
-              </p>
-              
-              <!-- Part Details -->
-              <div class="space-y-2 mb-3">
-                <div class="flex items-center justify-between text-sm">
-                  <span class="text-secondary-500 dark:text-secondary-400">Category:</span>
-                  <span class="font-medium">{{ part.category.charAt(0).toUpperCase() + part.category.slice(1) }}</span>
-                </div>
-                <div class="flex items-center justify-between text-sm">
-                  <span class="text-secondary-500 dark:text-secondary-400">Manufacturer:</span>
-                  <span class="font-medium">{{ part.manufacturer }}</span>
-                </div>
-                <div class="flex items-center justify-between text-sm">
-                  <span class="text-secondary-500 dark:text-secondary-400">Difficulty:</span>
-                  <span class="px-2 py-1 text-xs font-medium rounded-full" :class="getDifficultyColor(part.difficulty_level)">
-                    {{ part.difficulty_level.charAt(0).toUpperCase() + part.difficulty_level.slice(1) }}
-                  </span>
-                </div>
+          </div>
+          
+          <!-- Product Info -->
+          <div class="p-3 space-y-2">
+            <!-- Category -->
+            <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              {{ part.category }}
+            </div>
+            
+            <!-- Product Name -->
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+              {{ part.name }}
+            </h3>
+            
+            <!-- Price -->
+            <div class="flex items-center justify-between">
+              <div class="text-lg font-bold text-primary-600 dark:text-primary-400">
+                {{ part.formatted_price }}
               </div>
-
-              <!-- Price and Quality -->
-              <div class="flex items-center justify-between">
-                <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                  {{ part.formatted_price }}
+              <div class="flex items-center gap-1">
+                <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                </svg>
+                <span class="text-xs text-gray-600 dark:text-gray-400">
+                  {{ parseFloat(part.rating).toFixed(1) }}
                 </span>
-                <span class="px-2 py-1 text-xs font-medium rounded-full" :class="getQualityColor(part.quality_grade)">
-                  {{ part.quality_display }}
-                </span>
-              </div>
-
-              <!-- Stock Status -->
-              <div class="mt-3 flex items-center justify-between">
-                <span class="text-sm" :class="part.in_stock ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                  {{ part.in_stock ? 'In Stock' : 'Out of Stock' }}
-                </span>
-                <div class="flex items-center text-sm text-secondary-500 dark:text-secondary-400">
-                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  {{ parseFloat(part.rating).toFixed(1) }} ({{ part.review_count }})
-                </div>
               </div>
             </div>
+            
+            <!-- Action Button -->
+            <button 
+              @click.stop="viewPart(part)"
+              class="w-full bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200"
+            >
+              View Details
+            </button>
           </div>
         </div>
+      </div>
 
         <!-- Pagination -->
         <div v-if="totalPages > 1" class="mt-8 flex justify-center">
@@ -630,7 +841,7 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else class="card glass text-center py-20">
+      <div v-if="parts.length === 0" class="card glass text-center py-20">
         <div class="max-w-md mx-auto">
           <div class="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-full flex items-center justify-center">
             <svg class="w-12 h-12 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -827,7 +1038,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -841,6 +1051,16 @@ const searchQuery = ref('')
 const selectedCategory = ref('')
 const selectedManufacturer = ref('')
 const sortBy = ref('name')
+
+// Ranking system
+const activeRankingTab = ref('best_selling')
+const rankingTabs = ref([
+  { key: 'best_selling', label: 'Best Selling' },
+  { key: 'highest_rated', label: 'Highest Rated' },
+  { key: 'trending', label: 'Trending' },
+  { key: 'new_arrivals', label: 'New Arrivals' },
+  { key: 'price_low', label: 'Best Value' }
+])
 const currentPage = ref(1)
 const totalPages = ref(1)
 const totalParts = ref(0)
@@ -867,6 +1087,67 @@ const visiblePages = computed(() => {
 })
 
 // Methods
+// Ranking system methods
+const getRankedParts = () => {
+  let rankedParts = [...parts.value]
+  
+  switch (activeRankingTab.value) {
+    case 'best_selling':
+      rankedParts = rankedParts.sort((a, b) => (b.sales_count || 0) - (a.sales_count || 0))
+      break
+    case 'highest_rated':
+      rankedParts = rankedParts.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating))
+      break
+    case 'trending':
+      rankedParts = rankedParts.sort((a, b) => (b.trending_score || 0) - (a.trending_score || 0))
+      break
+    case 'new_arrivals':
+      rankedParts = rankedParts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      break
+    case 'price_low':
+      rankedParts = rankedParts.sort((a, b) => parseFloat(a.price) - parseFloat(b.price))
+      break
+  }
+  
+  return rankedParts.slice(0, 8) // Show top 8
+}
+
+const getRankingBadgeColor = (rank) => {
+  switch (rank) {
+    case 1:
+      return 'bg-gradient-to-r from-yellow-400 to-yellow-500'
+    case 2:
+      return 'bg-gradient-to-r from-gray-300 to-gray-400'
+    case 3:
+      return 'bg-gradient-to-r from-orange-400 to-orange-500'
+    default:
+      return 'bg-gradient-to-r from-blue-500 to-blue-600'
+  }
+}
+
+const getRankingLabel = (rank) => {
+  switch (rank) {
+    case 1:
+      return 'Best'
+    case 2:
+      return '2nd'
+    case 3:
+      return '3rd'
+    default:
+      return ''
+  }
+}
+
+const getSalesCount = (index) => {
+  const baseSales = [1250, 980, 850, 720, 650, 580, 520, 480]
+  return baseSales[index] || Math.floor(Math.random() * 500) + 100
+}
+
+const getGrowthRate = (index) => {
+  const growthRates = [25, 18, 15, 12, 10, 8, 6, 5]
+  return growthRates[index] || Math.floor(Math.random() * 10) + 1
+}
+
 const loadParts = async () => {
   try {
     const params = new URLSearchParams({
