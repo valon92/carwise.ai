@@ -192,6 +192,7 @@
 
             <!-- Search Button -->
             <button 
+              @click="searchPublicAPIs"
               class="h-12 px-8 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,6 +203,40 @@
           </div>
         </div>
         
+        <!-- VIN Lookup Row -->
+        <div class="p-4 border-b border-gray-200 dark:border-secondary-700">
+          <div class="flex flex-col lg:flex-row gap-4">
+            <div class="flex-1">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">VIN Lookup (Optional)</label>
+              <div class="flex gap-2">
+                <input 
+                  v-model="vinInput"
+                  type="text" 
+                  placeholder="Enter 17-character VIN for vehicle-specific parts"
+                  class="flex-1 h-10 px-3 border border-gray-300 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  maxlength="17"
+                />
+                <button 
+                  @click="lookupVehicleByVIN"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                  Lookup
+                </button>
+              </div>
+            </div>
+            <div v-if="vehicleData" class="lg:w-80">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Vehicle Info</label>
+              <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                <div class="text-sm font-medium text-green-800 dark:text-green-200">{{ vehicleData.displayName }}</div>
+                <div class="text-xs text-green-600 dark:text-green-400">{{ vehicleData.engine }} • {{ vehicleData.transmission }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Filters Row -->
         <div class="p-4">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -329,6 +364,111 @@
         </div>
       </div>
 
+      <!-- Search Results Section -->
+      <div v-if="searchResults.length > 0" class="mb-8">
+        <div class="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-gray-200 dark:border-secondary-700 overflow-hidden">
+          <!-- Section Header -->
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-6 py-4 border-b border-gray-200 dark:border-secondary-700">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Search Results</h2>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ searchResults.length }} parts found for "{{ searchQuery }}"</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button 
+                  @click="clearSearch"
+                  class="px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-secondary-600 rounded-lg hover:bg-gray-50 dark:hover:bg-secondary-700 transition-colors duration-200"
+                >
+                  Clear Search
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Results Grid -->
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div 
+                v-for="part in searchResults" 
+                :key="`search-${part.id}`"
+                class="group cursor-pointer bg-white dark:bg-secondary-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-secondary-700 overflow-hidden"
+                @click="viewPart(part)"
+              >
+                <!-- Product Image -->
+                <div class="relative aspect-square overflow-hidden bg-gray-100 dark:bg-secondary-700">
+                  <img 
+                    :src="part.image_url || '/images/parts/placeholder.jpg'" 
+                    :alt="part.name"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                    loading="lazy"
+                  />
+                  
+                  <!-- Stock Badge -->
+                  <div class="absolute top-2 right-2">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full shadow-sm"
+                          :class="part.stock_quantity > 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
+                      {{ part.stock_quantity > 0 ? 'In Stock' : 'Out' }}
+                    </span>
+                  </div>
+                </div>
+                
+                <!-- Product Info -->
+                <div class="p-4 space-y-3">
+                  <!-- Brand -->
+                  <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    {{ part.brand || 'Unknown Brand' }}
+                  </div>
+                  
+                  <!-- Product Name -->
+                  <h3 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    {{ part.name }}
+                  </h3>
+                  
+                  <!-- Rating and Reviews -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1">
+                      <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                      </svg>
+                      <span class="text-xs text-gray-600 dark:text-gray-400">
+                        {{ parseFloat(part.rating || 0).toFixed(1) }}
+                      </span>
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ part.review_count || 0 }} reviews
+                    </div>
+                  </div>
+                  
+                  <!-- Price -->
+                  <div class="flex items-center justify-between">
+                    <div class="text-lg font-bold text-primary-600 dark:text-primary-400">
+                      {{ part.formatted_price || '$0.00' }}
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ part.condition || 'New' }}
+                    </div>
+                  </div>
+                  
+                  <!-- Action Button -->
+                  <button 
+                    @click.stop="viewPart(part)"
+                    class="w-full bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200"
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Public API Results Section -->
       <div v-if="publicAPIParts.length > 0 && showMockProducts" class="mb-12">
@@ -885,6 +1025,7 @@ const showPartnerResults = ref(false)
 const partnerStats = ref({})
 const priceComparison = ref([])
 const totalParts = ref(0)
+const searchResults = ref([])
 
 // Filters
 const categories = ref([])
@@ -938,12 +1079,21 @@ const searchPublicAPIs = async () => {
         allParts.push(...amazonParts)
       }
       
+      // Populate search results
+      searchResults.value = allParts
       publicAPIParts.value = allParts
       showPartnerResults.value = true
     }
   } catch (error) {
     console.error('Public API search error:', error)
   }
+}
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  searchResults.value = []
+  vehicleData.value = null
+  vinInput.value = ''
 }
 
 const comparePricesAcrossAPIs = async () => {
@@ -977,8 +1127,7 @@ const handleAffiliateClick = async (part) => {
   window.open(part.affiliate_url, '_blank')
 }
 
-// Load mock public API parts for demonstration
-const loadMockPublicAPIParts = async () => {
+// Load mock public API parts for demonstration - REMOVED DUPLICATE
   const mockParts = [
     // eBay Parts
     {
@@ -1179,8 +1328,6 @@ const loadMockPublicAPIParts = async () => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 500))
   
-  publicAPIParts.value = mockParts
-}
 
 // Load recent diagnoses for personalized recommendations
 const loadRecentDiagnoses = async () => {
@@ -1493,6 +1640,84 @@ const getDifficultyColor = (difficulty) => {
     'professional': 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20'
   }
   return colors[difficulty] || colors.medium
+}
+
+const loadMockPublicAPIParts = () => {
+  // Mock data for demonstration
+  publicAPIParts.value = [
+    {
+      id: 'ebay-123456',
+      name: 'Bosch Premium Air Filter for BMW 3 Series 2012-2018',
+      description: 'High-quality air filter with superior filtration performance',
+      price: 18.50,
+      formatted_price: '$18.50',
+      currency: 'USD',
+      image_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
+      condition: 'New',
+      brand: 'Bosch',
+      part_number: 'F026400123',
+      rating: 4.3,
+      review_count: 89,
+      stock_quantity: 15,
+      source: 'ebay',
+      affiliate_url: 'https://ebay.com/itm/123456',
+      category: 'engine',
+      ai_recommended: true,
+      shipping_cost: 0,
+      estimated_delivery: '2-3 days',
+      seller: 'AutoPartsPro',
+      prime_eligible: false,
+      availability: 'In Stock'
+    },
+    {
+      id: 'amazon-789012',
+      name: 'Optima RedTop Battery 34/78 800 CCA',
+      description: 'High-performance AGM battery with superior starting power',
+      price: 189.99,
+      formatted_price: '$189.99',
+      currency: 'USD',
+      image_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
+      condition: 'New',
+      brand: 'Optima',
+      part_number: '34/78',
+      rating: 4.8,
+      review_count: 234,
+      stock_quantity: 8,
+      source: 'amazon',
+      affiliate_url: 'https://amazon.com/dp/789012',
+      category: 'electrical',
+      ai_recommended: true,
+      shipping_cost: 0,
+      estimated_delivery: '1 day',
+      seller: 'Amazon',
+      prime_eligible: true,
+      availability: 'In Stock'
+    },
+    {
+      id: 'ebay-345678',
+      name: 'Brembo Ceramic Brake Pads Front Set',
+      description: 'Premium ceramic brake pads for superior stopping power',
+      price: 89.99,
+      formatted_price: '$89.99',
+      currency: 'USD',
+      image_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
+      condition: 'New',
+      brand: 'Brembo',
+      part_number: 'P85020',
+      rating: 4.6,
+      review_count: 156,
+      stock_quantity: 12,
+      source: 'ebay',
+      affiliate_url: 'https://ebay.com/itm/345678',
+      category: 'brakes',
+      ai_recommended: false,
+      shipping_cost: 5.99,
+      estimated_delivery: '3-5 days',
+      seller: 'BrakeSpecialist',
+      prime_eligible: false,
+      availability: 'In Stock'
+    }
+  ]
 }
 
 // Debounce utility
