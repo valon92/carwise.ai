@@ -580,7 +580,7 @@ export default {
     const isLoading = ref(true)
     
     // Use the global auth state
-    const { user, isAuthenticated, checkAuth } = useAuth()
+    const { user, isAuthenticated, checkAuth, logout } = useAuth()
     
     // Weather data
     const weather = ref({
@@ -838,8 +838,8 @@ export default {
     }
 
     const handleSettings = () => {
-      // Navigate to settings page or open settings modal
-      alert('Settings feature coming soon!')
+      // Navigate to profile edit page for settings
+      router.push('/profile/edit')
     }
 
     const handleHistory = () => {
@@ -848,18 +848,7 @@ export default {
     }
 
     const handleLogout = async () => {
-      try {
-        await authAPI.logout()
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        router.push('/login')
-      } catch (error) {
-        console.error('Logout error:', error)
-        // Force logout even if API call fails
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        router.push('/login')
-      }
+      await logout()
     }
 
     const formatDate = (dateString) => {
