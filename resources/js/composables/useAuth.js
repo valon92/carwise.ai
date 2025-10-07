@@ -8,7 +8,14 @@ const isLoading = ref(false)
 const isAuthenticated = computed(() => !!user.value)
 
 export function useAuth() {
-  const router = useRouter()
+  let router = null
+  
+  // Only get router if we're in a component context
+  try {
+    router = useRouter()
+  } catch (e) {
+    // Not in component context, router will be null
+  }
 
   const login = async (credentials) => {
     try {
@@ -85,7 +92,9 @@ export function useAuth() {
         window.$notify.info('Logged Out', 'You have been successfully logged out')
       }
       
-      router.push('/login')
+      if (router) {
+        router.push('/login')
+      }
     }
   }
 
@@ -116,6 +125,11 @@ export function useAuth() {
     return false
   }
 
+  const updateUser = (newUserData) => {
+    user.value = newUserData
+    localStorage.setItem('user', JSON.stringify(newUserData))
+  }
+
   const getUser = () => user.value
   const getIsAuthenticated = () => isAuthenticated.value
   const getIsLoading = () => isLoading.value
@@ -131,6 +145,7 @@ export function useAuth() {
     register,
     logout,
     checkAuth,
+    updateUser,
     
     // Getters
     getUser,

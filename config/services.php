@@ -75,5 +75,11 @@ return [
         'temperature' => env('MISTRAL_TEMPERATURE', 0.3),
     ],
 
+    'carapi' => [
+        'token' => env('CARAPI_TOKEN'),
+        'secret' => env('CARAPI_SECRET'),
+        'base_url' => env('CARAPI_BASE_URL', 'https://carapi.app/api'),
+        'enabled' => env('CARAPI_ENABLED', false),
+    ],
 
 ];

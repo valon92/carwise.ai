@@ -4,71 +4,197 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ChatConversation extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
-        'mechanic_id',
-        'subject',
+        'agent_id',
         'status',
+        'subject',
         'priority',
-        'related_type',
-        'related_id',
-        'last_message_at',
-        'closed_at',
-        'archived_at'
+        'channel',
+        'user_agent',
+        'page_url',
+        'ip_address',
+        'started_at',
+        'ended_at',
+        'rating',
+        'feedback',
+        'metadata'
     ];
 
     protected $casts = [
-        'last_message_at' => 'datetime',
-        'closed_at' => 'datetime',
-        'archived_at' => 'datetime'
+        'started_at' => 'datetime',
+        'ended_at' => 'datetime',
+        'metadata' => 'array'
     ];
 
+    const STATUS_WAITING = 'waiting';
+    const STATUS_ACTIVE = 'active';
+    const STATUS_ENDED = 'ended';
+    const STATUS_TRANSFERRED = 'transferred';
+
+    const PRIORITY_LOW = 'low';
+    const PRIORITY_MEDIUM = 'medium';
+    const PRIORITY_HIGH = 'high';
+    const PRIORITY_URGENT = 'urgent';
+
+    const CHANNEL_WEBSITE = 'website';
+    const CHANNEL_MOBILE = 'mobile';
+    const CHANNEL_EMAIL = 'email';
+
     /**
-     * Get the user in this conversation.
+     * Get the user that owns the conversation.
      */
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
     /**
-     * Get the mechanic in this conversation.
+     * Get the agent assigned to the conversation.
      */
-    public function mechanic(): BelongsTo
+    public function agent()
     {
-        return $this->belongsTo(Mechanic::class);
+        return $this->belongsTo(User::class, 'agent_id');
     }
 
     /**
-     * Get the related entity (polymorphic).
+     * Get the messages for the conversation.
      */
-    public function related(): MorphTo
+    public function messages()
     {
-        return $this->morphTo();
+        return $this->hasMany(ChatMessage::class, 'conversation_id')->orderBy('created_at');
     }
 
     /**
-     * Get all messages in this conversation.
+     * Get the latest message for the conversation.
      */
-    public function messages(): HasMany
+    public function latestMessage()
     {
-        return $this->hasMany(ChatMessage::class);
+        return $this->hasOne(ChatMessage::class, 'conversation_id')->latest();
     }
 
     /**
-     * Get the latest message in this conversation.
+     * Get unread messages count for the user.
      */
-    public function latestMessage(): HasMany
+    public function unreadMessagesCount()
     {
-        return $this->hasMany(ChatMessage::class)->latest();
+        return $this->messages()
+            ->where('sender_type', 'agent')
+            ->whereNull('read_at')
+            ->count();
+    }
+
+    /**
+     * Mark all messages as read for the user.
+     */
+    public function markAsRead()
+    {
+        $this->messages()
+            ->where('sender_type', 'agent')
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+    }
+
+    /**
+     * Check if conversation is active.
+     */
+    public function isActive()
+    {
+        return in_array($this->status, [self::STATUS_WAITING, self::STATUS_ACTIVE]);
+    }
+
+    /**
+     * Check if conversation can receive messages.
+     */
+    public function canReceiveMessages()
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * Start the conversation.
+     */
+    public function start($agentId = null)
+    {
+        $this->update([
+            'status' => self::STATUS_ACTIVE,
+            'agent_id' => $agentId,
+            'started_at' => now()
+        ]);
+    }
+
+    /**
+     * End the conversation.
+     */
+    public function end($rating = null, $feedback = null)
+    {
+        $this->update([
+            'status' => self::STATUS_ENDED,
+            'ended_at' => now(),
+            'rating' => $rating,
+            'feedback' => $feedback
+        ]);
+    }
+
+    /**
+     * Transfer conversation to another agent.
+     */
+    public function transferTo($agentId, $reason = null)
+    {
+        $oldAgentId = $this->agent_id;
+        
+        $this->update([
+            'agent_id' => $agentId,
+            'status' => self::STATUS_TRANSFERRED
+        ]);
+
+        // Create system message about transfer
+        $this->messages()->create([
+            'content' => "Conversation transferred to another agent. Reason: " . ($reason ?: 'No reason provided'),
+            'type' => 'system',
+            'sender_type' => 'system',
+            'metadata' => [
+                'old_agent_id' => $oldAgentId,
+                'new_agent_id' => $agentId,
+                'reason' => $reason
+            ]
+        ]);
+    }
+
+    /**
+     * Get conversation duration in minutes.
+     */
+    public function getDurationAttribute()
+    {
+        if (!$this->started_at) return 0;
+        
+        $endTime = $this->ended_at ?: now();
+        return $this->started_at->diffInMinutes($endTime);
+    }
+
+    /**
+     * Get conversation summary.
+     */
+    public function getSummaryAttribute()
+    {
+        $messageCount = $this->messages()->count();
+        $userMessageCount = $this->messages()->where('sender_type', 'user')->count();
+        $agentMessageCount = $this->messages()->where('sender_type', 'agent')->count();
+
+        return [
+            'total_messages' => $messageCount,
+            'user_messages' => $userMessageCount,
+            'agent_messages' => $agentMessageCount,
+            'duration_minutes' => $this->duration,
+            'has_rating' => !is_null($this->rating),
+            'has_feedback' => !is_null($this->feedback)
+        ];
     }
 
     /**
@@ -76,23 +202,15 @@ class ChatConversation extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->whereIn('status', [self::STATUS_WAITING, self::STATUS_ACTIVE]);
     }
 
     /**
-     * Scope for closed conversations.
+     * Scope for conversations waiting for agent.
      */
-    public function scopeClosed($query)
+    public function scopeWaiting($query)
     {
-        return $query->where('status', 'closed');
-    }
-
-    /**
-     * Scope for archived conversations.
-     */
-    public function scopeArchived($query)
-    {
-        return $query->where('status', 'archived');
+        return $query->where('status', self::STATUS_WAITING);
     }
 
     /**
@@ -104,207 +222,18 @@ class ChatConversation extends Model
     }
 
     /**
-     * Scope for conversations with unread messages.
+     * Scope for conversations by agent.
      */
-    public function scopeWithUnreadMessages($query, $userId)
+    public function scopeByAgent($query, $agentId)
     {
-        return $query->whereHas('messages', function ($q) use ($userId) {
-            $q->where('sender_id', '!=', $userId)
-              ->where('is_read', false);
-        });
+        return $query->where('agent_id', $agentId);
     }
 
     /**
-     * Check if conversation is active.
+     * Scope for recent conversations.
      */
-    public function isActive(): bool
+    public function scopeRecent($query, $days = 7)
     {
-        return $this->status === 'active';
-    }
-
-    /**
-     * Check if conversation is closed.
-     */
-    public function isClosed(): bool
-    {
-        return $this->status === 'closed';
-    }
-
-    /**
-     * Check if conversation is archived.
-     */
-    public function isArchived(): bool
-    {
-        return $this->status === 'archived';
-    }
-
-    /**
-     * Get unread message count for a user.
-     */
-    public function getUnreadCountForUser(int $userId): int
-    {
-        return $this->messages()
-            ->where('sender_id', '!=', $userId)
-            ->where('is_read', false)
-            ->count();
-    }
-
-    /**
-     * Mark all messages as read for a user.
-     */
-    public function markAllMessagesAsReadForUser(int $userId): int
-    {
-        return $this->messages()
-            ->where('sender_id', '!=', $userId)
-            ->where('is_read', false)
-            ->update([
-                'is_read' => true,
-                'read_at' => now()
-            ]);
-    }
-
-    /**
-     * Get the other participant in the conversation.
-     */
-    public function getOtherParticipant(int $currentUserId): User|Mechanic
-    {
-        if ($this->user_id === $currentUserId) {
-            return $this->mechanic;
-        }
-        
-        return $this->user;
-    }
-
-    /**
-     * Get conversation status color for UI.
-     */
-    public function getStatusColorAttribute(): string
-    {
-        return match($this->status) {
-            'active' => 'green',
-            'closed' => 'gray',
-            'archived' => 'blue',
-            default => 'gray'
-        };
-    }
-
-    /**
-     * Get priority color for UI.
-     */
-    public function getPriorityColorAttribute(): string
-    {
-        return match($this->priority) {
-            'urgent' => 'red',
-            'high' => 'orange',
-            'normal' => 'blue',
-            'low' => 'gray',
-            default => 'blue'
-        };
-    }
-
-    /**
-     * Close the conversation.
-     */
-    public function close(): bool
-    {
-        $this->status = 'closed';
-        $this->closed_at = now();
-        return $this->save();
-    }
-
-    /**
-     * Archive the conversation.
-     */
-    public function archive(): bool
-    {
-        $this->status = 'archived';
-        $this->archived_at = now();
-        return $this->save();
-    }
-
-    /**
-     * Reactivate the conversation.
-     */
-    public function reactivate(): bool
-    {
-        $this->status = 'active';
-        $this->closed_at = null;
-        $this->archived_at = null;
-        return $this->save();
-    }
-
-    /**
-     * Update last message timestamp.
-     */
-    public function updateLastMessageTime(): bool
-    {
-        $this->last_message_at = now();
-        return $this->save();
-    }
-
-    /**
-     * Create a new conversation.
-     */
-    public static function createConversation(
-        int $userId,
-        int $mechanicId,
-        string $subject = null,
-        string $relatedType = null,
-        int $relatedId = null,
-        string $priority = 'normal'
-    ): self {
-        return static::create([
-            'user_id' => $userId,
-            'mechanic_id' => $mechanicId,
-            'subject' => $subject,
-            'related_type' => $relatedType,
-            'related_id' => $relatedId,
-            'priority' => $priority,
-            'status' => 'active'
-        ]);
-    }
-
-    /**
-     * Find or create conversation between user and mechanic.
-     */
-    public static function findOrCreateConversation(
-        int $userId,
-        int $mechanicId,
-        string $subject = null,
-        string $relatedType = null,
-        int $relatedId = null
-    ): self {
-        $conversation = static::where('user_id', $userId)
-            ->where('mechanic_id', $mechanicId)
-            ->where('status', 'active')
-            ->first();
-
-        if (!$conversation) {
-            $conversation = static::createConversation(
-                $userId,
-                $mechanicId,
-                $subject,
-                $relatedType,
-                $relatedId
-            );
-        }
-
-        return $conversation;
-    }
-
-    /**
-     * Get conversation statistics.
-     */
-    public static function getConversationStats(): array
-    {
-        return [
-            'total_active' => static::active()->count(),
-            'total_closed' => static::closed()->count(),
-            'total_archived' => static::archived()->count(),
-            'avg_messages_per_conversation' => static::withCount('messages')->avg('messages_count') ?? 0,
-            'conversations_with_unread' => static::whereHas('messages', function ($q) {
-                $q->where('is_read', false);
-            })->count(),
-        ];
+        return $query->where('created_at', '>=', now()->subDays($days));
     }
 }

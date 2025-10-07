@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\UserActivityService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -190,6 +191,7 @@ class AuthController extends Controller
             'experience_years' => 'sometimes|integer|min:0|max:50',
             'hourly_rate' => 'sometimes|numeric|min:0',
             'bio' => 'sometimes|string|max:1000',
+            'avatar' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
         ]);
 
         if ($validator->fails()) {
@@ -216,6 +218,14 @@ class AuthController extends Controller
             // Hash password if provided
             if ($request->has('password')) {
                 $updateData['password'] = Hash::make($request->password);
+            }
+
+            // Handle avatar upload
+            if ($request->hasFile('avatar')) {
+                $avatar = $request->file('avatar');
+                $filename = 'avatar_' . $user->id . '_' . time() . '.' . $avatar->getClientOriginalExtension();
+                $path = $avatar->storeAs('avatars', $filename, 'public');
+                $updateData['avatar'] = $path;
             }
 
             // Remove null values

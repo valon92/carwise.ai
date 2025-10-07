@@ -20,7 +20,7 @@ class AffiliateController extends Controller
     {
         try {
             $validated = $request->validate([
-                'part_id' => 'required|integer|exists:car_parts,id',
+                'part_id' => 'required|string',
                 'brand' => 'required|string',
                 'category' => 'required|string',
                 'user_agent' => 'nullable|string',
@@ -28,10 +28,16 @@ class AffiliateController extends Controller
                 'timestamp' => 'required|date'
             ]);
 
-            // Get part details
+            // Get part details (for external parts, we'll use the provided data)
             $part = CarPart::find($validated['part_id']);
             if (!$part) {
-                return response()->json(['success' => false, 'message' => 'Part not found'], 404);
+                // For external parts (eBay, Amazon, etc.), create a temporary part object
+                $part = (object) [
+                    'id' => $validated['part_id'],
+                    'name' => $validated['brand'] . ' ' . $validated['category'],
+                    'brand' => $validated['brand'],
+                    'category' => $validated['category']
+                ];
             }
 
             // Create affiliate click record
@@ -73,7 +79,7 @@ class AffiliateController extends Controller
         try {
             $validated = $request->validate([
                 'click_id' => 'required|string',
-                'part_id' => 'required|integer|exists:car_parts,id',
+                'part_id' => 'required|string',
                 'amount' => 'required|numeric|min:0',
                 'currency' => 'required|string|size:3',
                 'order_id' => 'required|string',

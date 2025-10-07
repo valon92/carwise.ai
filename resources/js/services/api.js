@@ -1,5 +1,9 @@
 import axios from 'axios'
 
+// Set axios defaults for CSRF token
+axios.defaults.withCredentials = true
+axios.defaults.withXSRFToken = true
+
 // Create axios instance
 const api = axios.create({
   baseURL: '/api',
@@ -7,11 +11,25 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  withCredentials: true,
+  withXSRFToken: true
 })
 
-// Request interceptor to add auth token
+// Get CSRF token from cookie
+const getCsrfToken = () => {
+  const match = document.cookie.match(new RegExp('(^|;\\s*)(XSRF-TOKEN)=([^;]*)'))
+  return match ? decodeURIComponent(match[3]) : null
+}
+
+// Request interceptor to add auth token and CSRF token
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    // Get CSRF token before making the request
+    const csrfToken = getCsrfToken()
+    if (csrfToken) {
+      config.headers['X-XSRF-TOKEN'] = csrfToken
+    }
+    
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -54,11 +72,31 @@ api.interceptors.response.use(
 
 // Auth API
 export const authAPI = {
-  register: (data) => api.post('/register', data),
-  login: (data) => api.post('/login', data),
+  // Get CSRF cookie before making auth requests
+  getCsrfCookie: () => axios.get('/sanctum/csrf-cookie', { withCredentials: true }),
+  
+  register: async (data) => {
+    await authAPI.getCsrfCookie()
+    return api.post('/register', data)
+  },
+  
+  login: async (data) => {
+    await authAPI.getCsrfCookie()
+    return api.post('/login', data)
+  },
+  
   logout: () => api.post('/logout'),
   getUser: () => api.get('/user'),
-  updateProfile: (data) => api.put('/user/profile', data),
+  updateProfile: (data) => {
+    const isFormData = data instanceof FormData
+    return api.post('/user/profile', data, {
+      headers: isFormData ? {
+        'Content-Type': 'multipart/form-data',
+      } : {
+        'Content-Type': 'application/json',
+      }
+    })
+  },
 }
 
 // Cars API

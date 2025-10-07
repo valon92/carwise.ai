@@ -363,23 +363,35 @@ class CarController extends Controller
             $user = Auth::user();
             $cars = Car::where('user_id', $user->id);
 
-            // Get cached basic statistics
-            $baseStats = CacheService::getUserStatistics($user->id);
+            // Get basic statistics
+            $totalCars = $cars->count();
+            $activeCars = $cars->where('status', 'active')->count();
+            $totalDiagnoses = \App\Models\DiagnosisSession::where('user_id', $user->id)->count();
+            
+            // Get brands statistics
+            $brands = $cars->selectRaw('brand, COUNT(*) as count')
+                ->groupBy('brand')
+                ->orderBy('count', 'desc')
+                ->get();
+            
+            // Get fuel types statistics
+            $fuelTypes = $cars->selectRaw('fuel_type, COUNT(*) as count')
+                ->whereNotNull('fuel_type')
+                ->groupBy('fuel_type')
+                ->get();
+            
+            // Calculate average age (SQLite compatible)
+            $currentYear = date('Y');
+            $averageAge = $cars->selectRaw("AVG({$currentYear} - year) as avg_age")
+                ->value('avg_age');
             
             $stats = [
-                'total_cars' => $baseStats['total_cars'],
-                'active_cars' => $cars->where('status', 'active')->count(),
-                'total_diagnoses' => $baseStats['total_diagnoses'],
-                'brands' => $cars->selectRaw('brand, COUNT(*) as count')
-                    ->groupBy('brand')
-                    ->orderBy('count', 'desc')
-                    ->get(),
-                'fuel_types' => $cars->selectRaw('fuel_type, COUNT(*) as count')
-                    ->whereNotNull('fuel_type')
-                    ->groupBy('fuel_type')
-                    ->get(),
-                'average_age' => $cars->selectRaw('AVG(YEAR(CURDATE()) - year) as avg_age')
-                    ->value('avg_age'),
+                'total_cars' => $totalCars,
+                'active_cars' => $activeCars,
+                'total_diagnoses' => $totalDiagnoses,
+                'brands' => $brands,
+                'fuel_types' => $fuelTypes,
+                'average_age' => round($averageAge ?? 0, 1),
             ];
 
             return response()->json([

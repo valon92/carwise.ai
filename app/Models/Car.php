@@ -286,6 +286,7 @@ class Car extends Model
         return 'green';
     }
 
+
     /**
      * Get the primary image for this car
      */

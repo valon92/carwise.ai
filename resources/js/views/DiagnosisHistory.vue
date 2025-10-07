@@ -244,13 +244,27 @@ export default {
     const loadDiagnoses = async () => {
       try {
         isLoading.value = true
+        console.log('Loading diagnosis history...')
+        
         const response = await diagnosisAPI.getHistory()
+        console.log('Diagnosis history response:', response)
+        
         if (response.data.success) {
           // The API returns paginated data with 'data' property
           diagnoses.value = response.data.data?.data || []
+          console.log('Loaded diagnoses:', diagnoses.value.length)
+        } else {
+          console.error('API returned error:', response.data.message)
         }
       } catch (error) {
         console.error('Error loading diagnosis history:', error)
+        console.error('Error details:', error.response?.data)
+        
+        // Check if it's an authentication error
+        if (error.response?.status === 401) {
+          console.log('Authentication error, redirecting to login')
+          router.push('/login')
+        }
       } finally {
         isLoading.value = false
       }
@@ -268,9 +282,54 @@ export default {
       selectedDiagnosis.value = null
     }
 
-    const downloadReport = (diagnosis) => {
-      // TODO: Implement PDF download
-      alert('Download feature coming soon!')
+    const downloadReport = async (diagnosis) => {
+      try {
+        // Create PDF content
+        const pdfContent = {
+          title: 'CarWise.ai - AI Diagnosis Report',
+          vehicle: {
+            make: diagnosis.make,
+            model: diagnosis.model,
+            year: diagnosis.year,
+            mileage: diagnosis.mileage,
+            engine_type: diagnosis.engine_type,
+            engine_size: diagnosis.engine_size
+          },
+          symptoms: diagnosis.symptoms || [],
+          description: diagnosis.description,
+          result: diagnosis.result,
+          generated_at: diagnosis.created_at
+        }
+
+        // Call backend to generate PDF
+        const response = await fetch('/api/diagnosis/export-pdf', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(pdfContent)
+        })
+
+        if (response.ok) {
+          // Create download link
+          const blob = await response.blob()
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `CarWise_Diagnosis_${diagnosis.make}_${diagnosis.model}_${new Date(diagnosis.created_at).toISOString().split('T')[0]}.pdf`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          window.URL.revokeObjectURL(url)
+        } else {
+          const error = await response.json()
+          alert('Failed to download report: ' + (error.message || 'Unknown error'))
+        }
+      } catch (error) {
+        console.error('Error downloading report:', error)
+        alert('Failed to download report. Please try again.')
+      }
     }
 
     const clearFilters = () => {

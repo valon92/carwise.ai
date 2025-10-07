@@ -151,3 +151,5 @@ class DiagnosisSessionFactory extends Factory
     }
 }
 
+
+

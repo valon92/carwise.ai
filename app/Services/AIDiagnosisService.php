@@ -63,8 +63,8 @@ class AIDiagnosisService
                 Log::info('Using AI provider: ' . $this->aiProvider->getProviderName());
                 $result = $this->aiProvider->analyzeDiagnosis($data);
                 
-                // Translate response to user's language
-                return $this->translateResponse($result, $data['user_language'] ?? 'en');
+                // Return result in user's language (AI should already respond in correct language)
+                return $result;
             }
             
             // Fallback to mock response if AI provider is not available

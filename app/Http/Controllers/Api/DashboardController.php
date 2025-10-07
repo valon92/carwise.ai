@@ -44,24 +44,25 @@ class DashboardController extends Controller
                 ->count();
 
             $diagnosesThisWeek = DiagnosisSession::where('user_id', $userId)
-                ->whereRaw('WEEK(created_at) = ?', [$thisWeek])
-                ->whereYear('created_at', $thisYear)
+                ->whereRaw("strftime('%W', created_at) = ?", [$thisWeek])
+                ->whereRaw("strftime('%Y', created_at) = ?", [$thisYear])
                 ->count();
 
-            // Performance metrics
+            // Performance metrics - using analysis completion time
             $averageResponseTime = DiagnosisSession::where('user_id', $userId)
                 ->where('status', 'completed')
-                ->join('diagnosis_results', 'diagnosis_sessions.id', '=', 'diagnosis_results.session_id')
-                ->whereNotNull('diagnosis_results.processing_time')
-                ->avg('diagnosis_results.processing_time');
+                ->join('diagnosis_results', 'diagnosis_sessions.id', '=', 'diagnosis_results.diagnosis_session_id')
+                ->whereNotNull('diagnosis_results.analysis_completed_at')
+                ->selectRaw('AVG(julianday(diagnosis_results.analysis_completed_at) - julianday(diagnosis_sessions.created_at)) * 24 * 60 as avg_minutes')
+                ->value('avg_minutes');
 
             // Success rate
             $successRate = $totalDiagnoses > 0 ? round(($completedDiagnoses / $totalDiagnoses) * 100) : 0;
 
             // Monthly trend data
             $monthlyData = DiagnosisSession::where('user_id', $userId)
-                ->whereYear('created_at', $thisYear)
-                ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                ->whereRaw("strftime('%Y', created_at) = ?", [$thisYear])
+                ->selectRaw("strftime('%m', created_at) as month, COUNT(*) as count")
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get()
@@ -69,14 +70,15 @@ class DashboardController extends Controller
 
             $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             $monthlyDiagnoses = collect($months)->map(function ($month, $index) use ($monthlyData) {
+                $monthNumber = str_pad($index + 1, 2, '0', STR_PAD_LEFT);
                 return [
                     'month' => $month,
-                    'value' => $monthlyData->get($index + 1)->count ?? 0
+                    'value' => $monthlyData->get($monthNumber)->count ?? 0
                 ];
             });
 
             // Common issues analysis
-            $commonIssues = DiagnosisResult::whereHas('session', function ($query) use ($userId) {
+            $commonIssues = DiagnosisResult::whereHas('diagnosisSession', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
             ->whereNotNull('likely_causes')

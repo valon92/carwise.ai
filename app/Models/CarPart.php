@@ -190,12 +190,15 @@ class CarPart extends Model
      */
     public function scopeSearch($query, $search)
     {
-        return $query->where(function($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhere('description', 'like', "%{$search}%")
-              ->orWhere('part_number', 'like', "%{$search}%")
-              ->orWhere('manufacturer', 'like', "%{$search}%")
-              ->orWhere('aftermarket_brand', 'like', "%{$search}%");
+        // Handle both string and InputBag objects
+        $searchTerm = is_string($search) ? $search : (string) $search;
+        
+        return $query->where(function($q) use ($searchTerm) {
+            $q->where('name', 'like', "%{$searchTerm}%")
+              ->orWhere('description', 'like', "%{$searchTerm}%")
+              ->orWhere('part_number', 'like', "%{$searchTerm}%")
+              ->orWhere('manufacturer', 'like', "%{$searchTerm}%")
+              ->orWhere('aftermarket_brand', 'like', "%{$searchTerm}%");
         });
     }
 

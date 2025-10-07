@@ -117,10 +117,11 @@
                 @click="userDropdownOpen = !userDropdownOpen"
                 class="flex items-center space-x-2 px-3 py-2 rounded-lg text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-200"
               >
-                <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-                  <span class="text-primary-600 dark:text-primary-400 font-medium text-sm">
+                <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center overflow-hidden">
+                  <span v-if="!user?.avatar" class="text-primary-600 dark:text-primary-400 font-medium text-sm">
                     {{ userInitials }}
                   </span>
+                  <img v-else :src="`/storage/${user.avatar}`" :alt="user?.first_name || user?.name" class="w-full h-full object-cover">
                 </div>
                 <span class="text-sm font-medium">{{ user?.first_name || user?.name }}</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,10 +278,11 @@
           <!-- User Profile Section (when authenticated) -->
           <div v-else class="pt-4 border-t border-secondary-200 dark:border-secondary-700 space-y-3">
             <div class="flex items-center px-4 py-3 bg-secondary-50 dark:bg-secondary-800 rounded-lg">
-              <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-3">
-                <span class="text-primary-600 dark:text-primary-400 font-medium">
+              <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-3 overflow-hidden">
+                <span v-if="!user?.avatar" class="text-primary-600 dark:text-primary-400 font-medium">
                   {{ userInitials }}
                 </span>
+                <img v-else :src="`/storage/${user.avatar}`" :alt="user?.first_name || user?.name" class="w-full h-full object-cover">
               </div>
               <div>
                 <div class="text-sm font-medium text-secondary-700 dark:text-secondary-300">
@@ -336,6 +338,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { authAPI } from '../services/api'
+import { useAuth } from '../composables/useAuth'
 
 export default {
   name: 'Navbar',
@@ -353,9 +356,10 @@ export default {
     const route = useRoute()
     const mobileMenuOpen = ref(false)
     const userDropdownOpen = ref(false)
-    const isAuthenticated = ref(false)
-    const user = ref(null)
     const userDropdown = ref(null)
+    
+    // Use the global auth state
+    const { user, isAuthenticated, logout: authLogout, checkAuth } = useAuth()
 
     const userInitials = computed(() => {
       if (!user.value) return 'U'
@@ -375,16 +379,11 @@ export default {
 
     const logout = async () => {
       try {
-        await authAPI.logout()
-      } catch (error) {
-        console.error('Logout error:', error)
-      } finally {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        isAuthenticated.value = false
-        user.value = null
+        await authLogout()
         mobileMenuOpen.value = false
         router.push('/')
+      } catch (error) {
+        console.error('Logout error:', error)
       }
     }
 
@@ -395,37 +394,22 @@ export default {
       }
     }
 
-    const checkAuthState = () => {
-      const token = localStorage.getItem('token')
-      const userData = localStorage.getItem('user')
-      
-      if (token && userData) {
-        isAuthenticated.value = true
-        user.value = JSON.parse(userData)
-        console.log('Navbar: User authenticated', user.value)
-      } else {
-        isAuthenticated.value = false
-        user.value = null
-        console.log('Navbar: User not authenticated')
-      }
-    }
-
     // Watch for route changes to update auth state
     watch(() => route.path, () => {
-      checkAuthState()
+      checkAuth()
     })
 
     onMounted(() => {
-      checkAuthState()
+      checkAuth()
       document.addEventListener('click', handleClickOutside)
       
       // Listen for storage changes (when user logs in/out in another tab)
-      window.addEventListener('storage', checkAuthState)
+      window.addEventListener('storage', checkAuth)
     })
 
     onUnmounted(() => {
       document.removeEventListener('click', handleClickOutside)
-      window.removeEventListener('storage', checkAuthState)
+      window.removeEventListener('storage', checkAuth)
     })
 
     return {

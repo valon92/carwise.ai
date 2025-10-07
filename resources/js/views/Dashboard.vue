@@ -1,48 +1,93 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-800">
-    <!-- Header Section -->
-    <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-secondary-200 dark:border-secondary-700">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4">
-            <div class="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center shadow-lg">
-              <span class="text-white font-bold text-2xl">{{ userInitials }}</span>
-            </div>
-            <div>
-              <h1 class="text-2xl font-bold text-secondary-900 dark:text-white">
-                Welcome back, {{ user?.first_name || user?.name }}!
-              </h1>
-              <p class="text-secondary-600 dark:text-secondary-400">
-                {{ user?.role === 'mechanic' ? 'Certified Mechanic' : 'Car Owner' }} • {{ user?.location || 'No location set' }}
-              </p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <!-- Notifications -->
-            <div class="relative">
-              <button @click="handleNotifications" class="p-2 text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-white transition-colors duration-200 relative">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.828 7l2.586 2.586a2 2 0 002.828 0L12.828 7H4.828zM4 7h8l-2 2H6l-2-2z"></path>
-                </svg>
-                <span v-if="notifications.length > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {{ notifications.length }}
-                </span>
-              </button>
+  <div class="min-h-screen bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600">
+    <!-- Modern Header Section -->
+    <div class="relative overflow-hidden">
+      <!-- Animated Background -->
+      <div class="absolute inset-0 bg-gradient-to-r from-primary-600 via-primary-700 to-secondary-600 opacity-90">
+        <div class="absolute inset-0 bg-black/20"></div>
+        <div class="absolute top-0 left-0 w-full h-full">
+          <div class="absolute top-10 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-float"></div>
+          <div class="absolute top-20 right-20 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl animate-float" style="animation-delay: 2s;"></div>
+          <div class="absolute bottom-10 left-1/3 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl animate-float" style="animation-delay: 4s;"></div>
+        </div>
+      </div>
+      
+      <!-- Header Content -->
+      <div class="relative bg-white/10 dark:bg-slate-900/10 backdrop-blur-xl border-b border-white/20 dark:border-slate-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <div class="flex items-center space-x-4 sm:space-x-6">
+              <div class="relative">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-white/20 to-white/10 rounded-3xl flex items-center justify-center shadow-2xl border border-white/30 backdrop-blur-sm overflow-hidden">
+                  <span v-if="!user?.avatar" class="text-white font-bold text-2xl sm:text-3xl drop-shadow-lg">{{ userInitials }}</span>
+                  <img v-else :src="`/storage/${user.avatar}`" :alt="user?.first_name || user?.name" class="w-full h-full object-cover">
+                </div>
+                <div class="absolute -inset-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-3xl blur opacity-30 animate-pulse"></div>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white drop-shadow-lg mb-2 truncate">
+                  Welcome back, {{ user?.first_name || user?.name }}!
+                </h1>
+                <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <p class="text-white/90 text-sm sm:text-lg">
+                      {{ user?.role === 'mechanic' ? 'Certified Mechanic' : 'Car Owner' }}
+                    </p>
+                  </div>
+                  <div class="hidden sm:block w-px h-6 bg-white/30"></div>
+                  <p class="text-white/80 text-sm sm:text-lg">
+                    {{ user?.location || 'No location set' }}
+                  </p>
+                </div>
+              </div>
             </div>
             
-            <button @click="handleSettings" class="btn-secondary">
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              Settings
-            </button>
-            <button @click="handleLogout" class="btn-outline">
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-              </svg>
-              Logout
-            </button>
+            <div class="flex items-center justify-between lg:justify-end space-x-2 sm:space-x-4">
+              <!-- Weather Widget -->
+              <div class="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl px-2 sm:px-4 py-2 sm:py-3 border border-white/20">
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                  <div class="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-400/20 rounded-lg flex items-center justify-center">
+                    <svg class="w-3 h-3 sm:w-5 sm:h-5 text-yellow-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.38l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-white/90 text-xs sm:text-sm font-medium">{{ weather.temperature }}°C</p>
+                    <p class="text-white/70 text-xs hidden sm:block">{{ weather.condition }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Notifications -->
+              <div class="relative">
+                <button @click="handleNotifications" class="p-2 sm:p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-white/20 transition-all duration-200 relative group">
+                  <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.828 7l2.586 2.586a2 2 0 002.828 0L12.828 7H4.828zM4 7h8l-2 2H6l-2-2z"></path>
+                  </svg>
+                  <span v-if="notifications.length > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 sm:h-6 sm:w-6 flex items-center justify-center font-bold animate-pulse">
+                    {{ notifications.length }}
+                  </span>
+                </button>
+              </div>
+              
+              <!-- Settings -->
+              <button @click="handleSettings" class="px-3 sm:px-6 py-2 sm:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-white/20 text-white font-medium transition-all duration-200 flex items-center space-x-1 sm:space-x-2 group">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span class="hidden sm:inline text-sm sm:text-base">Settings</span>
+              </button>
+              
+              <!-- Logout -->
+              <button @click="handleLogout" class="px-3 sm:px-6 py-2 sm:py-3 bg-red-500/20 hover:bg-red-500/30 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-red-400/30 text-white font-medium transition-all duration-200 flex items-center space-x-1 sm:space-x-2 group">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                <span class="hidden sm:inline text-sm sm:text-base">Logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -53,44 +98,70 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Left Column - Quick Actions -->
         <div class="lg:col-span-2 space-y-8">
-          <!-- Quick Actions -->
-          <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md rounded-2xl p-6 border border-white/20 dark:border-secondary-700/20">
-            <h2 class="text-xl font-semibold text-secondary-900 dark:text-white mb-6">Quick Actions</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <router-link to="/diagnose" class="group p-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl text-white hover:from-primary-600 hover:to-primary-700 transition-all duration-200 transform hover:scale-105">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h3 class="text-lg font-semibold mb-2">AI Diagnosis</h3>
-                    <p class="text-primary-100 text-sm">Get instant car diagnosis</p>
+          <!-- Modern Quick Actions -->
+          <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-8 border border-white/20 dark:border-slate-700/50 shadow-2xl hover:shadow-3xl transition-all duration-300">
+            <div class="flex items-center mb-8">
+              <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Quick Actions</h2>
+                <p class="text-slate-600 dark:text-slate-400">Access your most used features</p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <!-- AI Diagnosis -->
+              <router-link to="/diagnose" class="group p-6 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl text-white hover:from-blue-600 hover:via-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                <div class="flex flex-col items-center text-center">
+                  <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
                   </div>
-                  <svg class="w-8 h-8 text-primary-200 group-hover:text-white transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
+                  <h3 class="text-lg font-semibold mb-2">AI Diagnosis</h3>
+                  <p class="text-blue-100 text-sm">Instant car analysis</p>
                 </div>
               </router-link>
 
-              <router-link to="/my-cars" class="group p-6 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-xl text-white hover:from-secondary-600 hover:to-secondary-700 transition-all duration-200 transform hover:scale-105">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h3 class="text-lg font-semibold mb-2">My Cars</h3>
-                    <p class="text-secondary-100 text-sm">Manage your vehicles</p>
+              <!-- My Cars -->
+              <router-link to="/my-cars" class="group p-6 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 rounded-2xl text-white hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                <div class="flex flex-col items-center text-center">
+                  <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
                   </div>
-                  <svg class="w-8 h-8 text-secondary-200 group-hover:text-white transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                  </svg>
+                  <h3 class="text-lg font-semibold mb-2">My Cars</h3>
+                  <p class="text-emerald-100 text-sm">Manage vehicles</p>
                 </div>
               </router-link>
 
-
-              <div @click="handleHistory" class="group p-6 bg-gradient-to-br from-success-500 to-success-600 rounded-xl text-white hover:from-success-600 hover:to-success-700 transition-all duration-200 transform hover:scale-105 cursor-pointer">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h3 class="text-lg font-semibold mb-2">History</h3>
-                    <p class="text-success-100 text-sm">View past diagnoses</p>
+              <!-- Car Parts Store -->
+              <router-link to="/car-parts" class="group p-6 bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 rounded-2xl text-white hover:from-orange-600 hover:via-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                <div class="flex flex-col items-center text-center">
+                  <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>
                   </div>
-                  <svg class="w-8 h-8 text-success-200 group-hover:text-white transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
+                  <h3 class="text-lg font-semibold mb-2">Parts Store</h3>
+                  <p class="text-orange-100 text-sm">Buy car parts</p>
+                </div>
+              </router-link>
+
+              <!-- Live Chat -->
+              <div @click="toggleLiveChat" class="group p-6 bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-600 rounded-2xl text-white hover:from-purple-600 hover:via-indigo-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl cursor-pointer">
+                <div class="flex flex-col items-center text-center">
+                  <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="text-lg font-semibold mb-2">Live Chat</h3>
+                  <p class="text-purple-100 text-sm">Get support</p>
                 </div>
               </div>
             </div>
@@ -141,22 +212,91 @@
             </div>
           </div>
 
-          <!-- Recent Activity -->
-          <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md rounded-2xl p-6 border border-white/20 dark:border-secondary-700/20">
-            <h2 class="text-xl font-semibold text-secondary-900 dark:text-white mb-6">Recent Activity</h2>
+          <!-- Maintenance Reminders -->
+          <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-8 border border-white/20 dark:border-slate-700/50 shadow-2xl hover:shadow-3xl transition-all duration-300">
+            <div class="flex items-center mb-8">
+              <div class="w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Maintenance Reminders</h2>
+                <p class="text-slate-600 dark:text-slate-400">Keep your vehicles in top condition</p>
+              </div>
+            </div>
+            
             <div class="space-y-4">
-              <div v-for="activity in recentActivity" :key="activity.id" class="flex items-center space-x-4 p-4 bg-secondary-50 dark:bg-secondary-700/50 rounded-lg">
-                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-                  <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div v-for="reminder in maintenanceReminders" :key="reminder.id" class="p-6 bg-gradient-to-r from-amber-50 via-orange-50 to-red-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-red-900/20 rounded-2xl border border-amber-200 dark:border-amber-700/50 hover:shadow-lg transition-all duration-200">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center" :class="getReminderUrgencyClass(reminder.urgency)">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-slate-900 dark:text-white">{{ reminder.title }}</h4>
+                      <p class="text-sm text-slate-600 dark:text-slate-400">{{ reminder.carName }} • {{ reminder.description }}</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-sm font-medium" :class="getReminderUrgencyTextClass(reminder.urgency)">
+                      {{ reminder.dueDate }}
+                    </div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                      {{ reminder.mileage }} km
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div v-if="maintenanceReminders.length === 0" class="text-center py-8">
+                <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                 </div>
-                <div class="flex-1">
-                  <h4 class="text-sm font-medium text-secondary-900 dark:text-white">{{ activity.title }}</h4>
-                  <p class="text-xs text-secondary-600 dark:text-secondary-400">{{ activity.description }}</p>
-                </div>
-                <div class="text-xs text-secondary-500 dark:text-secondary-500">
-                  {{ activity.time }}
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">All caught up!</h3>
+                <p class="text-slate-600 dark:text-slate-400">No maintenance reminders at this time.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Insights & Recommendations -->
+          <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-8 border border-white/20 dark:border-slate-700/50 shadow-2xl hover:shadow-3xl transition-all duration-300">
+            <div class="flex items-center mb-8">
+              <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">AI Insights</h2>
+                <p class="text-slate-600 dark:text-slate-400">Smart recommendations for your vehicles</p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div v-for="insight in aiInsights" :key="insight.id" class="p-6 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-indigo-900/20 rounded-2xl border border-purple-200 dark:border-purple-700/50 hover:shadow-lg transition-all duration-200">
+                <div class="flex items-start space-x-4">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center" :class="getInsightTypeClass(insight.type)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getInsightIcon(insight.type)"></path>
+                    </svg>
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-slate-900 dark:text-white mb-2">{{ insight.title }}</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mb-3">{{ insight.description }}</p>
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs px-3 py-1 rounded-full" :class="getInsightPriorityClass(insight.priority)">
+                        {{ insight.priority }}
+                      </span>
+                      <button v-if="insight.action" @click="handleInsightAction(insight)" class="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
+                        {{ insight.action }}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -170,8 +310,9 @@
             <h2 class="text-xl font-semibold text-secondary-900 dark:text-white mb-6">Profile</h2>
             <div class="space-y-4">
               <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center">
-                  <span class="text-white font-bold text-lg">{{ userInitials }}</span>
+                <div class="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center overflow-hidden">
+                  <span v-if="!user?.avatar" class="text-white font-bold text-lg">{{ userInitials }}</span>
+                  <img v-else :src="`/storage/${user.avatar}`" :alt="user?.first_name || user?.name" class="w-full h-full object-cover">
                 </div>
                 <div>
                   <h3 class="font-semibold text-secondary-900 dark:text-white">{{ user?.full_name || user?.name }}</h3>
@@ -416,6 +557,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Live Chat Widget -->
+    <LiveChatWidget :is-cart-open="false" />
   </div>
 </template>
 
@@ -423,13 +567,86 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { authAPI, carsAPI, diagnosisAPI, dashboardAPI } from '../services/api'
+import { useAuth } from '../composables/useAuth'
+import LiveChatWidget from '../components/LiveChatWidget.vue'
 
 export default {
   name: 'Dashboard',
+  components: {
+    LiveChatWidget
+  },
   setup() {
     const router = useRouter()
-    const user = ref(null)
     const isLoading = ref(true)
+    
+    // Use the global auth state
+    const { user, isAuthenticated, checkAuth } = useAuth()
+    
+    // Weather data
+    const weather = ref({
+      temperature: 22,
+      condition: 'Sunny',
+      humidity: 65,
+      windSpeed: 12
+    })
+    
+    // Maintenance reminders
+    const maintenanceReminders = ref([
+      {
+        id: 1,
+        title: 'Oil Change Due',
+        carName: 'Volkswagen Golf 2014',
+        description: 'Regular oil change required',
+        dueDate: 'In 3 days',
+        mileage: '295,000 km',
+        urgency: 'high'
+      },
+      {
+        id: 2,
+        title: 'Brake Inspection',
+        carName: 'BMW X3 2018',
+        description: 'Brake pads need checking',
+        dueDate: 'In 1 week',
+        mileage: '85,000 km',
+        urgency: 'medium'
+      }
+    ])
+    
+    // AI Insights
+    const aiInsights = ref([
+      {
+        id: 1,
+        type: 'maintenance',
+        title: 'Winter Preparation',
+        description: 'Based on weather data, consider winter tire installation and antifreeze check.',
+        priority: 'High',
+        action: 'View Details'
+      },
+      {
+        id: 2,
+        type: 'fuel',
+        title: 'Fuel Efficiency Tip',
+        description: 'Your driving patterns suggest 15% fuel savings with eco-driving techniques.',
+        priority: 'Medium',
+        action: 'Learn More'
+      },
+      {
+        id: 3,
+        type: 'safety',
+        title: 'Safety Check',
+        description: 'All safety systems are functioning properly. Next check due in 2 months.',
+        priority: 'Low',
+        action: 'Schedule'
+      },
+      {
+        id: 4,
+        type: 'cost',
+        title: 'Cost Optimization',
+        description: 'You could save €200/year by switching to synthetic oil for your Golf.',
+        priority: 'Medium',
+        action: 'Compare Prices'
+      }
+    ])
 
     const userInitials = computed(() => {
       if (!user.value) return 'U'
@@ -486,10 +703,13 @@ export default {
 
     const loadUserData = async () => {
       try {
-        const response = await authAPI.getUser()
-        if (response.data.success) {
-          user.value = response.data.user
+        // Check auth state first
+        await checkAuth()
+        if (isAuthenticated.value && user.value) {
           await loadStatistics()
+        } else {
+          // Redirect to login if not authenticated
+          router.push('/login')
         }
       } catch (error) {
         console.error('Error loading user data:', error)
@@ -672,6 +892,80 @@ export default {
       }
     }
 
+    // Maintenance reminder functions
+    const getReminderUrgencyClass = (urgency) => {
+      switch (urgency?.toLowerCase()) {
+        case 'high': return 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+        case 'medium': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+        case 'low': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+        default: return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+      }
+    }
+
+    const getReminderUrgencyTextClass = (urgency) => {
+      switch (urgency?.toLowerCase()) {
+        case 'high': return 'text-red-600 dark:text-red-400'
+        case 'medium': return 'text-amber-600 dark:text-amber-400'
+        case 'low': return 'text-blue-600 dark:text-blue-400'
+        default: return 'text-gray-600 dark:text-gray-400'
+      }
+    }
+
+    // AI Insights functions
+    const getInsightTypeClass = (type) => {
+      switch (type?.toLowerCase()) {
+        case 'maintenance': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+        case 'fuel': return 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+        case 'safety': return 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+        case 'cost': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+        default: return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+      }
+    }
+
+    const getInsightIcon = (type) => {
+      switch (type?.toLowerCase()) {
+        case 'maintenance': return 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z'
+        case 'fuel': return 'M13 10V3L4 14h7v7l9-11h-7z'
+        case 'safety': return 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'
+        case 'cost': return 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1'
+        default: return 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+      }
+    }
+
+    const getInsightPriorityClass = (priority) => {
+      switch (priority?.toLowerCase()) {
+        case 'high': return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+        case 'medium': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+        case 'low': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+        default: return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+      }
+    }
+
+    const handleInsightAction = (insight) => {
+      // Handle insight action based on type
+      switch (insight.type) {
+        case 'maintenance':
+          router.push('/my-cars')
+          break
+        case 'fuel':
+          alert('Fuel efficiency tips coming soon!')
+          break
+        case 'safety':
+          router.push('/diagnose')
+          break
+        case 'cost':
+          router.push('/car-parts')
+          break
+        default:
+          console.log('Insight action:', insight.action)
+      }
+    }
+
+    const toggleLiveChat = () => {
+      // This will be handled by the LiveChatWidget component
+      console.log('Live chat toggled')
+    }
+
     onMounted(() => {
       // Check if user is logged in
       const token = localStorage.getItem('token')
@@ -698,6 +992,9 @@ export default {
       notifications,
       isLoading,
       showNotificationsModal,
+      weather,
+      maintenanceReminders,
+      aiInsights,
       handleEditProfile,
       handleNotifications,
       closeNotificationsModal,
@@ -706,8 +1003,71 @@ export default {
       handleLogout,
       formatDate,
       getDiagnosisStatusColor,
-      getDiagnosisStatusTextColor
+      getDiagnosisStatusTextColor,
+      getReminderUrgencyClass,
+      getReminderUrgencyTextClass,
+      getInsightTypeClass,
+      getInsightIcon,
+      getInsightPriorityClass,
+      handleInsightAction,
+      toggleLiveChat
     }
   }
 }
 </script>
+
+<style scoped>
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+</style>

@@ -108,6 +108,7 @@ class DiagnosisController extends Controller
             'engine_size' => 'nullable|string|max:255',
             'description' => 'required|string|max:2000',
             'symptoms' => 'nullable|array',
+            'car_id' => 'nullable|integer|exists:cars,id',
             'photos' => 'nullable|array|max:5',
             'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max
             'videos' => 'nullable|array|max:2',
@@ -125,9 +126,13 @@ class DiagnosisController extends Controller
         }
 
         try {
+            // Log the received car_id for debugging
+            \Log::info('Diagnosis submission received car_id: ' . ($request->car_id ?? 'null'));
+            
             // Create diagnosis session
             $session = DiagnosisSession::create([
                 'user_id' => auth()->id(),
+                'car_id' => $request->car_id,
                 'session_id' => DiagnosisSession::generateSessionId(),
                 'make' => $request->make,
                 'model' => $request->model,
@@ -614,7 +619,7 @@ class DiagnosisController extends Controller
         $text = strtolower(trim($text));
         
         // Global language detection based on common words
-        $albanianWords = ['makinë', 'motor', 'problem', 'nuk', 'po', 'është', 'ka', 'me', 'të', 'nga', 'për', 'në', 'me', 'analizo', 'foto', 'dërgo', 'shpjegim', 'shqip', 'shqipe', 'baze', 'fotografis', 'pershkruaj', 'qfare', 'eshte', 'problemi', 'që', 'dhe', 'ose', 'por', 'kur', 'si', 'ku', 'cila', 'cilin', 'cilat', 'cilët'];
+        $albanianWords = ['makinë', 'motor', 'problem', 'nuk', 'po', 'është', 'ka', 'me', 'të', 'nga', 'për', 'në', 'me', 'analizo', 'foto', 'dërgo', 'shpjegim', 'shqip', 'shqipe', 'baze', 'fotografis', 'pershkruaj', 'qfare', 'eshte', 'problemi', 'që', 'dhe', 'ose', 'por', 'kur', 'si', 'ku', 'cila', 'cilin', 'cilat', 'cilët', 'vetures', 'duke', 'bazuar', 'foton', 'dergova', 'pershkruaj', 'problemin', 'vetures', 'duke', 'bazuar', 'foton', 'qe', 'dergova', 'vetura', 'automjeti', 'shqip', 'shqipe', 'gjuhen', 'shqipe'];
         $germanWords = ['auto', 'motor', 'problem', 'nicht', 'ist', 'hat', 'mit', 'von', 'für', 'in', 'das', 'der', 'die', 'und', 'oder', 'wenn', 'wie', 'wo', 'was', 'welche', 'welcher', 'welches'];
         $frenchWords = ['voiture', 'moteur', 'problème', 'ne', 'pas', 'est', 'a', 'avec', 'de', 'pour', 'dans', 'le', 'la', 'et', 'ou', 'quand', 'comment', 'où', 'que', 'quelle', 'quel', 'quels', 'quelles'];
         $spanishWords = ['motor', 'problema', 'ruido', 'potencia', 'coche', 'auto', 'vehículo', 'tiene', 'hace', 'ha', 'perdido', 'mucho', 'el', 'la', 'de', 'en', 'con', 'por', 'para', 'que', 'como', 'cuando', 'donde', 'cual', 'cuales'];
@@ -875,4 +880,5 @@ class DiagnosisController extends Controller
         
         return $method->invoke($aiService, $result, $language);
     }
+
 }

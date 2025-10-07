@@ -46,3 +46,5 @@ class CarBrandFactory extends Factory
     }
 }
 
+
+

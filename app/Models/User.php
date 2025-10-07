@@ -113,6 +113,26 @@ class User extends Authenticatable
         return $this->belongsTo(Currency::class, 'preferred_currency_id');
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function wishlist()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function searchHistory()
+    {
+        return $this->hasMany(SearchHistory::class);
+    }
+
+    public function savedSearches()
+    {
+        return $this->hasMany(SavedSearch::class);
+    }
+
     public function isMechanic()
     {
         return $this->role === 'mechanic';

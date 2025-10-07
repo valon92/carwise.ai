@@ -19,11 +19,11 @@ class DatabaseSeeder extends Seeder
         // Seed car models (depends on brands)
         $this->call(CarModelsSeeder::class);
         
-        // Seed car parts
-        $this->call(CarPartsSeeder::class);
-        
-        // Seed authorized companies
+        // Seed authorized companies first (required for car parts)
         $this->call(AuthorizedCompaniesSeeder::class);
+        
+        // Seed car parts (depends on authorized companies)
+        $this->call(CarPartsSeeder::class);
 
         // Seed mechanics from major cities worldwide
         $this->call(MechanicSeeder::class);
