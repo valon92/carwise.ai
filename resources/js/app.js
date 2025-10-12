@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import './assets/main.css'
+import { useAnalytics } from './composables/useAnalytics'
 
 // Lazy load views for better performance
 const Home = () => import('./views/Home.vue')
@@ -17,6 +18,8 @@ const DiagnosisHistory = () => import('./views/DiagnosisHistory.vue')
 const PrivacyPolicy = () => import('./views/PrivacyPolicy.vue')
 const TermsOfService = () => import('./views/TermsOfService.vue')
 const CookiePolicy = () => import('./views/CookiePolicy.vue')
+const SubscriptionPlans = () => import('./views/SubscriptionPlans.vue')
+const SubscriptionDashboard = () => import('./views/SubscriptionDashboard.vue')
 
 // Lazy load components
 const Navbar = () => import('./components/Navbar.vue')
@@ -148,6 +151,26 @@ const routes = [
       description: 'Learn about our cookie usage and how to manage your preferences'
     }
   },
+  { 
+    path: '/subscription/plans', 
+    name: 'SubscriptionPlans', 
+    component: SubscriptionPlans,
+    meta: { 
+      title: 'Subscription Plans - CarWise AI',
+      description: 'Choose the perfect subscription plan for your needs',
+      requiresAuth: true
+    }
+  },
+  { 
+    path: '/subscription/dashboard', 
+    name: 'SubscriptionDashboard', 
+    component: SubscriptionDashboard,
+    meta: { 
+      title: 'Subscription Dashboard - CarWise AI',
+      description: 'Manage your subscription and billing information',
+      requiresAuth: true
+    }
+  },
 ]
 
 const router = createRouter({
@@ -166,6 +189,15 @@ router.beforeEach((to, from, next) => {
     if (metaDescription) {
       metaDescription.setAttribute('content', to.meta.description)
     }
+  }
+
+  // Track page view with Google Analytics
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'page_view', {
+      page_title: to.meta.title || to.name,
+      page_location: window.location.href,
+      page_path: to.path
+    })
   }
 
   // Check authentication for protected routes

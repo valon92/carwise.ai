@@ -88,6 +88,18 @@ export function useAuth() {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       
+      // Clear diagnosis form data when user logs out
+      localStorage.removeItem('diagnosis_form_data')
+      localStorage.removeItem('selectedCarForDiagnosis')
+      localStorage.removeItem('lastDiagnosisResult')
+      localStorage.removeItem('lastDiagnosisSession')
+      localStorage.removeItem('diagnosisCache')
+      
+      // Clear session storage as well
+      sessionStorage.removeItem('diagnosisCache')
+      
+      console.log('🧹 Cleared diagnosis form data on logout')
+      
       if (window.$notify) {
         window.$notify.info('Logged Out', 'You have been successfully logged out')
       }
@@ -170,3 +182,4 @@ const initializeAuth = () => {
 
 // Auto-initialize on module load
 initializeAuth()
+

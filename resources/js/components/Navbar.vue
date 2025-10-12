@@ -145,6 +145,17 @@
                 </router-link>
                 
                 <router-link 
+                  to="/subscription/dashboard" 
+                  class="flex items-center px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors duration-200"
+                  @click="userDropdownOpen = false"
+                >
+                  <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                  </svg>
+                  Subscription
+                </router-link>
+                
+                <router-link 
                   v-if="user?.role === 'admin'"
                   to="/admin" 
                   class="flex items-center px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors duration-200"
@@ -420,3 +431,13 @@ export default {
   @apply text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20;
 }
 </style>
+
+}
+
+.mobile-nav-link {
+  @apply block px-3 py-2 rounded-lg text-base font-medium text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-200;
+}
+
+.mobile-nav-link-active {
+  @apply text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20;
+}
