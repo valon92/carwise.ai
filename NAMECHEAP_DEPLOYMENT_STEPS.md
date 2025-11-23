@@ -159,3 +159,10 @@
 - **Backups**: Setup automated backups
 - **Updates**: Keep Laravel dhe dependencies updated
 
+
+
+
+
+
+
+

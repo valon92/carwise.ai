@@ -372,3 +372,10 @@ Backend (Laravel)
 
 **Sistemi është gati për përdorim dhe mund të integrohet lehtësisht me sistemet ekzistuese të inventarit!** 🚗✨
 
+
+
+
+
+
+
+

@@ -320,3 +320,10 @@ zip -r carwise-deployment.zip . -x "node_modules/*" ".git/*" "storage/logs/*" "s
 4. **Monitor resource usage**
 5. **Use staging environment** for testing
 
+
+
+
+
+
+
+

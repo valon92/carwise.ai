@@ -254,3 +254,10 @@ php artisan view:cache
 - Check error logs
 - Update dependencies quarterly
 
+
+
+
+
+
+
+

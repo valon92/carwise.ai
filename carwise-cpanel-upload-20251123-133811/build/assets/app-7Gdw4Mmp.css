@@ -1,0 +1,1 @@
+*{transition:background-color .3s ease,border-color .3s ease,color .3s ease}.focus-visible:focus{outline:2px solid #0ea5e9;outline-offset:2px}.router-enter-active,.router-leave-active{transition:all .3s ease}.router-enter-from{opacity:0;transform:translateY(20px)}.router-leave-to{opacity:0;transform:translateY(-20px)}

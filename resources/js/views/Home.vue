@@ -79,6 +79,9 @@
       </div>
     </section>
 
+    <!-- Latest Vehicles Carousel -->
+    <LatestVehiclesCarousel />
+
     <!-- How It Works Section -->
     <section class="py-24 bg-white/90 backdrop-blur-xl">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -406,9 +409,13 @@
 
 <script>
 import { ref, onMounted } from 'vue'
+import LatestVehiclesCarousel from '@/components/LatestVehiclesCarousel.vue'
 
 export default {
   name: 'Home',
+  components: {
+    LatestVehiclesCarousel
+  },
   setup() {
     const isVisible = ref(false)
 

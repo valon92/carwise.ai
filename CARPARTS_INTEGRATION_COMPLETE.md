@@ -253,3 +253,10 @@ const createPart = (partData, partType) => {
 **Problema e raportuar është zgjidhur plotësisht!** 🎉
 
 
+
+
+
+
+
+
+

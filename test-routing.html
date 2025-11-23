@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CarWise.ai Routing</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>CarWise.ai Routing Test</h1>
+    
+    <div class="test-section info">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Open browser DevTools (F12)</li>
+            <li>Go to Console tab</li>
+            <li>Click the test buttons below</li>
+            <li>Check console for any errors</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Routes:</h3>
+        <button onclick="testRoute('/')">Test Home</button>
+        <button onclick="testRoute('/dashboard')">Test Dashboard</button>
+        <button onclick="testRoute('/subscription/dashboard')">Test Subscription Dashboard</button>
+        <button onclick="testRoute('/subscription/plans')">Test Subscription Plans</button>
+        <button onclick="testRoute('/login')">Test Login</button>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Authentication:</h3>
+        <button onclick="checkAuth()">Check Auth Status</button>
+        <button onclick="testLogin()">Test Login (Mock)</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        function testRoute(route) {
+            console.log(`Testing route: ${route}`);
+            const url = `http://127.0.0.1:8000${route}`;
+            
+            fetch(url)
+                .then(response => {
+                    console.log(`Response for ${route}:`, response.status, response.statusText);
+                    addResult(`Route ${route}: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                    
+                    if (response.ok) {
+                        return response.text();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                })
+                .then(html => {
+                    const hasVue = html.includes('app.js');
+                    const hasVite = html.includes('vite');
+                    console.log(`Vue.js loaded: ${hasVue}, Vite loaded: ${hasVite}`);
+                    addResult(`Vue.js: ${hasVue ? 'Loaded' : 'Not loaded'}, Vite: ${hasVite ? 'Loaded' : 'Not loaded'}`, hasVue ? 'success' : 'error');
+                })
+                .catch(error => {
+                    console.error(`Error testing ${route}:`, error);
+                    addResult(`Error: ${error.message}`, 'error');
+                });
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            console.log('Auth check:', { token: !!token, user: !!user });
+            
+            if (token && user) {
+                try {
+                    const userData = JSON.parse(user);
+                    addResult(`Authenticated as: ${userData.name || userData.email}`, 'success');
+                } catch (e) {
+                    addResult('Invalid user data in localStorage', 'error');
+                }
+            } else {
+                addResult('Not authenticated', 'info');
+            }
+        }
+
+        function testLogin() {
+            // Mock login for testing
+            const mockUser = {
+                id: 1,
+                name: 'Test User',
+                email: 'test@example.com',
+                role: 'user'
+            };
+            
+            localStorage.setItem('token', 'mock-token-123');
+            localStorage.setItem('user', JSON.stringify(mockUser));
+            
+            addResult('Mock login successful', 'success');
+            console.log('Mock login completed');
+        }
+
+        function addResult(message, type) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            results.appendChild(div);
+        }
+
+        // Auto-check auth on load
+        window.addEventListener('load', () => {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>
+
+
+
+

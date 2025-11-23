@@ -458,3 +458,10 @@ For offline functionality issues:
 **CarWise.ai Offline System** - A Robust Offline-First Application
 Built with ❤️ using Vue.js, Service Workers, and IndexedDB
 
+
+
+
+
+
+
+

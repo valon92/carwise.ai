@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue Test</title>
+</head>
+<body>
+    <div id="app">
+        <h1>Testing Vue.js Loading...</h1>
+        <p>If you see this message, Vue.js is not loading properly.</p>
+    </div>
+
+    <script type="module">
+        console.log('Testing Vue.js...');
+        
+        // Test if Vue is available
+        import { createApp } from 'vue';
+        
+        const app = createApp({
+            data() {
+                return {
+                    message: 'Vue.js is working!'
+                }
+            },
+            template: `
+                <div>
+                    <h1>{{ message }}</h1>
+                    <p>Current time: {{ new Date().toLocaleTimeString() }}</p>
+                    <button @click="message = 'Button clicked!'">Click me</button>
+                </div>
+            `
+        });
+        
+        app.mount('#app');
+        console.log('Vue.js app mounted successfully!');
+    </script>
+</body>
+</html>
+
+
+
+
+

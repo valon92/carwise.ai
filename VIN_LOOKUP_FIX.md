@@ -209,3 +209,10 @@ Expected: Show vehicle data and parts
 - Fallback system siguron 100% success rate
 - User experience është përmirësuar ndjeshëm
 
+
+
+
+
+
+
+
