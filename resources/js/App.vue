@@ -5,6 +5,7 @@
       <router-view />
     </main>
     <Footer />
+    <BackToTop />
     
     <!-- Notification System -->
     <NotificationSystem />
@@ -60,12 +61,21 @@ const NotificationSystem = defineAsyncComponent({
   timeout: 2000
 })
 
+const BackToTop = defineAsyncComponent({
+  loader: () => import('./components/BackToTop.vue'),
+  loadingComponent: { template: '<div></div>' },
+  errorComponent: { template: '<div></div>' },
+  delay: 200,
+  timeout: 2000,
+})
+
 export default {
   name: 'App',
   components: {
     Navbar,
     Footer,
-    NotificationSystem
+    NotificationSystem,
+    BackToTop
   },
   setup() {
     const isDarkMode = ref(false)

@@ -15,13 +15,15 @@
       <div class="text-center mb-16">
         <div class="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-6">
           <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse mr-3"></div>
-          <span class="text-white/90 text-sm font-medium">Latest Releases</span>
+          <span class="text-white/90 text-sm font-medium">{{ listingTier === 'luxury' ? 'Verified listings' : 'Latest Releases' }}</span>
         </div>
         <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-          New Vehicles in Market
+          {{ listingTier === 'luxury' ? 'Luxury vehicles for sale' : 'New Vehicles in Market' }}
         </h2>
         <p class="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed">
-          Discover the latest models from top manufacturers
+          {{ listingTier === 'luxury'
+            ? 'Real dealer inventory, sorted by price — continue on the seller’s secure site to purchase.'
+            : 'Discover the latest models from top manufacturers' }}
         </p>
       </div>
 
@@ -57,23 +59,27 @@
                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   @error="handleImageError"
                 />
-                <!-- Badge -->
-                <div class="absolute top-2 left-2">
-                  <span class="px-2 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full text-white text-xs font-semibold">
-                    New
+                <div
+                  class="absolute inset-x-2 top-2 flex justify-between items-start gap-2 pointer-events-none z-[1]"
+                >
+                  <span
+                    class="shrink min-w-0 max-w-[55%] px-2 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full text-white text-xs font-semibold capitalize truncate shadow-sm"
+                    :title="cardBadgeLabel(vehicle)"
+                  >
+                    {{ cardBadgeLabel(vehicle) }}
                   </span>
-                </div>
-                <!-- Manufacturer Badge -->
-                <div class="absolute top-2 right-2">
-                  <span class="px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs font-semibold border border-white/30">
+                  <span
+                    class="shrink-0 max-w-[42%] px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs font-semibold border border-white/30 truncate text-right shadow-sm"
+                    :title="vehicle.manufacturer"
+                  >
                     {{ vehicle.manufacturer }}
                   </span>
                 </div>
               </div>
 
               <!-- Content -->
-              <div class="p-4">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 text-center">
+              <div class="p-4 pt-3">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 text-center break-words px-0.5">
                   {{ vehicle.name }}
                 </h3>
                 
@@ -112,14 +118,14 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="!loading" class="text-center py-20">
+      <div v-else-if="!loading" class="text-center py-20 max-w-xl mx-auto px-4">
         <div class="inline-flex items-center justify-center w-20 h-20 bg-white/10 backdrop-blur-sm rounded-full mb-6">
           <svg class="w-10 h-10 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
           </svg>
         </div>
-        <p class="text-white/80 text-lg font-medium mb-2">No vehicles available at the moment.</p>
-        <p class="text-white/60 text-sm">Please check back later or contact support.</p>
+        <p class="text-white/80 text-lg font-medium mb-2">{{ emptyTitle }}</p>
+        <p class="text-white/60 text-sm leading-relaxed">{{ emptySubtitle }}</p>
       </div>
     </div>
 
@@ -148,6 +154,7 @@
               :src="selectedVehicle.image_url"
               :alt="selectedVehicle.name"
               class="w-full h-full object-cover"
+              @error="handleImageError"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             <div class="absolute bottom-6 left-6 right-6">
@@ -295,14 +302,26 @@
             </div>
 
             <!-- Price -->
-            <div v-if="selectedVehicle.price" class="flex items-center justify-between p-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl">
+            <div v-if="selectedVehicle.price" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl">
               <div>
-                <p class="text-white/80 text-sm mb-1">Starting Price</p>
+                <p class="text-white/80 text-sm mb-1">Listed price</p>
                 <p class="text-3xl font-bold text-white">{{ formatPrice(selectedVehicle.price, selectedVehicle.currency) }}</p>
               </div>
-              <button class="px-8 py-3 bg-white text-blue-600 rounded-2xl font-semibold hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                Contact Dealer
-              </button>
+              <a
+                v-if="listingPurchaseUrl(selectedVehicle)"
+                :href="listingPurchaseUrl(selectedVehicle)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex justify-center px-8 py-3 bg-white text-blue-600 rounded-2xl font-semibold hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl text-center"
+              >
+                Continue to seller
+              </a>
+              <span
+                v-else
+                class="inline-flex justify-center px-8 py-3 bg-white/20 text-white rounded-2xl font-semibold text-center text-sm"
+              >
+                Listing link unavailable
+              </span>
             </div>
           </div>
         </div>
@@ -317,7 +336,33 @@ import api from '../services/api'
 
 const vehicles = ref([])
 const loading = ref(true)
+const listSource = ref('')
+const listingTier = ref('')
+const apiMessage = ref('')
 const selectedVehicle = ref(null)
+
+const emptyTitle = computed(() => {
+  if (listSource.value === 'not_configured') {
+    return 'Live inventory is not configured'
+  }
+  if (listSource.value === 'error') {
+    return 'Unable to load listings'
+  }
+  if (listSource.value === 'marketcheck') {
+    return 'No live listings to show right now'
+  }
+  return 'No vehicles available at the moment.'
+})
+
+const emptySubtitle = computed(() => {
+  if (apiMessage.value) {
+    return apiMessage.value
+  }
+  if (listSource.value === 'not_configured') {
+    return 'Add your MarketCheck API key and a US ZIP (or latitude/longitude) in .env, then clear config cache.'
+  }
+  return 'Please check back later or contact support.'
+})
 const carouselRef = ref(null)
 const canScrollLeft = ref(false)
 const canScrollRight = ref(true)
@@ -325,19 +370,41 @@ const canScrollRight = ref(true)
 const fetchVehicles = async () => {
   try {
     loading.value = true
+    console.log('Fetching vehicles from /latest-vehicles/featured')
     const response = await api.get('/latest-vehicles/featured')
-    console.log('API Response:', response.data)
-    if (response.data && response.data.success) {
-      vehicles.value = response.data.data
-      console.log('Vehicles loaded:', vehicles.value.length)
+    console.log('API Response:', response)
+    console.log('API Response Data:', response.data)
+    
+    if (response && response.data) {
+      listSource.value = response.data.source || ''
+      listingTier.value = response.data.listing_tier || ''
+      apiMessage.value = response.data.message || ''
+      if (response.data.success && Array.isArray(response.data.data)) {
+        vehicles.value = response.data.data
+        console.log('Vehicles loaded successfully:', vehicles.value.length)
+      } else if (Array.isArray(response.data)) {
+        // Handle case where API returns array directly
+        vehicles.value = response.data
+        console.log('Vehicles loaded (direct array):', vehicles.value.length)
+      } else {
+        console.warn('API response format unexpected:', response.data)
+        vehicles.value = []
+      }
     } else {
-      console.warn('API response format unexpected:', response.data)
+      console.warn('No response data received')
+      vehicles.value = []
     }
   } catch (error) {
     console.error('Error fetching vehicles:', error)
     console.error('Error details:', error.response?.data || error.message)
+    console.error('Error stack:', error.stack)
+    vehicles.value = []
+    listSource.value = 'error'
+    listingTier.value = ''
+    apiMessage.value = error.response?.data?.message || 'Could not load vehicle listings.'
   } finally {
     loading.value = false
+    console.log('Loading complete. Vehicles count:', vehicles.value.length)
   }
 }
 
@@ -349,17 +416,38 @@ const updateScrollPosition = () => {
   canScrollRight.value = scrollLeft < scrollWidth - clientWidth - 10
 }
 
+const listingPurchaseUrl = (vehicle) => {
+  if (!vehicle) return null
+  return vehicle.cta_url || vehicle.vdp_url || null
+}
+
+/** Avoid misleading "Live" on DB demos; real MarketCheck rows use inventory_type when present. */
+const cardBadgeLabel = (vehicle) => {
+  if (!vehicle) return 'Featured'
+  if (listSource.value === 'marketcheck') {
+    const t = vehicle.inventory_type
+    if (t != null && String(t).trim() !== '') {
+      return String(t).trim()
+    }
+    return 'Listed'
+  }
+  return 'Featured'
+}
+
 const formatPrice = (price, currency = 'EUR') => {
   if (!price) return 'N/A'
   const numPrice = typeof price === 'string' ? parseFloat(price) : price
+  const cur = currency || 'EUR'
+  const sym = cur === 'USD' ? '$' : '€'
   if (numPrice >= 1000000) {
-    return `€${(numPrice / 1000000).toFixed(1)}M`
-  } else if (numPrice >= 1000) {
-    return `€${(numPrice / 1000).toFixed(0)}K`
+    return `${sym}${(numPrice / 1000000).toFixed(1)}M`
+  }
+  if (numPrice >= 1000) {
+    return `${sym}${(numPrice / 1000).toFixed(0)}K`
   }
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: currency || 'EUR',
+    currency: cur,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(numPrice)
@@ -390,7 +478,25 @@ const closeModal = () => {
 }
 
 const handleImageError = (event) => {
-  event.target.src = 'https://via.placeholder.com/800x600?text=Vehicle+Image'
+  // Prevent infinite loop - if already a placeholder or data URL, stop
+  if (event.target.src.includes('placeholder') || event.target.src.startsWith('data:') || event.target.dataset.fallback) {
+    event.target.style.display = 'none'
+    return
+  }
+  
+  // Mark as fallback to prevent retry
+  event.target.dataset.fallback = 'true'
+  
+  // Use a simple inline SVG placeholder instead of external URL
+  const svgPlaceholder = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
+    <svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+      <rect width="800" height="600" fill="#e5e7eb"/>
+      <text x="400" y="300" font-family="Arial, sans-serif" font-size="24" fill="#6b7280" text-anchor="middle" dominant-baseline="middle">Vehicle Image</text>
+    </svg>
+  `)
+  
+  event.target.src = svgPlaceholder
+  event.target.onerror = null // Prevent further error handling
 }
 
 onMounted(() => {

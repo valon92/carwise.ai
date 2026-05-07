@@ -285,247 +285,84 @@
         window.Pusher = Pusher;
         console.log('🔌 Pusher SDK loaded successfully');
     </script>
+    @endif
+
+    <!-- Suppress HTTP errors for optional API endpoints (before app.js loads) -->
+    <script>
+      // Suppress console errors for optional API endpoints
+      (function() {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          const originalFetch = window.fetch;
+          window.fetch = function(...args) {
+            const url = args[0];
+            const urlStr = typeof url === 'string' ? url : (url instanceof Request ? url.url : url.toString());
+            
+            // Check if this is an optional API endpoint
+            const isOptionalEndpoint = urlStr && (
+              urlStr.includes('/api/carapi/real-parts') ||
+              urlStr.includes('/api/carapi/models') ||
+              urlStr.includes('/api/carapi/makes')
+            );
+            
+            if (isOptionalEndpoint) {
+              return originalFetch.apply(this, args).catch(() => {
+                // Return a mock response to prevent console errors
+                return new Response(JSON.stringify({ success: false, message: 'API not configured' }), {
+                  status: 503,
+                  statusText: 'Service Unavailable',
+                  headers: { 'Content-Type': 'application/json' }
+                });
+              });
+            }
+            
+            return originalFetch.apply(this, args);
+          };
+          
+          // Suppress console.error for optional endpoints
+          const originalError = console.error;
+          console.error = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('/api/carapi/real-parts') || 
+                message.includes('/api/carapi/models') ||
+                message.includes('/api/carapi/makes') ||
+                (message.includes('404') && message.includes('carapi')) ||
+                (message.includes('503') && message.includes('carapi'))) {
+              return; // Suppress
+            }
+            originalError.apply(console, args);
+          };
+        }
+      })();
+    </script>
 
     <!-- Styles / Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <!-- PWA Service Worker Registration -->
+    <!-- PWA Service Worker Registration (disabled on localhost/dev) -->
     <script>
         // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                        console.log('[PWA] Service Worker registered successfully:', registration.scope);
-                        
-                        // Check for updates
-                        registration.addEventListener('updatefound', function() {
-                            const newWorker = registration.installing;
-                            if (newWorker) {
-                                newWorker.addEventListener('statechange', function() {
-                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                        // New content is available, show update notification
-                                        console.log('[PWA] New content available, please refresh.');
-                                        if (confirm('New version available! Refresh to update?')) {
-                                            window.location.reload();
-                                        }
-                                    }
+                const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+                const isDevEnv = {{ app()->environment('local') ? 'true' : 'false' }};
+
+                // In dev/localhost: always unregister and do NOT register.
+                if (isLocalhost || isDevEnv) {
+                    navigator.serviceWorker.getRegistrations()
+                        .then((regs) => Promise.all(regs.map((r) => r.unregister())))
+                        .then(() => {
+                            console.log('[PWA] Service Worker disabled on localhost/dev (unregistered).');
+                            // Also clear any cached service workers
+                            if ('caches' in window) {
+                                caches.keys().then(names => {
+                                    names.forEach(name => caches.delete(name));
                                 });
                             }
-                        });
-                    })
-                    .catch(function(error) {
-                        console.log('[PWA] Service Worker registration failed:', error);
-                    });
-            });
-        }
-        
-        // PWA Install Prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', function(e) {
-            console.log('[PWA] Install prompt triggered');
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // Show install button or notification
-            if (window.showInstallPrompt) {
-                window.showInstallPrompt();
-            }
-        });
-        
-        // PWA Installed
-        window.addEventListener('appinstalled', function() {
-            console.log('[PWA] App was installed');
-            deferredPrompt = null;
-        });
-        
-        // Connection status
-        window.addEventListener('online', function() {
-            console.log('[PWA] Back online');
-            document.body.classList.remove('offline');
-        });
-        
-        window.addEventListener('offline', function() {
-            console.log('[PWA] Gone offline');
-            document.body.classList.add('offline');
-        });
-        
-        // Initial connection status
-        if (!navigator.onLine) {
-            document.body.classList.add('offline');
-        }
-    </script>
-</head>
-<body class="font-sans antialiased">
-    <div id="app"></div>
-</body>
-</html>
-
-                
-                return event;
-            },
-        });
-        
-        // Set user context if available
-        const user = localStorage.getItem('user');
-        if (user) {
-            try {
-                const userData = JSON.parse(user);
-                Sentry.setUser({
-                    id: userData.id,
-                    email: userData.email,
-                    username: userData.name || userData.first_name,
-                    role: userData.role || 'customer'
-                });
-            } catch (e) {
-                console.warn('Failed to parse user data for Sentry:', e);
-            }
-        }
-        
-        console.log('🔍 Sentry initialized successfully');
-    </script>
-    @endif
-
-    <!-- New Relic Browser Agent -->
-    @if(config('services.newrelic.enabled') && config('services.newrelic.license_key'))
-    <script type="text/javascript">
-        window.NREUM||(NREUM={});NREUM.info = {
-            "beacon":"bam.nr-data.net",
-            "errorBeacon":"bam.nr-data.net",
-            "licenseKey":"{{ config('services.newrelic.license_key') }}",
-            "applicationID":"{{ config('services.newrelic.account_id') }}",
-            "transactionName":"{{ config('services.newrelic.app_name', 'CarWise.ai') }}",
-            "queueTime":0,
-            "applicationTime":0,
-            "agent":"",
-            "atts":""
-        };
-    </script>
-    <script type="text/javascript" src="https://js-agent.newrelic.com/nr-1218.min.js"></script>
-    <script>
-        // Initialize New Relic
-        if (window.newrelic) {
-            // Set application name
-            window.newrelic.setApplicationID('{{ config('services.newrelic.app_name', 'CarWise.ai') }}');
-            
-            // Set user context if available
-            const user = localStorage.getItem('user');
-            if (user) {
-                try {
-                    const userData = JSON.parse(user);
-                    window.newrelic.setCustomAttribute('user_id', userData.id);
-                    window.newrelic.setCustomAttribute('user_type', userData.role || 'customer');
-                    window.newrelic.setCustomAttribute('user_email', userData.email);
-                } catch (e) {
-                    console.warn('Failed to parse user data for New Relic:', e);
+                        })
+                        .catch(() => {});
+                    return;
                 }
-            }
-            
-            // Set environment attributes
-            window.newrelic.setCustomAttribute('environment', '{{ config('app.env') }}');
-            window.newrelic.setCustomAttribute('version', '1.0.0');
-            window.newrelic.setCustomAttribute('platform', 'carwise-ai');
-            
-            console.log('📊 New Relic initialized successfully');
-        }
-    </script>
-    @endif
 
-    <!-- Firebase SDK -->
-    @if(config('services.firebase.enabled') && config('services.firebase.messaging_sender_id'))
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js';
-
-        const firebaseConfig = {
-            apiKey: "{{ config('services.firebase.api_key') }}",
-            authDomain: "{{ config('services.firebase.project_id') }}.firebaseapp.com",
-            projectId: "{{ config('services.firebase.project_id') }}",
-            storageBucket: "{{ config('services.firebase.project_id') }}.appspot.com",
-            messagingSenderId: "{{ config('services.firebase.messaging_sender_id') }}",
-            appId: "{{ config('services.firebase.app_id') }}",
-            vapidKey: "{{ config('services.firebase.vapid_key') }}"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const messaging = getMessaging(app);
-
-        // Make messaging available globally
-        window.firebase = { messaging };
-
-        // Handle foreground messages
-        onMessage(messaging, (payload) => {
-            console.log('Message received in foreground:', payload);
-            
-            // Show notification manually for foreground messages
-            if (payload.notification) {
-                const notificationTitle = payload.notification.title;
-                const notificationOptions = {
-                    body: payload.notification.body,
-                    icon: payload.notification.icon || '/icons/icon-192x192.png',
-                    badge: '/icons/icon-72x72.png',
-                    tag: 'carwise-notification',
-                    data: payload.data
-                };
-
-                if ('Notification' in window && Notification.permission === 'granted') {
-                    new Notification(notificationTitle, notificationOptions);
-                }
-            }
-        });
-
-        console.log('🔥 Firebase initialized successfully');
-    </script>
-    @endif
-
-    <!-- OneSignal SDK -->
-    @if(config('services.onesignal.enabled') && config('services.onesignal.app_id'))
-    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
-    <script>
-        window.OneSignal = window.OneSignal || [];
-        OneSignal.push(function() {
-            OneSignal.init({
-                appId: "{{ config('services.onesignal.app_id') }}",
-                allowLocalhostAsSecureOrigin: true,
-                notifyButton: {
-                    enable: false
-                },
-                promptOptions: {
-                    slidedown: {
-                        enabled: true,
-                        autoPrompt: true,
-                        timeDelay: 20,
-                        pageViews: 1,
-                        actionMessage: "We'd like to show you notifications for the latest updates.",
-                        acceptButtonText: "Allow",
-                        cancelButtonText: "No Thanks"
-                    }
-                }
-            });
-        });
-        console.log('📱 OneSignal initialized successfully');
-    </script>
-    @endif
-
-    <!-- Pusher SDK -->
-    @if(config('services.pusher.enabled') && config('services.pusher.key'))
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-    <script>
-        // Initialize Pusher globally
-        window.Pusher = Pusher;
-        console.log('🔌 Pusher SDK loaded successfully');
-    </script>
-    @endif
-
-    <!-- Styles / Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
-    <!-- PWA Service Worker Registration -->
-    <script>
-        // PWA Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
                         console.log('[PWA] Service Worker registered successfully:', registration.scope);

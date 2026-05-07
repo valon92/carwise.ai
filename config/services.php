@@ -292,4 +292,46 @@ return [
         'base_url' => env('PARTSGEEK_BASE_URL', 'https://api.partsgeek.com'),
     ],
 
+    /*
+    | MarketCheck Cars API — inventory search (e.g. /v2/search/car/active).
+    | Docs: https://docs.marketcheck.com/docs/api/cars/inventory/inventory-search
+    | Sign up: https://www.marketcheck.com/apis/cars/
+    */
+    'marketcheck' => [
+        'enabled' => filter_var(env('MARKETCHECK_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
+        'api_key' => env('MARKETCHECK_API_KEY'),
+        'inventory_photo_links' => filter_var(
+            env('MARKETCHECK_INVENTORY_PHOTO_LINKS', false),
+            FILTER_VALIDATE_BOOLEAN
+        ),
+        'base_url' => env('MARKETCHECK_BASE_URL', 'https://api.marketcheck.com'),
+        'zip' => env('MARKETCHECK_ZIP'),
+        'latitude' => env('MARKETCHECK_LATITUDE'),
+        'longitude' => env('MARKETCHECK_LONGITUDE'),
+        'radius' => env('MARKETCHECK_RADIUS', 100),
+        'rows' => env('MARKETCHECK_FEATURED_ROWS', 20),
+        'cache_ttl' => env('MARKETCHECK_CACHE_TTL', 21600),
+        'country' => env('MARKETCHECK_COUNTRY', 'us'),
+        'carousel_car_type' => env('MARKETCHECK_CAROUSEL_CAR_TYPE'),
+        'search_make' => env('MARKETCHECK_SEARCH_MAKE'),
+        'search_model' => env('MARKETCHECK_SEARCH_MODEL'),
+        'price_range' => env('MARKETCHECK_PRICE_RANGE'),
+        'price_max' => env('MARKETCHECK_PRICE_MAX'),
+        'carousel_database_fallback' => filter_var(
+            env(
+                'MARKETCHECK_CAROUSEL_DATABASE_FALLBACK',
+                env('APP_ENV', 'production') === 'local'
+            ),
+            FILTER_VALIDATE_BOOLEAN
+        ),
+        'cache_empty_ttl' => env('MARKETCHECK_CACHE_EMPTY_TTL', 600),
+        'luxury_showcase' => filter_var(env('MARKETCHECK_LUXURY_SHOWCASE', false), FILTER_VALIDATE_BOOLEAN),
+        'luxury_price_range' => env('MARKETCHECK_LUXURY_PRICE_RANGE', '125000-10000000'),
+        'luxury_makes' => env(
+            'MARKETCHECK_LUXURY_MAKES',
+            'Mercedes-Benz,BMW,Porsche,Ferrari,Lamborghini,Bentley,Rolls-Royce,Aston Martin,McLaren'
+        ),
+        'outbound_token_ttl_hours' => env('MARKETCHECK_OUTBOUND_TOKEN_TTL', 72),
+    ],
+
 ];
