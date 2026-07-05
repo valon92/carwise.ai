@@ -34,8 +34,9 @@ class AIDiagnosisService
             // If no providers are available, create a dummy provider that will use fallback
             $this->aiProvider = new class implements AIProviderInterface {
                 public function analyzeDiagnosis(array $data): array { throw new \Exception('No AI provider available'); }
-                public function getProviderInfo(): array { return ['name' => 'none', 'available' => false]; }
+                public function getProviderName(): string { return 'none'; }
                 public function isAvailable(): bool { return false; }
+                public function getEstimatedCost(array $data): float { return 0.0; }
             };
         }
     }

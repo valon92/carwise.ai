@@ -776,7 +776,11 @@
         </div>
 
         <!-- Modern Results Panel -->
-        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-8 hover:shadow-3xl transition-all duration-300">
+        <div
+          id="diagnosis-results-panel"
+          ref="resultsPanelRef"
+          class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-8 hover:shadow-3xl transition-all duration-300 scroll-mt-24"
+        >
           <div class="flex items-center justify-between mb-8">
             <div class="flex items-center">
               <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4">
@@ -1281,7 +1285,7 @@
           </div>
 
           <!-- Modern Empty State -->
-          <div v-else class="text-center py-16">
+          <div v-else class="text-center py-12 sm:py-16">
             <div class="relative mb-8">
               <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-slate-400 to-slate-500 rounded-3xl shadow-xl">
                 <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1290,13 +1294,39 @@
               </div>
               <div class="absolute -inset-4 bg-gradient-to-r from-slate-400/20 to-slate-500/20 rounded-3xl animate-pulse"></div>
             </div>
-            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Ready for AI Diagnosis</h3>
-            <p class="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto">
-              Fill out the form on the left and submit to get instant AI-powered diagnosis results for your vehicle.
-            </p>
+
+            <div v-if="!isAuthenticated" class="max-w-lg mx-auto">
+              <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Hyni për të filluar diagnostikimin</h3>
+              <p class="text-slate-600 dark:text-slate-400 mb-6">
+                Për të marrë rezultate AI, duhet të jeni të kyçur. Plotësoni formularin më sipër, pastaj hyni dhe klikoni <strong>Start AI Diagnosis</strong>.
+              </p>
+              <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  type="button"
+                  @click="router.push('/login')"
+                  class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                >
+                  Hyr në llogari
+                </button>
+                <button
+                  type="button"
+                  @click="quickLogin"
+                  class="w-full sm:w-auto px-6 py-3 border border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 font-semibold rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
+                >
+                  Demo: demo@carwise.ai
+                </button>
+              </div>
+            </div>
+
+            <div v-else>
+              <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Gati për diagnostikim AI</h3>
+              <p class="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto">
+                Plotëso formularin më sipër dhe kliko <strong>Start AI Diagnosis</strong> për të marrë analizë profesionale të automjetit tënd.
+              </p>
+            </div>
             
             <!-- Modern Quick Tips -->
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 text-left max-w-lg mx-auto border border-blue-200 dark:border-blue-700">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 text-left max-w-lg mx-auto border border-blue-200 dark:border-blue-700 mt-8">
               <h4 class="text-lg font-bold text-blue-900 dark:text-blue-100 mb-4 flex items-center">
                 <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
                   <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1394,6 +1424,13 @@ export default {
     const audioUrl = ref(null)
     const recordingStartTime = ref(null)
     const formErrors = ref([])
+    const resultsPanelRef = ref(null)
+
+    const scrollToResults = () => {
+      nextTick(() => {
+        resultsPanelRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
 
     const steps = ['Vehicle Info', 'Symptoms', 'AI Analysis', 'Results']
 
@@ -2105,6 +2142,7 @@ export default {
 
       isLoading.value = true
       currentStep.value = 2
+      scrollToResults()
 
       try {
         const formData = new FormData()
@@ -2170,6 +2208,7 @@ export default {
           diagnosisResult.value = freshResult
           currentStep.value = 3
           isLoading.value = false
+          scrollToResults()
           
           console.log('✅ RESULT SET SUCCESSFULLY')
           console.log('Current diagnosisResult:', diagnosisResult.value)
@@ -2345,8 +2384,8 @@ export default {
             'Accept': 'application/json',
           },
           body: JSON.stringify({
-            email: 'test@example.com',
-            password: 'password',
+            email: 'demo@carwise.ai',
+            password: 'password123',
             remember: true
           })
         })
@@ -2729,6 +2768,9 @@ export default {
       commonSymptoms,
       isLoading,
       diagnosisResult,
+      isAuthenticated,
+      router,
+      resultsPanelRef,
       fileInput,
       photoInput,
       videoInput,
