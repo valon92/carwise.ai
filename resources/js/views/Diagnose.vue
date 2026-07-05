@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-800">
+  <div class="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-800 overflow-x-clip">
     <!-- Background Elements -->
     <div class="absolute inset-0 overflow-hidden">
       <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-200 dark:bg-primary-800 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl opacity-70 animate-blob"></div>
@@ -127,7 +127,7 @@
         </div>
       </div>
 
-      <div class="space-y-8">
+      <div class="space-y-8 min-w-0 overflow-x-clip">
         <!-- Modern Diagnosis Form -->
         <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-8 hover:shadow-3xl transition-all duration-300">
           <div class="flex items-center mb-8">
@@ -779,30 +779,30 @@
         <div
           id="diagnosis-results-panel"
           ref="resultsPanelRef"
-          class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-8 hover:shadow-3xl transition-all duration-300 scroll-mt-24"
+          class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-4 sm:p-6 lg:p-8 hover:shadow-3xl transition-all duration-300 scroll-mt-24 overflow-x-clip max-w-full diagnosis-results"
         >
-          <div class="flex items-center justify-between mb-8">
-            <div class="flex items-center">
-              <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6 sm:mb-8">
+            <div class="flex items-start gap-3 min-w-0">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
               </div>
-              <div>
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">
+              <div class="min-w-0">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white break-words">
                   AI Diagnosis Results
                 </h2>
-                <p class="text-slate-600 dark:text-slate-400">
+                <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
                   Professional analysis powered by advanced AI
                 </p>
               </div>
             </div>
             
             <!-- Action Buttons -->
-            <div v-if="diagnosisResult" class="flex items-center space-x-3">
+            <div v-if="diagnosisResult" class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
               <button 
                 @click="exportToPDF"
-                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+                class="w-full sm:w-auto px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors duration-200 flex items-center justify-center gap-2"
                 title="Export to PDF"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -813,7 +813,7 @@
               
               <button 
                 @click="viewHistory"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+                class="w-full sm:w-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors duration-200 flex items-center justify-center gap-2"
                 title="View History"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -863,19 +863,19 @@
           </div>
 
           <!-- Modern Results State -->
-          <div v-else-if="diagnosisResult" class="space-y-6">
+          <div v-else-if="diagnosisResult" class="space-y-4 sm:space-y-6 min-w-0">
             <!-- Header Section -->
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6">
-              <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div class="flex items-center space-x-3">
-                  <div class="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full text-sm font-semibold">
+            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl border border-white/20 dark:border-slate-700/50 p-4 sm:p-6">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex flex-wrap items-center gap-2">
+                  <div class="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full text-xs sm:text-sm font-semibold">
                     {{ diagnosisResult?.ai_provider || 'AI' }} Analysis
                   </div>
                   <div class="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-medium">
                     {{ diagnosisResult.confidence_score || 85 }}% Confidence
                   </div>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center gap-2">
                   <button 
                     @click="shareResults"
                     class="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors duration-200"
@@ -901,34 +901,34 @@
             <!-- Main Content Layout -->
             <div class="space-y-6">
                 <!-- Modern Diagnosis Summary -->
-                <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                  <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-4 sm:p-6 lg:p-8 min-w-0 overflow-hidden">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+                <div class="flex items-start gap-3 min-w-0">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                     </svg>
                   </div>
-                  <div>
-                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white">AI Diagnosis Summary</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Professional analysis powered by advanced AI</p>
+                  <div class="min-w-0">
+                    <h3 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white break-words">AI Diagnosis Summary</h3>
+                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">Professional analysis powered by advanced AI</p>
                   </div>
                 </div>
-                <div class="flex items-center space-x-3">
-                  <div class="flex items-center px-3 py-1 rounded-full" :class="getSeverityBadgeClass(diagnosisResult.severity)">
-                    <div class="w-2 h-2 rounded-full mr-2" :class="getSeverityColor(diagnosisResult.severity)"></div>
-                    <span class="text-sm font-semibold" :class="getSeverityTextColor(diagnosisResult.severity)">
+                <div class="flex items-center shrink-0 self-start sm:self-auto">
+                  <div class="flex items-center px-3 py-1.5 rounded-full whitespace-nowrap" :class="getSeverityBadgeClass(diagnosisResult.severity)">
+                    <div class="w-2 h-2 rounded-full mr-2 shrink-0" :class="getSeverityColor(diagnosisResult.severity)"></div>
+                    <span class="text-xs sm:text-sm font-semibold" :class="getSeverityTextColor(diagnosisResult.severity)">
                       {{ getSeverityText(diagnosisResult.severity) }}
                     </span>
                   </div>
                 </div>
               </div>
               
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <h4 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/50 dark:border-slate-700/50 min-w-0">
+                <h4 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mb-3 sm:mb-4 break-words">
                   {{ diagnosisResult.problem_title || 'Vehicle Issue Detected' }}
                 </h4>
-                <p class="text-slate-700 dark:text-slate-300 text-lg leading-relaxed mb-6">
+                <p class="text-slate-700 dark:text-slate-300 text-base sm:text-lg leading-relaxed mb-4 sm:mb-6 break-words">
                   {{ diagnosisResult.problem_summary || diagnosisResult.problem_description || diagnosisResult.summary }}
                 </p>
                 
@@ -957,59 +957,59 @@
             </div>
 
                 <!-- AI Insights -->
-                <div v-if="diagnosisResult.ai_insights" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div v-if="diagnosisResult.ai_insights" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-4 sm:p-6 lg:p-8 min-w-0 overflow-hidden">
+              <div class="flex items-start gap-3 mb-4 sm:mb-6 min-w-0">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                   </svg>
                 </div>
-                <div>
-                  <h3 class="text-2xl font-bold text-slate-900 dark:text-white">AI Insights</h3>
-                  <p class="text-slate-600 dark:text-slate-400">Advanced analysis and recommendations</p>
+                <div class="min-w-0">
+                  <h3 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white break-words">AI Insights</h3>
+                  <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">Advanced analysis and recommendations</p>
                 </div>
               </div>
               
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
+              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/50 dark:border-slate-700/50 min-w-0">
                 <ul class="space-y-4">
-                  <li v-for="(insight, index) in diagnosisResult.ai_insights" :key="index" class="flex items-start">
-                    <div class="w-6 h-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mr-4 mt-0.5 flex-shrink-0">
-                      <span class="text-white text-sm font-bold">{{ index + 1 }}</span>
+                  <li v-for="(insight, index) in diagnosisResult.ai_insights" :key="index" class="flex items-start gap-3 min-w-0">
+                    <div class="w-6 h-6 shrink-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mt-0.5">
+                      <span class="text-white text-xs font-bold">{{ index + 1 }}</span>
                     </div>
-                    <p class="text-slate-700 dark:text-slate-300 text-lg leading-relaxed">{{ insight }}</p>
+                    <p class="text-slate-700 dark:text-slate-300 text-base sm:text-lg leading-relaxed break-words min-w-0">{{ insight }}</p>
                   </li>
                 </ul>
               </div>
             </div>
 
                 <!-- Likely Causes -->
-                <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-4 sm:p-6 lg:p-8 min-w-0 overflow-hidden">
+              <div class="flex items-start gap-3 mb-4 sm:mb-6 min-w-0">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
                   </svg>
                 </div>
-                <div>
-                  <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Likely Causes</h3>
-                  <p class="text-slate-600 dark:text-slate-400">Most probable reasons for the issue</p>
+                <div class="min-w-0">
+                  <h3 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white break-words">Likely Causes</h3>
+                  <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">Most probable reasons for the issue</p>
                 </div>
               </div>
               
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <div class="space-y-6">
-                  <div v-for="(cause, index) in (diagnosisResult.likely_causes || diagnosisResult.likelyCauses || [])" :key="index" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-orange-200 dark:border-orange-700 hover:shadow-lg transition-all duration-300">
-                    <div class="flex items-start justify-between mb-4">
-                      <div class="flex items-center">
-                        <div class="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mr-4">
+              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/50 dark:border-slate-700/50 min-w-0">
+                <div class="space-y-4 sm:space-y-6">
+                  <div v-for="(cause, index) in (diagnosisResult.likely_causes || diagnosisResult.likelyCauses || [])" :key="index" class="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-orange-200 dark:border-orange-700 hover:shadow-lg transition-shadow duration-300 min-w-0">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div class="flex items-start gap-3 min-w-0 flex-1">
+                        <div class="w-8 h-8 shrink-0 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center">
                           <span class="text-white text-sm font-bold">{{ index + 1 }}</span>
                         </div>
-                        <div>
-                          <h4 class="text-xl font-bold text-slate-900 dark:text-white">{{ cause.title || cause.cause || 'Unknown Cause' }}</h4>
-                          <p class="text-slate-600 dark:text-slate-400">{{ cause.description || cause.explanation || 'No description available' }}</p>
+                        <div class="min-w-0">
+                          <h4 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white break-words">{{ cause.title || cause.cause || 'Unknown Cause' }}</h4>
+                          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400 break-words mt-1">{{ cause.description || cause.explanation || 'No description available' }}</p>
                         </div>
                       </div>
-                      <div class="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-sm font-semibold">
+                      <div class="px-3 py-1.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap shrink-0 self-start">
                         {{ cause.probability || 75 }}% probability
                       </div>
                     </div>
@@ -1019,35 +1019,35 @@
             </div>
 
                 <!-- Recommended Actions -->
-                <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-4 sm:p-6 lg:p-8 min-w-0 overflow-hidden">
+              <div class="flex items-start gap-3 mb-4 sm:mb-6 min-w-0">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                 </div>
-                <div>
-                  <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Recommended Actions</h3>
-                  <p class="text-slate-600 dark:text-slate-400">Step-by-step solutions to fix the issue</p>
+                <div class="min-w-0">
+                  <h3 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white break-words">Recommended Actions</h3>
+                  <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">Step-by-step solutions to fix the issue</p>
                 </div>
               </div>
               
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <div class="space-y-6">
-                  <div v-for="(action, index) in (diagnosisResult.recommended_actions || diagnosisResult.recommendedActions || [])" :key="index" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-emerald-200 dark:border-emerald-700 hover:shadow-lg transition-all duration-300">
-                    <div class="flex items-start justify-between mb-4">
-                      <div class="flex items-center">
-                        <div class="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mr-4">
+              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/50 dark:border-slate-700/50 min-w-0">
+                <div class="space-y-4 sm:space-y-6">
+                  <div v-for="(action, index) in (diagnosisResult.recommended_actions || diagnosisResult.recommendedActions || [])" :key="index" class="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-emerald-200 dark:border-emerald-700 hover:shadow-lg transition-shadow duration-300 min-w-0">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div class="flex items-start gap-3 min-w-0 flex-1">
+                        <div class="w-8 h-8 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
                           <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                           </svg>
                         </div>
-                        <div>
-                          <h4 class="text-xl font-bold text-slate-900 dark:text-white">{{ action.title || action.action || 'Recommended Action' }}</h4>
-                          <p class="text-slate-600 dark:text-slate-400">{{ action.description || action.explanation || 'No description available' }}</p>
+                        <div class="min-w-0">
+                          <h4 class="text-base sm:text-xl font-bold text-slate-900 dark:text-white break-words">{{ action.title || action.action || 'Recommended Action' }}</h4>
+                          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400 break-words mt-1">{{ action.description || action.explanation || 'No description available' }}</p>
                         </div>
                       </div>
-                      <div class="px-4 py-2 rounded-full text-sm font-semibold" :class="getUrgencyBadgeClass(action.urgency)">
+                      <div class="px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap shrink-0 self-start" :class="getUrgencyBadgeClass(action.urgency)">
                         {{ action.urgency || 'Immediate' }}
                       </div>
                     </div>
@@ -1057,29 +1057,29 @@
             </div>
 
                 <!-- Estimated Costs -->
-                <div v-if="diagnosisResult.estimated_costs" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div v-if="diagnosisResult.estimated_costs" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-4 sm:p-6 lg:p-8 min-w-0 overflow-hidden">
+              <div class="flex items-start gap-3 mb-4 sm:mb-6 min-w-0">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                   </svg>
                 </div>
-                <div>
-                  <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Estimated Costs</h3>
-                  <p class="text-slate-600 dark:text-slate-400">Approximate repair costs and services</p>
+                <div class="min-w-0">
+                  <h3 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white break-words">Estimated Costs</h3>
+                  <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">Approximate repair costs and services</p>
                 </div>
               </div>
               
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div v-for="cost in diagnosisResult.estimated_costs" :key="cost.service" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-yellow-200 dark:border-yellow-700 hover:shadow-lg transition-all duration-300">
-                    <div class="flex justify-between items-center">
-                      <div>
-                        <h4 class="text-lg font-bold text-slate-900 dark:text-white">{{ cost.service }}</h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400">{{ cost.description || 'Repair service' }}</p>
+              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/50 dark:border-slate-700/50 min-w-0">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div v-for="cost in diagnosisResult.estimated_costs" :key="cost.service" class="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-yellow-200 dark:border-yellow-700 hover:shadow-lg transition-shadow duration-300 min-w-0">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-start">
+                      <div class="min-w-0">
+                        <h4 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white break-words">{{ cost.service }}</h4>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 break-words">{{ cost.description || 'Repair service' }}</p>
                       </div>
-                      <div class="text-right">
-                        <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                      <div class="sm:text-right shrink-0">
+                        <div class="text-xl sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400 whitespace-nowrap">
                           €{{ cost.min }} - €{{ cost.max }}
                         </div>
                         <div class="text-sm text-slate-500 dark:text-slate-500">{{ cost.urgency || 'Standard' }}</div>
@@ -1128,59 +1128,58 @@
             </div>
 
             <!-- Modern AI Recommended Parts -->
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                  <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-4 sm:p-6 lg:p-8 min-w-0 overflow-hidden">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+                <div class="flex items-start gap-3 min-w-0">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                     </svg>
                   </div>
-                  <div>
-                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white">AI Recommended Parts</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Smart suggestions based on your diagnosis</p>
+                  <div class="min-w-0">
+                    <h3 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white break-words">AI Recommended Parts</h3>
+                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">Smart suggestions based on your diagnosis</p>
                   </div>
                 </div>
-                <router-link to="/car-parts" class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-semibold transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <router-link to="/car-parts" class="w-full sm:w-auto shrink-0 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl sm:rounded-2xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl text-sm sm:text-base">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                   </svg>
                   Browse All Parts
                 </router-link>
               </div>
               
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <p class="text-slate-700 dark:text-slate-300 mb-6 text-lg">
+              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/50 dark:border-slate-700/50 min-w-0">
+                <p class="text-slate-700 dark:text-slate-300 mb-4 sm:mb-6 text-base sm:text-lg break-words">
                   Based on your diagnosis, here are the recommended parts you can purchase from our authorized suppliers:
                 </p>
                 
-                <!-- AI Recommended Parts -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                  <div v-for="(part, index) in getRecommendedParts()" :key="index" class="bg-white dark:bg-slate-800 rounded-2xl border border-emerald-200 dark:border-emerald-700 p-6 hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div class="flex items-start justify-between mb-4">
-                      <div class="flex-1">
-                        <h4 class="font-bold text-slate-900 dark:text-white mb-2 text-lg">{{ part.name }}</h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-2 font-medium">{{ part.brand }} - {{ part.part_number }}</p>
-                        <p class="text-sm text-slate-500 dark:text-slate-500 mb-3">{{ part.description }}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  <div v-for="(part, index) in getRecommendedParts()" :key="index" class="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl border border-emerald-200 dark:border-emerald-700 p-4 sm:p-6 hover:shadow-lg transition-shadow duration-300 min-w-0">
+                    <div class="flex items-start gap-3 mb-4 min-w-0">
+                      <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-slate-900 dark:text-white mb-1 sm:mb-2 text-base sm:text-lg break-words">{{ part.name }}</h4>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-1 sm:mb-2 font-medium break-words">{{ part.brand }} - {{ part.part_number }}</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-500 mb-2 sm:mb-3 break-words">{{ part.description }}</p>
                       </div>
-                      <div class="w-16 h-16 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-xl flex items-center justify-center ml-3">
-                        <svg class="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div class="w-12 h-12 sm:w-16 sm:h-16 shrink-0 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 sm:w-8 sm:h-8 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
                         </svg>
                       </div>
                     </div>
-                    <div class="space-y-3">
-                      <div class="flex justify-between items-center">
-                        <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">{{ part.price_range }}</span>
-                        <span class="px-3 py-1 rounded-full text-sm font-medium" :class="part.availability === 'In stock' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'">
+                    <div class="space-y-3 min-w-0">
+                      <div class="flex flex-wrap justify-between items-center gap-2">
+                        <span class="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400">{{ part.price_range }}</span>
+                        <span class="px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap" :class="part.availability === 'In stock' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'">
                           {{ part.availability }}
                         </span>
                       </div>
-                      <p class="text-sm text-slate-500 dark:text-slate-500">{{ part.compatibility }}</p>
+                      <p class="text-sm text-slate-500 dark:text-slate-500 break-words">{{ part.compatibility }}</p>
                       <p class="text-sm text-slate-500 dark:text-slate-500">Shipping: {{ part.shipping_time }}</p>
                       <button 
                         @click="searchPartInStore(part)"
-                        class="block w-full mt-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-center py-3 px-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                        class="block w-full mt-2 sm:mt-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-center py-2.5 sm:py-3 px-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
                       >
                         View in Car Parts Store
                       </button>
@@ -1191,45 +1190,44 @@
             </div>
 
             <!-- Modern Licensed Repair Videos -->
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                  <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-4 sm:p-6 lg:p-8 min-w-0 overflow-hidden">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-4 sm:mb-6">
+                <div class="flex items-start gap-3 min-w-0">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                     </svg>
                   </div>
-                  <div>
-                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Licensed Repair Videos</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Professional guides from authorized companies</p>
+                  <div class="min-w-0">
+                    <h3 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white break-words">Licensed Repair Videos</h3>
+                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">Professional guides from authorized companies</p>
                   </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                  <span class="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-sm font-semibold rounded-full">
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                  <span class="px-3 py-1.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs sm:text-sm font-semibold rounded-full whitespace-nowrap">
                     Professional Guides
                   </span>
-                  <span class="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-medium rounded-full">
+                  <span class="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-medium rounded-full whitespace-nowrap">
                     Licensed Content
                   </span>
                 </div>
               </div>
               
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <p class="text-slate-700 dark:text-slate-300 mb-6 text-lg">
+              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/50 dark:border-slate-700/50 min-w-0">
+                <p class="text-slate-700 dark:text-slate-300 mb-4 sm:mb-6 text-base sm:text-lg break-words">
                   Professional repair guides from authorized companies and certified mechanics:
                 </p>
                 
-                <!-- Licensed Repair Videos -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                  <div v-for="(video, index) in getRepairVideos()" :key="index" class="bg-white dark:bg-slate-800 rounded-2xl border border-orange-200 dark:border-orange-700 p-6 hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div class="flex items-start justify-between mb-4">
-                      <div class="flex-1">
-                        <h4 class="font-bold text-slate-900 dark:text-white mb-2 text-lg">{{ video.title }}</h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-2 font-medium">{{ video.company }}</p>
-                        <p class="text-sm text-slate-500 dark:text-slate-500 mb-3">{{ video.description }}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  <div v-for="(video, index) in getRepairVideos()" :key="index" class="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl border border-orange-200 dark:border-orange-700 p-4 sm:p-6 hover:shadow-lg transition-shadow duration-300 min-w-0">
+                    <div class="flex items-start gap-3 mb-4 min-w-0">
+                      <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-slate-900 dark:text-white mb-1 sm:mb-2 text-base sm:text-lg break-words">{{ video.title }}</h4>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-1 sm:mb-2 font-medium break-words">{{ video.company }}</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-500 mb-2 sm:mb-3 break-words">{{ video.description }}</p>
                       </div>
-                      <div class="ml-3 text-right">
-                        <span class="px-3 py-1 rounded-full text-sm font-medium" :class="getDifficultyBadgeClass(video.difficulty)">
+                      <div class="shrink-0">
+                        <span class="px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap" :class="getDifficultyBadgeClass(video.difficulty)">
                           {{ video.difficulty }}
                         </span>
                       </div>
@@ -1249,27 +1247,27 @@
                       </div>
                     </div>
                     
-                    <div class="space-y-3">
-                      <div class="flex justify-between items-center text-sm">
+                    <div class="space-y-3 min-w-0">
+                      <div class="flex flex-wrap justify-between items-center gap-2 text-sm">
                         <span class="text-slate-600 dark:text-slate-400">Duration: {{ video.duration }}</span>
                         <span class="text-slate-600 dark:text-slate-400">{{ video.estimated_time }}</span>
                       </div>
-                      <div v-if="video.licensed" class="flex items-center gap-2 text-sm">
-                        <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">
+                      <div v-if="video.licensed" class="flex flex-wrap items-center gap-2 text-sm">
+                        <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-medium whitespace-nowrap">
                           ✓ Licensed
                         </span>
-                        <span class="text-slate-500 dark:text-slate-400">{{ video.source }}</span>
+                        <span class="text-slate-500 dark:text-slate-400 break-words">{{ video.source }}</span>
                       </div>
-                      <div v-if="video.tools_required && video.tools_required.length > 0" class="text-sm text-slate-500 dark:text-slate-500">
+                      <div v-if="video.tools_required && video.tools_required.length > 0" class="text-sm text-slate-500 dark:text-slate-500 break-words">
                         <strong>Tools needed:</strong> {{ video.tools_required.join(', ') }}
                       </div>
-                      <div class="flex items-center justify-between">
+                      <div class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-sm text-slate-500 dark:text-slate-500">{{ video.views }} views</span>
                         <span class="text-sm text-slate-500 dark:text-slate-500">{{ video.rating }}/5 ⭐</span>
                       </div>
                       <button 
                         @click="openLicensedVideo(video)"
-                        class="block w-full mt-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-center py-3 px-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                        class="w-full mt-2 sm:mt-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-center py-2.5 sm:py-3 px-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base"
                       >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -2916,66 +2914,20 @@ export default {
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
 }
+
+/* Mobile-safe diagnosis results panel */
+.diagnosis-results {
+  overflow-x: clip;
+  max-width: 100%;
+  contain: inline-size;
+}
+
+.diagnosis-results :deep(h2),
+.diagnosis-results :deep(h3),
+.diagnosis-results :deep(h4),
+.diagnosis-results :deep(p),
+.diagnosis-results :deep(span) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 </style>
-
-/* Glass morphism effect */
-.glass {
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  background-color: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(209, 213, 219, 0.3);
-}
-
-.dark .glass {
-  background-color: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(71, 85, 105, 0.3);
-}
-
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Hover lift effect */
-.hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-.dark ::-webkit-scrollbar-track {
-  background: #1e293b;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #475569;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
