@@ -8,9 +8,9 @@
     leave-to-class="opacity-0 translate-y-2 scale-95"
   >
     <button
-      v-if="visible"
+      v-if="visible && !hidden"
       type="button"
-      class="fixed bottom-6 right-6 z-40 inline-flex items-center justify-center w-12 h-12 rounded-2xl border border-white/20 dark:border-secondary-700/50 bg-white/80 dark:bg-secondary-800/80 backdrop-blur-xl shadow-lg hover:shadow-xl text-secondary-800 dark:text-white hover:bg-white/90 dark:hover:bg-secondary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-secondary-900"
+      class="inline-flex items-center justify-center w-12 h-12 rounded-2xl border border-white/30 dark:border-secondary-600/60 bg-white/90 dark:bg-secondary-800/90 backdrop-blur-xl shadow-lg shadow-secondary-900/10 hover:shadow-xl text-secondary-700 dark:text-secondary-100 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-200 dark:hover:border-primary-700/50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-transparent"
       :aria-label="label"
       @click="scrollToTop"
     >
@@ -25,14 +25,9 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const props = defineProps({
-  /**
-   * Show button after scrolling this many pixels.
-   */
   threshold: { type: Number, default: 300 },
-  /**
-   * Accessible label
-   */
   label: { type: String, default: 'Scroll to top' },
+  hidden: { type: Boolean, default: false },
 })
 
 const visible = ref(false)
@@ -72,7 +67,6 @@ onMounted(() => {
   onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('resize', onScroll, { passive: true })
-  // Fallback for environments where scroll event is unreliable (some iOS cases).
   poll = window.setInterval(onScroll, 500)
 })
 
@@ -83,4 +77,3 @@ onBeforeUnmount(() => {
   if (poll) window.clearInterval(poll)
 })
 </script>
-

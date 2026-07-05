@@ -1,51 +1,42 @@
 <template>
-  <div 
-    class="fixed bottom-4 z-50 transition-all duration-300" 
-    :class="{ 
-      'right-4': !isCartOpen, 
-      'right-4 sm:right-80 md:right-96': isCartOpen 
-    }"
-  >
-    <!-- Chat Button (when closed) -->
-    <Transition
-      enter-active-class="transition ease-out duration-200"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition ease-in duration-150"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 scale-95"
-    >
-      <button
-        v-if="!isChatOpen"
-        @click="openChat"
-        class="relative bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-200 group"
-        title="Start Live Chat"
+  <div>
+    <!-- Chat FAB in shared dock -->
+    <Teleport to="#floating-action-dock-slot">
+      <Transition
+        enter-active-class="transition ease-out duration-200"
+        enter-from-class="opacity-0 scale-95"
+        enter-to-class="opacity-100 scale-100"
+        leave-active-class="transition ease-in duration-150"
+        leave-from-class="opacity-100 scale-100"
+        leave-to-class="opacity-0 scale-95"
       >
-        <!-- Chat Icon -->
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.955 8.955 0 01-4.126-.98L3 21l1.98-5.874A8.955 8.955 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z"></path>
-        </svg>
-        
-        <!-- Unread Badge -->
-        <span
-          v-if="unreadCount > 0"
-          class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center animate-pulse"
+        <button
+          v-if="!isChatOpen"
+          @click="openChat"
+          class="relative inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-white shadow-lg shadow-primary-600/30 hover:shadow-xl hover:from-primary-600 hover:to-primary-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 focus:ring-offset-transparent"
+          title="Start Live Chat"
+          aria-label="Open live chat"
         >
-          {{ unreadCount > 99 ? '99+' : unreadCount }}
-        </span>
-        
-        <!-- Online Indicator -->
-        <span
-          v-if="onlineAgents.length > 0"
-          class="absolute -top-1 -left-1 bg-green-500 rounded-full h-3 w-3 border-2 border-white"
-          title="Agents online"
-        ></span>
-        
-        <!-- Pulse Animation -->
-        <span class="absolute inset-0 rounded-full bg-primary-600 animate-ping opacity-20"></span>
-      </button>
-    </Transition>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.955 8.955 0 01-4.126-.98L3 21l1.98-5.874A8.955 8.955 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z"></path>
+          </svg>
+
+          <span
+            v-if="unreadCount > 0"
+            class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[1.25rem] h-5 px-1 flex items-center justify-center ring-2 ring-white dark:ring-secondary-900"
+          >
+            {{ unreadCount > 99 ? '99+' : unreadCount }}
+          </span>
+
+          <span
+            v-if="onlineAgents.length > 0"
+            class="absolute top-1 left-1 bg-emerald-400 rounded-full h-2.5 w-2.5 ring-2 ring-white dark:ring-primary-700"
+            title="Agents online"
+          ></span>
+        </button>
+      </Transition>
+    </Teleport>
 
     <!-- Chat Window -->
     <Transition
@@ -58,8 +49,11 @@
     >
       <div
         v-if="isChatOpen"
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
-        :class="isMinimized ? 'w-80 h-16' : 'w-96 h-96'"
+        class="fixed z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200/80 dark:border-gray-700 overflow-hidden transition-all duration-300"
+        :class="[
+          chatWindowPositionClass,
+          isMinimized ? 'w-80 h-16' : 'w-[min(24rem,calc(100vw-2rem))] h-[min(24rem,calc(100vh-8rem))]'
+        ]"
       >
         <!-- Chat Header -->
         <div class="bg-primary-600 text-white p-4 flex items-center justify-between">
@@ -324,8 +318,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick, watch, computed } from 'vue'
 import { useLiveChat } from '../composables/useLiveChat'
+import { useFloatingDock } from '../composables/useFloatingDock'
 
 const props = defineProps({
   isCartOpen: {
@@ -333,6 +328,8 @@ const props = defineProps({
     default: false
   }
 })
+
+const { setCartOpen, setChatOpen } = useFloatingDock()
 
 const {
   // State
@@ -363,6 +360,33 @@ const {
   // Constants
   MESSAGE_TYPES
 } = useLiveChat()
+
+const chatWindowPositionClass = computed(() => {
+  const base = 'bottom-[calc(5.75rem+env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))]'
+
+  if (props.isCartOpen) {
+    return `${base} sm:right-80 md:right-96`
+  }
+
+  return base
+})
+
+watch(
+  () => props.isCartOpen,
+  (value) => setCartOpen(value),
+  { immediate: true }
+)
+
+watch(
+  isChatOpen,
+  (value) => setChatOpen(value),
+  { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  setCartOpen(false)
+  setChatOpen(false)
+})
 
 // Local state
 const messageInput = ref('')
