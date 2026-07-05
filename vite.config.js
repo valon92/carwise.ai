@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
             output: {
                 manualChunks: {
                     vendor: ['vue', 'vue-router'],
-                    utils: ['axios', 'lodash'],
+                    utils: ['axios'],
                     ui: ['@headlessui/vue', '@heroicons/vue']
                 }
             }

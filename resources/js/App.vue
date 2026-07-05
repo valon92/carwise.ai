@@ -5,7 +5,7 @@
       <router-view />
     </main>
     <Footer />
-    <BackToTop />
+    <FloatingActionDock />
     
     <!-- Notification System -->
     <NotificationSystem />
@@ -23,6 +23,7 @@
 <script>
 import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { initPerformanceOptimizations } from './utils/performance'
+import FloatingActionDock from './components/FloatingActionDock.vue'
 
 // Lazy load components for better performance
 const Navbar = defineAsyncComponent({
@@ -61,21 +62,13 @@ const NotificationSystem = defineAsyncComponent({
   timeout: 2000
 })
 
-const BackToTop = defineAsyncComponent({
-  loader: () => import('./components/BackToTop.vue'),
-  loadingComponent: { template: '<div></div>' },
-  errorComponent: { template: '<div></div>' },
-  delay: 200,
-  timeout: 2000,
-})
-
 export default {
   name: 'App',
   components: {
     Navbar,
     Footer,
     NotificationSystem,
-    BackToTop
+    FloatingActionDock
   },
   setup() {
     const isDarkMode = ref(false)
