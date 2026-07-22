@@ -27,6 +27,16 @@
             Home
           </router-link>
           <router-link 
+            to="/how-it-works" 
+            class="nav-link"
+            :class="{ 'nav-link-active': $route.path === '/how-it-works' }"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            How it works
+          </router-link>
+          <router-link 
             to="/diagnose" 
             class="nav-link"
             :class="{ 'nav-link-active': $route.path === '/diagnose' }"
@@ -45,6 +55,16 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
             </svg>
             My Cars
+          </router-link>
+          <router-link 
+            to="/vehicle-twin" 
+            class="nav-link"
+            :class="{ 'nav-link-active': $route.path === '/vehicle-twin' }"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+            </svg>
+            Vehicle Twin
           </router-link>
           <router-link 
             to="/car-parts" 
@@ -210,7 +230,18 @@
               </svg>
               Home
             </router-link>
-            
+
+            <router-link 
+              to="/how-it-works" 
+              class="flex items-center px-4 py-3 rounded-lg text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-200"
+              :class="{ 'bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400': $route.path === '/how-it-works' }"
+              @click="mobileMenuOpen = false"
+            >
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              How it works
+            </router-link>
             
             <router-link 
               to="/diagnose" 
@@ -236,6 +267,18 @@
               My Cars
             </router-link>
             
+            <router-link 
+              to="/vehicle-twin" 
+              class="flex items-center px-4 py-3 rounded-lg text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-200"
+              :class="{ 'bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400': $route.path === '/vehicle-twin' }"
+              @click="mobileMenuOpen = false"
+            >
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+              </svg>
+              Vehicle Twin
+            </router-link>
+
             <router-link 
               to="/car-parts" 
               class="flex items-center px-4 py-3 rounded-lg text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-200"

@@ -67,6 +67,14 @@
                 My Cars
               </router-link>
             </li>
+            <li>
+              <router-link to="/how-it-works" class="footer-link">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                How it works
+              </router-link>
+            </li>
           </ul>
         </div>
 
@@ -75,36 +83,36 @@
           <h3 class="text-lg font-semibold text-white mb-4">Services</h3>
           <ul class="space-y-3">
             <li>
-              <a href="#" class="footer-link">
+              <router-link to="/diagnose" class="footer-link">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                 </svg>
                 AI Diagnosis
-              </a>
+              </router-link>
             </li>
             <li>
-              <a href="#" class="footer-link">
+              <router-link to="/car-parts" class="footer-link">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                 </svg>
-                Quick Check
-              </a>
+                Parts Store
+              </router-link>
             </li>
             <li>
-              <a href="#" class="footer-link">
+              <router-link to="/pricing" class="footer-link">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                Reports
-              </a>
+                Pricing
+              </router-link>
             </li>
             <li>
-              <a href="#" class="footer-link">
+              <router-link to="/how-it-works" class="footer-link">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                 </svg>
-                Maintenance
-              </a>
+                Customer guide
+              </router-link>
             </li>
           </ul>
         </div>
@@ -183,6 +191,9 @@
             © {{ currentYear }} CarWise.ai. All rights reserved.
           </div>
           <div class="flex space-x-6">
+            <router-link to="/how-it-works" class="text-secondary-400 hover:text-primary-400 text-sm transition-colors duration-200">
+              How it works
+            </router-link>
             <router-link to="/privacy-policy" class="text-secondary-400 hover:text-primary-400 text-sm transition-colors duration-200">
               Privacy Policy
             </router-link>

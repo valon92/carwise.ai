@@ -1,21 +1,45 @@
+import os from 'os';
 import { defineConfig, loadEnv } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 
+function getLanIp() {
+    const nets = os.networkInterfaces();
+
+    for (const iface of Object.values(nets)) {
+        if (!iface) {
+            continue;
+        }
+
+        for (const net of iface) {
+            if (net.family === 'IPv4' && !net.internal) {
+                return net.address;
+            }
+        }
+    }
+
+    return null;
+}
+
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
+    const lanEnabled = env.VITE_LAN === 'true';
+    const lanIp = env.VITE_LAN_IP || getLanIp() || '127.0.0.1';
+    const lanAppUrl = `http://${lanIp}:8001`;
+    const lanViteOrigin = `http://${lanIp}:5174`;
+
     const apiProxyTarget =
         env.VITE_DEV_SERVER_PROXY ||
-        env.APP_URL?.replace(/\/$/, '') ||
+        (lanEnabled ? lanAppUrl : env.APP_URL?.replace(/\/$/, '')) ||
         'http://127.0.0.1:8000';
 
     // When testing from LAN devices (iPhone, etc.)
     // - Vite must listen on 0.0.0.0 (host: true)
-    // - Set VITE_HMR_HOST to your Mac LAN IP (e.g. 192.168.1.20)
-    const hmrHost = env.VITE_HMR_HOST || 'localhost';
+    // - Run `npm run dev:lan` or set VITE_LAN=true + VITE_HMR_HOST to your Mac LAN IP
+    const hmrHost = env.VITE_HMR_HOST || (lanEnabled ? lanIp : 'localhost');
     const hmrProtocol = env.VITE_HMR_PROTOCOL || 'ws';
     const hmrClientPort = env.VITE_HMR_CLIENT_PORT ? Number(env.VITE_HMR_CLIENT_PORT) : undefined;
-    const devOrigin = env.VITE_DEV_SERVER_ORIGIN || undefined;
+    const devOrigin = env.VITE_DEV_SERVER_ORIGIN || (lanEnabled ? lanViteOrigin : undefined);
 
     return {
         plugins: [

@@ -21,6 +21,8 @@ const CookiePolicy = () => import('./views/CookiePolicy.vue')
 const SubscriptionPlans = () => import('./views/SubscriptionPlans.vue')
 const SubscriptionDashboard = () => import('./views/SubscriptionDashboard.vue')
 const Pricing = () => import('./views/Pricing.vue')
+const HowItWorks = () => import('./views/HowItWorks.vue')
+const VehicleTwin = () => import('./diagnostic-ecosystem/views/VehicleTwin.vue')
 
 // Lazy load components
 const Navbar = () => import('./components/Navbar.vue')
@@ -36,6 +38,15 @@ const routes = [
     meta: { 
       title: 'CarWise AI - Smart Car Diagnosis',
       description: 'AI-powered car diagnosis and maintenance platform'
+    }
+  },
+  {
+    path: '/how-it-works',
+    name: 'HowItWorks',
+    component: HowItWorks,
+    meta: {
+      title: 'How CarWise.ai Works — From Diagnosis to Repair',
+      description: 'Learn how CarWise.ai guides you from car symptoms to AI diagnosis, parts, and ongoing maintenance.'
     }
   },
   { 
@@ -180,6 +191,16 @@ const routes = [
       title: 'Pricing & Subscription Plans - CarWise AI',
       description: 'Choose the perfect plan for your car diagnostic needs',
       requiresAuth: false
+    }
+  },
+  {
+    path: '/vehicle-twin',
+    name: 'VehicleTwin',
+    component: VehicleTwin,
+    meta: {
+      title: 'Vehicle Twin - CarWise AI',
+      description: 'Your digital vehicle profiles — VIN identification, diagnostics, and history',
+      requiresAuth: true
     }
   },
 ]

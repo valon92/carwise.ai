@@ -14,6 +14,15 @@ const routes = [
     }
   },
   {
+    path: '/how-it-works',
+    name: 'HowItWorks',
+    component: lazyRoute('HowItWorks'),
+    meta: {
+      requiresAuth: false,
+      title: 'How CarWise.ai Works',
+    }
+  },
+  {
     path: '/login',
     name: 'Login',
     component: lazyRoute('Login'),

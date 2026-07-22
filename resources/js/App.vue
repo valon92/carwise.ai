@@ -23,6 +23,7 @@
 <script>
 import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { initPerformanceOptimizations } from './utils/performance'
+import BackToTop from './components/BackToTop.vue'
 
 // Lazy load components for better performance
 const Navbar = defineAsyncComponent({
@@ -59,14 +60,6 @@ const NotificationSystem = defineAsyncComponent({
   },
   delay: 100,
   timeout: 2000
-})
-
-const BackToTop = defineAsyncComponent({
-  loader: () => import('./components/BackToTop.vue'),
-  loadingComponent: { template: '<div></div>' },
-  errorComponent: { template: '<div></div>' },
-  delay: 200,
-  timeout: 2000,
 })
 
 export default {
