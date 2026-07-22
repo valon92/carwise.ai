@@ -15,7 +15,7 @@ class DiagnosticScanService
 
     public function createManualScan(DeVehicleProfile $profile, array $data): DeDiagnosticScan
     {
-        return DeDiagnosticScan::create([
+        $scan = DeDiagnosticScan::create([
             'vehicle_profile_id' => $profile->id,
             'connector_pairing_id' => $data['connector_pairing_id'] ?? null,
             'scan_date' => $data['scan_date'] ?? now(),
@@ -37,6 +37,14 @@ class DiagnosticScanService
             ],
             'notes' => $data['notes'] ?? null,
         ]);
+
+        if ($data['mileage'] ?? null) {
+            $profile->update(['current_mileage' => $data['mileage']]);
+        }
+
+        app(VehicleHistoryService::class)->logScan($profile, $scan);
+
+        return $scan;
     }
 
     public function createConnectorScan(DeVehicleProfile $profile, ?DeConnectorPairing $pairing = null): array

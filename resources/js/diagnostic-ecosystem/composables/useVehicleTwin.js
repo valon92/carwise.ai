@@ -224,6 +224,98 @@ export function useVehicleTwin() {
     }
   }
 
+  const loadHistory = async (id) => {
+    try {
+      const response = await vehicleTwinAPI.history(id)
+      if (response.data.success) {
+        mergeVehicle(id, { history_events: response.data.data })
+        return { success: true, events: response.data.data }
+      }
+      return { success: false, message: response.data.message }
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to load history' }
+    }
+  }
+
+  const createHistoryEvent = async (id, data) => {
+    try {
+      const response = await vehicleTwinAPI.createHistoryEvent(id, data)
+      if (response.data.success) {
+        await loadHistory(id)
+        return { success: true, event: response.data.data }
+      }
+      return { success: false, message: response.data.message }
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to add history event' }
+    }
+  }
+
+  const exportHistoryJson = async (id) => {
+    try {
+      const response = await vehicleTwinAPI.exportHistoryJson(id)
+      if (response.data.success) {
+        return { success: true, data: response.data.data }
+      }
+      return { success: false, message: response.data.message }
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to export history' }
+    }
+  }
+
+  const loadMaintenance = async (id) => {
+    try {
+      const response = await vehicleTwinAPI.maintenance(id)
+      if (response.data.success) {
+        mergeVehicle(id, { maintenance_items: response.data.data })
+        return { success: true, items: response.data.data }
+      }
+      return { success: false, message: response.data.message }
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to load maintenance' }
+    }
+  }
+
+  const generateMaintenance = async (id) => {
+    try {
+      const response = await vehicleTwinAPI.generateMaintenance(id)
+      if (response.data.success) {
+        mergeVehicle(id, { maintenance_items: response.data.data })
+        return { success: true, items: response.data.data }
+      }
+      return { success: false, message: response.data.message }
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to generate maintenance' }
+    }
+  }
+
+  const updateMaintenance = async (vehicleId, recommendationId, status) => {
+    try {
+      const response = await vehicleTwinAPI.updateMaintenance(recommendationId, { status })
+      if (response.data.success) {
+        await loadMaintenance(vehicleId)
+        return { success: true, item: response.data.data }
+      }
+      return { success: false, message: response.data.message }
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to update maintenance' }
+    }
+  }
+
+  const findParts = async (vehicleId, analysisId = null, q = '') => {
+    try {
+      const response = analysisId
+        ? await vehicleTwinAPI.partsForAnalysis(analysisId)
+        : await vehicleTwinAPI.searchParts(vehicleId, q)
+      if (response.data.success) {
+        mergeVehicle(vehicleId, { marketplace_parts: response.data.data })
+        return { success: true, data: response.data.data }
+      }
+      return { success: false, message: response.data.message }
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to find parts' }
+    }
+  }
+
   const totalVehicles = computed(() => vehicles.value.length)
 
   return {
@@ -243,5 +335,12 @@ export function useVehicleTwin() {
     createManualScan,
     analyzeScan,
     loadAnalyses,
+    loadHistory,
+    createHistoryEvent,
+    exportHistoryJson,
+    loadMaintenance,
+    generateMaintenance,
+    updateMaintenance,
+    findParts,
   }
 }

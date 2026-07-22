@@ -107,7 +107,8 @@ Phased delivery matching Steps 1–8. Each phase is independently deployable beh
 
 ## Phase 6 — Vehicle History (Step 6)
 
-**Flag:** `DE_VEHICLE_HISTORY=true`
+**Flag:** `DE_VEHICLE_HISTORY=true`  
+**Status:** Done
 
 | Deliverable |
 |-------------|
@@ -122,7 +123,8 @@ Phased delivery matching Steps 1–8. Each phase is independently deployable beh
 
 ## Phase 7 — Predictive Maintenance (Step 7)
 
-**Flag:** `DE_PREDICTIVE_ENABLED=true`
+**Flag:** `DE_PREDICTIVE_ENABLED=true`  
+**Status:** Done
 
 | Deliverable |
 |-------------|
@@ -136,12 +138,13 @@ Phased delivery matching Steps 1–8. Each phase is independently deployable beh
 
 ## Phase 8 — Marketplace Integrations (Step 8)
 
-**Flag:** `DE_MARKETPLACE_HOOKS=true`
+**Flag:** `DE_MARKETPLACE_HOOKS=true`  
+**Status:** Done (hooks + parts bridge; shops/insurance/roadside placeholders)
 
 | Deliverable |
 |-------------|
-| Adapters: `PartsMarketplaceAdapter`, `ShopLocatorAdapter` (stubs) |
-| Parts search bridged to existing marketplace API |
+| Adapters: `PartsMarketplaceAdapter`, shop/dealer/insurance/roadside placeholders |
+| Parts search bridged to existing `car_parts` data |
 | Placeholder endpoints for shops, dealers, insurance, roadside |
 | "Find parts for this vehicle" CTA on AI analysis |
 

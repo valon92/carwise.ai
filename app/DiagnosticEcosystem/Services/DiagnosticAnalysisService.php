@@ -51,7 +51,7 @@ class DiagnosticAnalysisService
         $analysis = $this->analysisProvider->analyze($snapshot, $context);
         $payload = $analysis->toArray();
 
-        return DeAiAnalysis::create([
+        $record = DeAiAnalysis::create([
             'diagnostic_scan_id' => $scan->id,
             'vehicle_profile_id' => $profile->id,
             'provider' => 'ai_diagnosis_service',
@@ -68,6 +68,10 @@ class DiagnosticAnalysisService
             'confidence_score' => $payload['confidence_score'],
             'raw_response' => $payload,
         ]);
+
+        app(VehicleHistoryService::class)->logAnalysis($profile, $record);
+
+        return $record;
     }
 
     public function latestForScan(DeDiagnosticScan $scan): ?DeAiAnalysis

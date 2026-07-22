@@ -79,6 +79,16 @@ class DeVehicleProfile extends Model
         return $this->hasMany(DeAiAnalysis::class, 'vehicle_profile_id');
     }
 
+    public function historyEvents(): HasMany
+    {
+        return $this->hasMany(DeVehicleHistoryEvent::class, 'vehicle_profile_id');
+    }
+
+    public function maintenanceRecommendations(): HasMany
+    {
+        return $this->hasMany(DeMaintenanceRecommendation::class, 'vehicle_profile_id');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');

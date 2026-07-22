@@ -335,6 +335,113 @@
                     {{ cause }}
                   </li>
                 </ul>
+                <button
+                  v-if="vehicle.latest_analysis.id"
+                  @click="loadPartsForAnalysis(vehicle)"
+                  class="mt-3 inline-flex items-center rounded-lg border border-amber-300 bg-white px-2.5 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-50 dark:border-amber-700 dark:bg-secondary-800 dark:text-amber-200"
+                >
+                  Find parts for this vehicle
+                </button>
+              </div>
+
+              <div
+                v-if="vehicle.marketplace_parts?.parts?.length"
+                class="rounded-xl border border-secondary-200 bg-white p-3 dark:border-secondary-700 dark:bg-secondary-800"
+              >
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-secondary-500">Marketplace parts</p>
+                <div class="space-y-2">
+                  <div
+                    v-for="(part, idx) in vehicle.marketplace_parts.parts.slice(0, 4)"
+                    :key="part.id || idx"
+                    class="flex items-center justify-between gap-2 text-xs"
+                  >
+                    <span class="text-secondary-800 dark:text-secondary-200">{{ part.name }}</span>
+                    <a
+                      :href="part.cta || vehicle.marketplace_parts.cta || '/car-parts'"
+                      class="font-medium text-primary-600 hover:text-primary-700"
+                    >
+                      Open
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-xl border border-secondary-200 bg-white p-3 dark:border-secondary-700 dark:bg-secondary-800">
+                <div class="mb-2 flex items-center justify-between gap-2">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-secondary-500">Predictive maintenance</p>
+                  <button
+                    @click="runMaintenance(vehicle)"
+                    class="text-xs font-medium text-primary-600 hover:text-primary-700"
+                  >
+                    Generate
+                  </button>
+                </div>
+                <div v-if="vehicle.maintenance_items?.length" class="space-y-2">
+                  <div
+                    v-for="item in vehicle.maintenance_items.slice(0, 4)"
+                    :key="item.id"
+                    class="rounded-lg bg-secondary-50 p-2 text-xs dark:bg-secondary-900"
+                  >
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="font-semibold text-secondary-800 dark:text-secondary-200">{{ item.title }}</span>
+                      <span class="uppercase text-[10px] text-secondary-500">{{ item.priority }} · {{ item.status }}</span>
+                    </div>
+                    <p class="mt-1 text-secondary-600 dark:text-secondary-300">{{ item.description }}</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                      <button @click="setMaintenanceStatus(vehicle, item.id, 'scheduled')" class="text-[11px] text-primary-600">Schedule</button>
+                      <button @click="setMaintenanceStatus(vehicle, item.id, 'completed')" class="text-[11px] text-green-600">Complete</button>
+                      <button @click="setMaintenanceStatus(vehicle, item.id, 'dismissed')" class="text-[11px] text-secondary-500">Dismiss</button>
+                    </div>
+                  </div>
+                </div>
+                <p v-else class="text-xs text-secondary-500">No recommendations yet. Click Generate.</p>
+              </div>
+
+              <div class="rounded-xl border border-secondary-200 bg-white p-3 dark:border-secondary-700 dark:bg-secondary-800">
+                <div class="mb-2 flex items-center justify-between gap-2">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-secondary-500">Vehicle history</p>
+                  <div class="flex gap-2">
+                    <button @click="downloadHistoryJson(vehicle)" class="text-xs font-medium text-primary-600">JSON</button>
+                    <a
+                      :href="`/api/de/vehicles/${vehicle.id}/history/export.pdf`"
+                      target="_blank"
+                      class="text-xs font-medium text-primary-600"
+                    >
+                      PDF
+                    </a>
+                  </div>
+                </div>
+                <form @submit.prevent="submitHistoryNote(vehicle)" class="mb-3 space-y-2">
+                  <input
+                    v-model="historyForms[vehicle.id].title"
+                    type="text"
+                    class="w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm dark:border-secondary-600 dark:bg-secondary-900 dark:text-white"
+                    placeholder="Service note title"
+                  />
+                  <textarea
+                    v-model="historyForms[vehicle.id].description"
+                    rows="2"
+                    class="w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm dark:border-secondary-600 dark:bg-secondary-900 dark:text-white"
+                    placeholder="What was done / replaced"
+                  />
+                  <button type="submit" class="rounded-lg bg-secondary-900 px-3 py-1.5 text-xs font-medium text-white dark:bg-primary-600">
+                    Add note
+                  </button>
+                </form>
+                <div v-if="vehicle.history_events?.length" class="space-y-2">
+                  <div
+                    v-for="event in vehicle.history_events.slice(0, 5)"
+                    :key="event.id"
+                    class="rounded-lg bg-secondary-50 p-2 text-xs dark:bg-secondary-900"
+                  >
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="font-semibold text-secondary-800 dark:text-secondary-200">{{ event.title }}</span>
+                      <span class="uppercase text-[10px] text-secondary-500">{{ event.event_type }}</span>
+                    </div>
+                    <p class="mt-1 text-secondary-600 dark:text-secondary-300">{{ event.description }}</p>
+                  </div>
+                </div>
+                <p v-else class="text-xs text-secondary-500">History will appear after scans, AI analyses, and notes.</p>
               </div>
             </div>
           </div>
@@ -463,6 +570,13 @@ export default {
       createManualScan,
       analyzeScan,
       loadAnalyses,
+      loadHistory,
+      createHistoryEvent,
+      exportHistoryJson,
+      loadMaintenance,
+      generateMaintenance,
+      updateMaintenance,
+      findParts,
     } = useVehicleTwin()
 
     const showRegisterModal = ref(false)
@@ -471,6 +585,7 @@ export default {
     const activeDiagnosticsVehicleId = ref(null)
     const analyzingScanId = ref(null)
     const manualScans = reactive({})
+    const historyForms = reactive({})
     const form = ref({ vin: '', nickname: '', license_plate: '', current_mileage: null })
 
     const ensureManualScanForm = (vehicleId) => {
@@ -484,6 +599,9 @@ export default {
           transmission_errors: '',
           notes: '',
         }
+      }
+      if (!historyForms[vehicleId]) {
+        historyForms[vehicleId] = { title: '', description: '' }
       }
     }
 
@@ -541,6 +659,8 @@ export default {
           loadConnectorStatus(vehicle.id),
           loadScans(vehicle.id),
           loadAnalyses(vehicle.id),
+          loadHistory(vehicle.id),
+          loadMaintenance(vehicle.id),
         ])
       }
     }
@@ -596,11 +716,75 @@ export default {
       const result = await analyzeScan(vehicle.id, scan.id)
       analyzingScanId.value = null
 
-      if (result.success && window.$notify) {
-        window.$notify.success('AI Analysis Ready', 'Diagnostic assistant generated repair guidance for this scan.')
+      if (result.success) {
+        await loadHistory(vehicle.id)
+        if (window.$notify) {
+          window.$notify.success('AI Analysis Ready', 'Diagnostic assistant generated repair guidance for this scan.')
+        }
       } else if (!result.success && window.$notify) {
         window.$notify.error('AI Analysis Failed', result.message)
       }
+    }
+
+    const loadPartsForAnalysis = async (vehicle) => {
+      if (!vehicle.latest_analysis?.id) return
+      const result = await findParts(vehicle.id, vehicle.latest_analysis.id)
+      if (result.success && window.$notify) {
+        window.$notify.success('Parts Ready', 'Marketplace suggestions were loaded for this analysis.')
+      } else if (!result.success && window.$notify) {
+        window.$notify.error('Parts Error', result.message)
+      }
+    }
+
+    const runMaintenance = async (vehicle) => {
+      const result = await generateMaintenance(vehicle.id)
+      if (result.success && window.$notify) {
+        window.$notify.success('Maintenance Ready', 'Predictive recommendations were generated.')
+      } else if (!result.success && window.$notify) {
+        window.$notify.error('Maintenance Error', result.message)
+      }
+    }
+
+    const setMaintenanceStatus = async (vehicle, recommendationId, status) => {
+      const result = await updateMaintenance(vehicle.id, recommendationId, status)
+      if (!result.success && window.$notify) {
+        window.$notify.error('Update Failed', result.message)
+      }
+    }
+
+    const submitHistoryNote = async (vehicle) => {
+      ensureManualScanForm(vehicle.id)
+      if (!historyForms[vehicle.id].title) {
+        if (window.$notify) window.$notify.error('Missing title', 'Please enter a history note title.')
+        return
+      }
+      const result = await createHistoryEvent(vehicle.id, {
+        event_type: 'service_note',
+        title: historyForms[vehicle.id].title,
+        description: historyForms[vehicle.id].description || null,
+        mileage: vehicle.current_mileage || null,
+      })
+      if (result.success) {
+        historyForms[vehicle.id] = { title: '', description: '' }
+        if (window.$notify) window.$notify.success('History Updated', 'Service note was added to the timeline.')
+      } else if (window.$notify) {
+        window.$notify.error('History Error', result.message)
+      }
+    }
+
+    const downloadHistoryJson = async (vehicle) => {
+      const result = await exportHistoryJson(vehicle.id)
+      if (!result.success) {
+        if (window.$notify) window.$notify.error('Export Failed', result.message)
+        return
+      }
+      const blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `vehicle-twin-${vehicle.id}-history.json`
+      a.click()
+      URL.revokeObjectURL(url)
     }
 
     const severityClass = (severity) => {
@@ -671,6 +855,7 @@ export default {
       form,
       formError,
       manualScans,
+      historyForms,
       activeDiagnosticsVehicleId,
       analyzingScanId,
       displayName,
@@ -680,6 +865,11 @@ export default {
       revokeVehicleConnector,
       submitManualScan,
       runAiAnalysis,
+      loadPartsForAnalysis,
+      runMaintenance,
+      setMaintenanceStatus,
+      submitHistoryNote,
+      downloadHistoryJson,
       severityClass,
       formatConfidence,
       joinCodes,
