@@ -1,6 +1,6 @@
 <template>
-  <div id="app" :class="{ 'dark': isDarkMode }" class="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 dark:from-secondary-900 dark:to-secondary-800 transition-colors duration-300 flex flex-col">
-    <Navbar @toggle-dark-mode="toggleDarkMode" :is-dark-mode="isDarkMode" />
+  <div id="app" class="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 transition-colors duration-300 flex flex-col">
+    <Navbar />
     <main class="relative flex-1">
       <router-view />
     </main>
@@ -71,33 +71,15 @@ export default {
     BackToTop
   },
   setup() {
-    const isDarkMode = ref(false)
     const isLoading = ref(false)
 
-    const toggleDarkMode = () => {
-      isDarkMode.value = !isDarkMode.value
-      localStorage.setItem('darkMode', isDarkMode.value.toString())
-    }
-
     onMounted(() => {
-      // Check for saved dark mode preference
-      const savedDarkMode = localStorage.getItem('darkMode')
-      if (savedDarkMode !== null) {
-        isDarkMode.value = savedDarkMode === 'true'
-      } else {
-        // Check system preference
-        isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
-      }
-
-      // Initialize performance optimizations - DISABLED
-      // initPerformanceOptimizations()
-      
+      localStorage.removeItem('darkMode')
+      document.documentElement.classList.remove('dark')
     })
 
     return {
-      isDarkMode,
-      isLoading,
-      toggleDarkMode
+      isLoading
     }
   }
 }

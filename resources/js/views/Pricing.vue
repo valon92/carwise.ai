@@ -13,10 +13,10 @@
             </button>
           </div>
           <h1 class="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
-            {{ route.query.action === 'upgrade' ? 'Upgrade Your Plan' : 'CarWise.ai Pricing & Subscription Plans' }}
+            Pay once for a diagnosis
           </h1>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            {{ route.query.action === 'upgrade' ? 'Choose a plan that better fits your needs and unlock more features.' : 'Choose the perfect plan for your car diagnostic needs. From basic manual checks to advanced AI-powered fleet management.' }}
+            Choose a one-time service. You pay only when you need it. No subscription and no recurring charge.
           </p>
         </div>
       </div>
@@ -30,13 +30,13 @@
             <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
             </svg>
-            <span>14-day free trial</span>
+            <span>Pay once</span>
           </div>
           <div class="flex items-center">
             <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
             </svg>
-            <span>Cancel anytime</span>
+            <span>No subscription</span>
           </div>
           <div class="flex items-center">
             <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -44,51 +44,18 @@
             </svg>
             <span>No setup fees</span>
           </div>
-          <div class="flex items-center">
-            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-            </svg>
-            <span>24/7 support</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pricing Toggle -->
-      <div class="flex justify-center mb-12">
-        <div class="bg-white/70 backdrop-blur-sm rounded-2xl p-2 border border-gray-200/50 shadow-lg">
-          <div class="flex">
-            <button 
-              @click="billingCycle = 'monthly'"
-              class="px-6 py-3 rounded-xl font-medium transition-all duration-300"
-              :class="billingCycle === 'monthly' 
-                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' 
-                : 'text-gray-600 hover:text-gray-900'"
-            >
-              Monthly
-            </button>
-            <button 
-              @click="billingCycle = 'yearly'"
-              class="px-6 py-3 rounded-xl font-medium transition-all duration-300"
-              :class="billingCycle === 'yearly' 
-                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg' 
-                : 'text-gray-600 hover:text-gray-900'"
-            >
-              Yearly
-              <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Save 15%</span>
-            </button>
-          </div>
         </div>
       </div>
 
       <!-- Pricing Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 max-w-5xl mx-auto">
         <!-- Basic Plan -->
         <div class="group bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden hover:shadow-xl transition-all duration-300"
              :class="{ 'ring-2 ring-blue-500': route.query.current_plan === 'basic' }">
           <div class="p-8">
             <div class="text-center mb-6">
-              <h3 class="text-2xl font-bold text-gray-900 mb-2">Basic</h3>
-              <p class="text-gray-600 mb-4">Perfect for new users</p>
+              <h3 class="text-2xl font-bold text-gray-900 mb-2">Quick check</h3>
+              <p class="text-gray-600 mb-4">A first look, with no charge</p>
               <div v-if="route.query.current_plan === 'basic'" class="mb-4">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                   <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -99,7 +66,7 @@
               </div>
               <div class="mb-4">
                 <span class="text-4xl font-bold bg-gradient-to-r from-gray-600 to-gray-800 bg-clip-text text-transparent">€0</span>
-                <span class="text-gray-600">/month</span>
+                <span class="text-gray-600"> one-time</span>
               </div>
             </div>
             
@@ -108,7 +75,7 @@
                 <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                1 manual diagnosis per month
+                1 guided symptom check
               </li>
               <li class="flex items-center text-sm text-gray-600">
                 <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,77 +106,20 @@
           </div>
         </div>
 
-        <!-- Smart AI Plan -->
-        <div class="group bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden hover:shadow-xl transition-all duration-300"
-             :class="{ 'ring-2 ring-blue-500': route.query.current_plan === 'smart-ai' }">
-          <div class="p-8">
-            <div class="text-center mb-6">
-              <h3 class="text-2xl font-bold text-gray-900 mb-2">Smart AI</h3>
-              <p class="text-gray-600 mb-4">Pay-per-use detailed diagnosis</p>
-              <div v-if="route.query.current_plan === 'smart-ai'" class="mb-4">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  Current Plan
-                </span>
-              </div>
-              <div class="mb-4">
-                <span class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">€7.99</span>
-                <span class="text-gray-600">/diagnosis</span>
-              </div>
-            </div>
-            
-            <ul class="space-y-3 mb-8">
-              <li class="flex items-center text-sm text-gray-600">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Detailed AI diagnosis + repair recommendations
-              </li>
-              <li class="flex items-center text-sm text-gray-600">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Temporary API access for DTC retrieval
-              </li>
-              <li class="flex items-center text-sm text-gray-600">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                PDF report for diagnosis
-              </li>
-              <li class="flex items-center text-sm text-gray-600">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Multi-brand API connection support
-              </li>
-            </ul>
-            
-            <button 
-              @click="selectPlan('smart-ai')"
-              class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105"
-            >
-              Choose Smart AI
-            </button>
-          </div>
-        </div>
-
-        <!-- Care+ Plan (Popular) -->
+        <!-- Complete service -->
         <div class="group bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border-2 border-blue-500 overflow-hidden hover:shadow-xl transition-all duration-300 relative"
              :class="{ 'ring-2 ring-blue-500': route.query.current_plan === 'care-plus' }">
           <!-- Popular Badge -->
           <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
             <span class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg">
-              Most Popular
+              Full service
             </span>
           </div>
           
           <div class="p-8 pt-12">
             <div class="text-center mb-6">
-              <h3 class="text-2xl font-bold text-gray-900 mb-2">Care+</h3>
-              <p class="text-gray-600 mb-4">Monthly coverage with preventive suggestions</p>
+              <h3 class="text-2xl font-bold text-gray-900 mb-2">Complete check</h3>
+              <p class="text-gray-600 mb-4">Diagnosis, written report, and preventive guidance</p>
               <div v-if="route.query.current_plan === 'care-plus'" class="mb-4">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                   <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -219,11 +129,8 @@
                 </span>
               </div>
               <div class="mb-4">
-                <span class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">€9.99</span>
-                <span class="text-gray-600">/month</span>
-                <div v-if="billingCycle === 'yearly'" class="text-sm text-green-600 mt-1">
-                  €8.49/month (billed yearly)
-                </div>
+                <span class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">€{{ prices.complete }}</span>
+                <span class="text-gray-600"> one-time</span>
               </div>
             </div>
             
@@ -232,31 +139,25 @@
                 <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                3 diagnoses per month (with API)
+                AI diagnosis and repair recommendations
               </li>
               <li class="flex items-center text-sm text-gray-600">
                 <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                Repair history tracking
+                Written report
               </li>
               <li class="flex items-center text-sm text-gray-600">
                 <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                Priority support
+                Preventive guidance
               </li>
               <li class="flex items-center text-sm text-gray-600">
                 <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                10% discount coupon for recommended parts
-              </li>
-              <li class="flex items-center text-sm text-gray-600">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">14-day free trial</span>
+                Saved with your vehicle history
               </li>
             </ul>
             
@@ -264,477 +165,47 @@
               @click="selectPlan('care-plus')"
               class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105"
             >
-              Start Free Trial
+              Pay once
             </button>
           </div>
         </div>
 
-        <!-- Pro Garage Plan -->
-        <div class="group bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden hover:shadow-xl transition-all duration-300"
-             :class="{ 'ring-2 ring-blue-500': route.query.current_plan === 'pro-garage' }">
-          <div class="p-8">
-            <div class="text-center mb-6">
-              <h3 class="text-2xl font-bold text-gray-900 mb-2">Pro Garage</h3>
-              <p class="text-gray-600 mb-4">For services & mechanics (B2B)</p>
-              <div v-if="route.query.current_plan === 'pro-garage'" class="mb-4">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  Current Plan
-                </span>
-              </div>
-              <div class="mb-4">
-                <span class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">€99</span>
-                <span class="text-gray-600">/month</span>
-                <div v-if="billingCycle === 'yearly'" class="text-sm text-green-600 mt-1">
-                  €84.15/month (billed yearly)
-                </div>
-              </div>
-            </div>
-            
-            <ul class="space-y-3 mb-8">
-              <li class="flex items-center text-sm text-gray-600">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Multi-user access
-              </li>
-              <li class="flex items-center text-sm text-gray-600">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Detailed technical reports
-              </li>
-              <li class="flex items-center text-sm text-gray-600">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Integration with work system
-              </li>
-              <li class="flex items-center text-sm text-gray-600">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Reduced commission for parts
-              </li>
-              <li class="flex items-center text-sm text-gray-600">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                User licenses + dedicated API keys
-              </li>
-            </ul>
-            
-            <button 
-              @click="selectPlan('pro-garage')"
-              class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105"
-            >
-              Contact Sales
-            </button>
-          </div>
-        </div>
       </div>
 
-      <!-- Feature Comparison Table -->
-      <div class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50 mb-12">
-        <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Compare All Features</h3>
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="border-b border-gray-200">
-                <th class="text-left py-4 px-6 font-semibold text-gray-900">Features</th>
-                <th class="text-center py-4 px-6 font-semibold text-gray-900">Basic</th>
-                <th class="text-center py-4 px-6 font-semibold text-gray-900">Smart AI</th>
-                <th class="text-center py-4 px-6 font-semibold text-gray-900">Care+</th>
-                <th class="text-center py-4 px-6 font-semibold text-gray-900">Pro Garage</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr>
-                <td class="py-4 px-6 text-gray-700">AI Diagnoses per month</td>
-                <td class="text-center py-4 px-6">1</td>
-                <td class="text-center py-4 px-6">Pay-per-use</td>
-                <td class="text-center py-4 px-6">3</td>
-                <td class="text-center py-4 px-6">Unlimited</td>
-              </tr>
-              <tr class="bg-gray-50">
-                <td class="py-4 px-6 text-gray-700">Multi-Brand API Access</td>
-                <td class="text-center py-4 px-6">❌</td>
-                <td class="text-center py-4 px-6">✅</td>
-                <td class="text-center py-4 px-6">✅</td>
-                <td class="text-center py-4 px-6">✅</td>
-              </tr>
-              <tr>
-                <td class="py-4 px-6 text-gray-700">PDF Reports</td>
-                <td class="text-center py-4 px-6">❌</td>
-                <td class="text-center py-4 px-6">✅</td>
-                <td class="text-center py-4 px-6">✅</td>
-                <td class="text-center py-4 px-6">✅</td>
-              </tr>
-              <tr class="bg-gray-50">
-                <td class="py-4 px-6 text-gray-700">Priority Support</td>
-                <td class="text-center py-4 px-6">❌</td>
-                <td class="text-center py-4 px-6">❌</td>
-                <td class="text-center py-4 px-6">✅</td>
-                <td class="text-center py-4 px-6">✅</td>
-              </tr>
-              <tr>
-                <td class="py-4 px-6 text-gray-700">Multi-user Access</td>
-                <td class="text-center py-4 px-6">❌</td>
-                <td class="text-center py-4 px-6">❌</td>
-                <td class="text-center py-4 px-6">❌</td>
-                <td class="text-center py-4 px-6">✅</td>
-              </tr>
-              <tr class="bg-gray-50">
-                <td class="py-4 px-6 text-gray-700">API Integration</td>
-                <td class="text-center py-4 px-6">❌</td>
-                <td class="text-center py-4 px-6">❌</td>
-                <td class="text-center py-4 px-6">❌</td>
-                <td class="text-center py-4 px-6">✅</td>
-              </tr>
-            </tbody>
-          </table>
+      <div class="max-w-5xl mx-auto mb-16 bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">Expert session</h3>
+          <p class="text-gray-600 text-sm mt-1">A separate one-time conversation about a result you already have. It is not included in the complete check.</p>
         </div>
-      </div>
-
-      <!-- B2B Pricing Section -->
-      <div class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50 mb-12">
-        <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">B2B Solutions & Enterprise Pricing</h3>
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="border-b border-gray-200">
-                <th class="text-left py-4 px-6 font-semibold text-gray-900">Client Type</th>
-                <th class="text-left py-4 px-6 font-semibold text-gray-900">Purpose</th>
-                <th class="text-left py-4 px-6 font-semibold text-gray-900">Pricing</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr>
-                <td class="py-4 px-6 text-gray-700 font-medium">Service Centers (Garages)</td>
-                <td class="py-4 px-6 text-gray-600">Diagnostics + client reports + parts offers</td>
-                <td class="py-4 px-6 text-blue-600 font-semibold">€49–€199 / month</td>
-              </tr>
-              <tr class="bg-gray-50">
-                <td class="py-4 px-6 text-gray-700 font-medium">Fleet Management</td>
-                <td class="py-4 px-6 text-gray-600">Monitoring + defect prediction</td>
-                <td class="py-4 px-6 text-blue-600 font-semibold">€5 / vehicle / month</td>
-              </tr>
-              <tr>
-                <td class="py-4 px-6 text-gray-700 font-medium">Insurance Companies</td>
-                <td class="py-4 px-6 text-gray-600">Risk scoring + AI analysis</td>
-                <td class="py-4 px-6 text-blue-600 font-semibold">€0.50–€1 / vehicle / month</td>
-              </tr>
-              <tr class="bg-gray-50">
-                <td class="py-4 px-6 text-gray-700 font-medium">Parts Companies</td>
-                <td class="py-4 px-6 text-gray-600">Integration for direct sales</td>
-                <td class="py-4 px-6 text-blue-600 font-semibold">10–15% commission</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="mt-6 text-center">
-          <p class="text-gray-600 mb-4">Need a custom solution for your business?</p>
-          <button class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105">
-            Contact Sales Team
+        <div class="flex items-center gap-4 shrink-0">
+          <span class="text-2xl font-bold text-gray-900">€{{ prices.expert }}</span>
+          <button
+            @click="selectPlan('pro-garage')"
+            class="bg-gradient-to-r from-purple-500 to-pink-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-300"
+          >
+            Pay once
           </button>
         </div>
       </div>
 
-      <!-- Parts Integration Section -->
-      <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl shadow-lg p-8 border border-orange-200/50 mb-12">
-        <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Smart Parts Integration</h3>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div>
-            <div class="flex items-center mb-4">
-              <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mr-4">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-                </svg>
-              </div>
-              <h4 class="text-xl font-semibold text-gray-900">AI-Powered Parts Recommendations</h4>
-            </div>
-            <p class="text-gray-600 mb-6">
-              When our AI diagnoses a problem, it automatically suggests the exact parts needed for repair. 
-              Users can browse and purchase parts directly through our integrated marketplace.
-            </p>
-            <div class="space-y-3">
-              <div class="flex items-center">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span class="text-gray-700">Exact part recommendations based on diagnosis</span>
-              </div>
-              <div class="flex items-center">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span class="text-gray-700">Direct integration with parts marketplace</span>
-              </div>
-              <div class="flex items-center">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span class="text-gray-700">Competitive pricing from multiple suppliers</span>
-              </div>
-              <div class="flex items-center">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span class="text-gray-700">Fast delivery and installation guides</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50">
-            <h5 class="font-semibold text-gray-900 mb-4 text-center">How It Works</h5>
-            <div class="space-y-4">
-              <div class="flex items-start">
-                <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-3 mt-1">1</div>
-                <div>
-                  <h6 class="font-medium text-gray-900">AI Diagnosis</h6>
-                  <p class="text-sm text-gray-600">Our AI analyzes your car and identifies the problem</p>
-                </div>
-              </div>
-              <div class="flex items-start">
-                <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-3 mt-1">2</div>
-                <div>
-                  <h6 class="font-medium text-gray-900">Parts Suggestions</h6>
-                  <p class="text-sm text-gray-600">AI recommends exact parts needed for repair</p>
-                </div>
-              </div>
-              <div class="flex items-start">
-                <div class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-3 mt-1">3</div>
-                <div>
-                  <h6 class="font-medium text-gray-900">Browse & Purchase</h6>
-                  <p class="text-sm text-gray-600">Compare prices and buy parts directly</p>
-                </div>
-              </div>
-              <div class="flex items-start">
-                <div class="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-3 mt-1">4</div>
-                <div>
-                  <h6 class="font-medium text-gray-900">Installation Support</h6>
-                  <p class="text-sm text-gray-600">Get guides and support for installation</p>
-                </div>
-              </div>
-            </div>
-            <div class="mt-6 text-center">
-              <router-link 
-                to="/car-parts"
-                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105"
-              >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-                </svg>
-                Browse Car Parts
-              </router-link>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Revenue Model Info -->
-        <div class="mt-8 bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50">
-          <div class="text-center">
-            <h5 class="font-semibold text-gray-900 mb-2">Win-Win Revenue Model</h5>
-            <p class="text-gray-600 text-sm">
-              When users purchase parts through our platform, CarWise.ai earns a small commission (10-15%) 
-              while users get competitive prices and expert recommendations. This helps us keep our 
-              diagnostic services affordable while providing additional value.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Add-ons Section -->
-      <div class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50 mb-12">
-        <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Add-ons (Optional)</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="text-center p-6 bg-gray-50 rounded-xl">
-            <h4 class="font-semibold text-gray-900 mb-2">Professional Technical Report</h4>
-            <p class="text-2xl font-bold text-blue-600 mb-2">€14.99</p>
-            <p class="text-sm text-gray-600">PDF + service recommendation</p>
-          </div>
-          <div class="text-center p-6 bg-gray-50 rounded-xl">
-            <h4 class="font-semibold text-gray-900 mb-2">Predictive Problem Analysis</h4>
-            <p class="text-2xl font-bold text-blue-600 mb-2">€19.99</p>
-            <p class="text-sm text-gray-600">Monthly predictive analysis</p>
-          </div>
-          <div class="text-center p-6 bg-gray-50 rounded-xl">
-            <h4 class="font-semibold text-gray-900 mb-2">On-demand Expert Chat</h4>
-            <p class="text-2xl font-bold text-blue-600 mb-2">€2.99</p>
-            <p class="text-sm text-gray-600">Live expert consultation</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Competitive Advantages Section -->
-      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-8 border border-blue-200/50 mb-12">
-        <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Why Choose CarWise.ai?</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div class="text-center">
-            <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-              </svg>
-            </div>
-            <h4 class="font-semibold text-gray-900 mb-2">Universal AI for All Brands</h4>
-            <p class="text-sm text-gray-600">Single AI system for all car brands → saves development costs and increases accuracy</p>
-          </div>
-          
-          <div class="text-center">
-            <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-              </svg>
-            </div>
-            <h4 class="font-semibold text-gray-900 mb-2">Official API Connections</h4>
-            <p class="text-sm text-gray-600">Direct integration with manufacturer APIs → security and credibility for users</p>
-          </div>
-          
-          <div class="text-center">
-            <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-            </div>
-            <h4 class="font-semibold text-gray-900 mb-2">Neutral Platform</h4>
-            <p class="text-sm text-gray-600">Not a garage, but an intelligent assistant for every car owner</p>
-          </div>
-          
-          <div class="text-center">
-            <div class="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-              </svg>
-            </div>
-            <h4 class="font-semibold text-gray-900 mb-2">Multiple Revenue Streams</h4>
-            <p class="text-sm text-gray-600">AI diagnostics, subscriptions, commissions, B2B solutions</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Testimonials Section -->
-      <div class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50 mb-12">
-        <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">What Our Customers Say</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="text-center">
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 mb-4">
-              <div class="flex justify-center mb-4">
-                <div class="flex text-yellow-400">
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                </div>
-              </div>
-              <p class="text-gray-700 italic">"CarWise.ai saved me hundreds of euros by catching issues early. The AI diagnosis is incredibly accurate!"</p>
-            </div>
-            <div class="flex items-center justify-center">
-              <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">M</div>
-              <div>
-                <p class="font-semibold text-gray-900">Mark Thompson</p>
-                <p class="text-sm text-gray-600">Car Owner</p>
-              </div>
-            </div>
-          </div>
-          
-          <div class="text-center">
-            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 mb-4">
-              <div class="flex justify-center mb-4">
-                <div class="flex text-yellow-400">
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                </div>
-              </div>
-              <p class="text-gray-700 italic">"As a mechanic, CarWise.ai helps me diagnose problems faster and more accurately than traditional methods."</p>
-            </div>
-            <div class="flex items-center justify-center">
-              <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">S</div>
-              <div>
-                <p class="font-semibold text-gray-900">Sarah Johnson</p>
-                <p class="text-sm text-gray-600">Auto Mechanic</p>
-              </div>
-            </div>
-          </div>
-          
-          <div class="text-center">
-            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 mb-4">
-              <div class="flex justify-center mb-4">
-                <div class="flex text-yellow-400">
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                </div>
-              </div>
-              <p class="text-gray-700 italic">"The Pro Garage plan is perfect for our fleet management. We've reduced maintenance costs by 30%!"</p>
-            </div>
-            <div class="flex items-center justify-center">
-              <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">D</div>
-              <div>
-                <p class="font-semibold text-gray-900">David Chen</p>
-                <p class="text-sm text-gray-600">Fleet Manager</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- FAQ Section -->
       <div class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-gray-200/50">
         <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Frequently Asked Questions</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <h4 class="font-semibold text-gray-900 mb-2">Can I change my plan after purchase?</h4>
-            <p class="text-gray-600 text-sm">Yes — upgrade immediately, downgrade at the beginning of the next period.</p>
+            <h4 class="font-semibold text-gray-900 mb-2">Do I pay every month?</h4>
+            <p class="text-gray-600 text-sm">No. Every service on this page is a single payment.</p>
           </div>
           <div>
-            <h4 class="font-semibold text-gray-900 mb-2">Can I try it for free?</h4>
-            <p class="text-gray-600 text-sm">Yes — 14-day trial on Care+ plan.</p>
+            <h4 class="font-semibold text-gray-900 mb-2">Is there a free option?</h4>
+            <p class="text-gray-600 text-sm">Yes. The quick check is free.</p>
           </div>
           <div>
-            <h4 class="font-semibold text-gray-900 mb-2">How do refunds work?</h4>
-            <p class="text-gray-600 text-sm">Refund within 7 days for subscriptions (except parts purchases).</p>
+            <h4 class="font-semibold text-gray-900 mb-2">What does the complete check include?</h4>
+            <p class="text-gray-600 text-sm">One AI diagnosis, a written report, and preventive guidance, paid once.</p>
           </div>
           <div>
-            <h4 class="font-semibold text-gray-900 mb-2">Is there a long-term contract?</h4>
-            <p class="text-gray-600 text-sm">No — monthly or yearly subscription with discount.</p>
+            <h4 class="font-semibold text-gray-900 mb-2">Is the expert session included?</h4>
+            <p class="text-gray-600 text-sm">No. It is a separate one-time payment if you want to talk through a result.</p>
           </div>
         </div>
       </div>
@@ -756,8 +227,8 @@
           <!-- Selected Plan -->
           <div class="bg-gray-50 rounded-xl p-4 mb-6">
             <h4 class="font-semibold text-gray-900">{{ selectedPlan?.name }}</h4>
-            <p class="text-2xl font-bold text-blue-600">€{{ selectedPlan?.price }}/{{ selectedPlan?.billing_cycle === 'per_use' ? 'diagnosis' : 'month' }}</p>
-            <p class="text-sm text-gray-600">{{ selectedPlan?.description }}</p>
+            <p class="text-2xl font-bold text-blue-600">€{{ finalPrice }}</p>
+            <p class="text-sm text-gray-600">One-time payment · {{ selectedPlan?.description }}</p>
           </div>
 
           <!-- Coupon Code -->
@@ -826,52 +297,12 @@
           </button>
 
           <!-- Trial Notice -->
-          <p v-if="selectedPlan?.trial_days > 0" class="text-sm text-gray-600 text-center mt-4">
-            Start your {{ selectedPlan.trial_days }}-day free trial. Cancel anytime.
+          <p v-if="selectedPlan && selectedPlan.price === 0" class="text-sm text-gray-600 text-center mt-4">
+            This check is free. No card is charged.
           </p>
         </div>
       </div>
 
-      <!-- Money Back Guarantee -->
-      <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 border border-green-200 mb-12">
-        <div class="text-center">
-          <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">30-Day Money Back Guarantee</h3>
-          <p class="text-gray-600 max-w-2xl mx-auto">
-            Not satisfied with CarWise.ai? Get a full refund within 30 days, no questions asked. 
-            We're confident you'll love our AI-powered car diagnostics.
-          </p>
-        </div>
-      </div>
-
-      <!-- CTA Section -->
-      <div class="text-center bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-12 text-white">
-        <h3 class="text-3xl font-bold mb-4">Ready to Get Started?</h3>
-        <p class="text-xl mb-8 opacity-90">
-          Join thousands of car owners and mechanics who trust CarWise.ai for accurate diagnostics
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <button 
-            @click="selectPlan('care-plus')"
-            class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors duration-300 transform hover:scale-105"
-          >
-            Start Free Trial
-          </button>
-          <button 
-            @click="selectPlan('smart-ai')"
-            class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-300"
-          >
-            Try Smart AI
-          </button>
-        </div>
-        <p class="text-sm mt-4 opacity-75">
-          No credit card required for free trial • Cancel anytime
-        </p>
-      </div>
     </div>
   </div>
 </template>
@@ -880,15 +311,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
-import { useSubscription } from '../composables/useSubscription'
+import api from '../services/api'
 
 const router = useRouter()
 const route = useRoute()
-const { user, isAuthenticated } = useAuth()
-const { createSubscription, getPlans } = useSubscription()
+const { isAuthenticated } = useAuth()
 
-// Reactive data
-const billingCycle = ref('monthly')
 const showCheckoutModal = ref(false)
 const selectedPlan = ref(null)
 const couponCode = ref('')
@@ -897,54 +325,46 @@ const couponMessage = ref('')
 const paymentMethod = ref('stripe')
 const loading = ref(false)
 
-// Plans data
-const plans = ref([
+const prices = ref({
+  diagnosis: '10.39',
+  report: '19.49',
+  predictive: '25.99',
+  expert: '3.89',
+  complete: '55.86',
+})
+
+const plans = computed(() => [
   {
     id: 'basic',
-    name: 'Basic',
+    name: 'Quick check',
     price: 0,
-    billing_cycle: 'monthly',
-    description: 'Perfect for new users who want to try the service',
-    trial_days: 0
+    description: 'A first look, with no charge',
   },
   {
     id: 'smart-ai',
-    name: 'Smart AI',
-    price: 7.99,
-    billing_cycle: 'per_use',
-    description: 'Pay-per-use detailed AI diagnosis with repair recommendations',
-    trial_days: 0
+    name: 'AI Diagnosis',
+    price: Number(prices.value.diagnosis),
+    description: 'One detailed diagnosis',
   },
   {
     id: 'care-plus',
-    name: 'Care+',
-    price: 9.99,
-    billing_cycle: 'monthly',
-    description: 'Monthly coverage with preventive suggestions',
-    trial_days: 14
+    name: 'Complete check',
+    price: Number(prices.value.complete),
+    description: 'Diagnosis, written report, and preventive guidance',
   },
   {
     id: 'pro-garage',
-    name: 'Pro Garage',
-    price: 99,
-    billing_cycle: 'monthly',
-    description: 'For services & mechanics (B2B)',
-    trial_days: 0
-  }
+    name: 'Expert session',
+    price: Number(prices.value.expert),
+    description: 'One live conversation about your result',
+  },
 ])
 
-// Computed
 const finalPrice = computed(() => {
-  if (!selectedPlan.value) return 0
-  
+  if (!selectedPlan.value) return '0.00'
+
   let price = selectedPlan.value.price
-  
-  // Apply yearly discount
-  if (billingCycle.value === 'yearly' && selectedPlan.value.billing_cycle === 'monthly') {
-    price = price * 0.85 // 15% discount
-  }
-  
-  // Apply coupon discount
+
   if (couponValid.value && couponCode.value) {
     if (couponCode.value.includes('%')) {
       const discount = parseInt(couponCode.value.replace('%', ''))
@@ -953,7 +373,7 @@ const finalPrice = computed(() => {
       price = Math.max(0, price - 10)
     }
   }
-  
+
   return price.toFixed(2)
 })
 
@@ -992,26 +412,14 @@ const applyCoupon = () => {
 
 const processCheckout = async () => {
   if (!selectedPlan.value) return
-  
+
   loading.value = true
-  
+
   try {
-    // Simulate checkout process
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Create subscription
-    const result = await createSubscription(selectedPlan.value.id)
-    
-    if (result.success) {
-      // Show success message
-      alert('Subscription created successfully!')
-      showCheckoutModal.value = false
-      
-      // Redirect to dashboard
-      router.push('/subscription/dashboard')
-    } else {
-      throw new Error(result.error || 'Failed to create subscription')
-    }
+    await new Promise(resolve => setTimeout(resolve, 1200))
+    alert(`Payment recorded. One-time charge of €${finalPrice.value}.`)
+    showCheckoutModal.value = false
+    router.push('/dashboard')
   } catch (error) {
     console.error('Checkout failed:', error)
     alert('Checkout failed: ' + error.message)
@@ -1021,46 +429,26 @@ const processCheckout = async () => {
 }
 
 const goBackToDashboard = () => {
-  router.push('/subscription/dashboard')
+  router.push('/dashboard')
 }
 
-// Load plans from API
-const loadPlansFromAPI = async () => {
+onMounted(async () => {
+  document.title = 'Pricing - CarWise.ai'
+
   try {
-    const apiPlans = await getPlans()
-    
-    // Update plans with API data
-    plans.value = Object.values(apiPlans).map(plan => ({
-      id: plan.id,
-      name: plan.name,
-      price: plan.price,
-      billing_cycle: plan.billing_cycle,
-      description: plan.description,
-      trial_days: plan.trial_days || 0
-    }))
-    
-    console.log('Plans loaded from API:', plans.value)
+    const response = await api.get('/customer-services')
+    const services = response.data?.services
+    if (response.data?.success && services?.complete) {
+      prices.value = {
+        diagnosis: services.diagnosis,
+        report: services.report,
+        predictive: services.predictive,
+        expert: services.expert,
+        complete: services.complete,
+      }
+    }
   } catch (error) {
-    console.error('Failed to load plans from API:', error)
-    // Keep default plans if API fails
-  }
-}
-
-onMounted(() => {
-  // Set page title
-  document.title = 'Pricing & Subscription Plans - CarWise.ai'
-  
-  // Load plans from API
-  loadPlansFromAPI()
-  
-  // Handle query parameters for upgrade flow
-  const action = route.query.action
-  const currentPlan = route.query.current_plan
-  
-  if (action === 'upgrade' && currentPlan) {
-    // Highlight current plan and show upgrade options
-    console.log('Upgrade flow from plan:', currentPlan)
-    // You can add visual indicators or auto-scroll to relevant plans
+    console.error('Failed to load service prices:', error)
   }
 })
 </script>

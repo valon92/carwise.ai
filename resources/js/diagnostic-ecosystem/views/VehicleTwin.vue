@@ -336,7 +336,7 @@
                   </li>
                 </ul>
                 <button
-                  v-if="vehicle.latest_analysis.id"
+                  v-if="carPartsEnabled && vehicle.latest_analysis.id"
                   @click="loadPartsForAnalysis(vehicle)"
                   class="mt-3 inline-flex items-center rounded-lg border border-amber-300 bg-white px-2.5 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-50 dark:border-amber-700 dark:bg-secondary-800 dark:text-amber-200"
                 >
@@ -345,7 +345,7 @@
               </div>
 
               <div
-                v-if="vehicle.marketplace_parts?.parts?.length"
+                v-if="carPartsEnabled && vehicle.marketplace_parts?.parts?.length"
                 class="rounded-xl border border-secondary-200 bg-white p-3 dark:border-secondary-700 dark:bg-secondary-800"
               >
                 <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-secondary-500">Marketplace parts</p>
@@ -551,6 +551,7 @@
 <script>
 import { ref, onMounted, reactive } from 'vue'
 import { useVehicleTwin } from '../composables/useVehicleTwin'
+import { features } from '../../config/features'
 
 export default {
   name: 'VehicleTwin',
@@ -848,6 +849,7 @@ export default {
     })
 
     return {
+      carPartsEnabled: features.carParts,
       vehicles,
       isLoading,
       showRegisterModal,

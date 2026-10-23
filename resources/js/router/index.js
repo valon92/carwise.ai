@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { lazyRoute, ResourcePrefetcher } from '@/utils/lazyLoading'
+import { features } from '@/config/features'
 
 // Lazy load all route components for better performance
 const routes = [
@@ -199,6 +200,11 @@ const router = createRouter({
 
 // Navigation guards with performance optimizations
 router.beforeEach(async (to, from, next) => {
+  if (!features.carParts && to.path.startsWith('/car-parts')) {
+    next('/')
+    return
+  }
+
   const { isAuthenticated, user } = useAuth()
   
   // Start preloading route component as early as possible

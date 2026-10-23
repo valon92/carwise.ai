@@ -88,9 +88,6 @@ export function useAuth() {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       
-      // Clear diagnosis form data when user logs out
-      localStorage.removeItem('diagnosis_form_data')
-      localStorage.removeItem('selectedCarForDiagnosis')
       localStorage.removeItem('lastDiagnosisResult')
       localStorage.removeItem('lastDiagnosisSession')
       localStorage.removeItem('diagnosisCache')

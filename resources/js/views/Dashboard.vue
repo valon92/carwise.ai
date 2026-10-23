@@ -139,8 +139,7 @@
                 </div>
               </router-link>
 
-              <!-- Car Parts Store -->
-              <router-link to="/car-parts" class="group p-6 bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 rounded-2xl text-white hover:from-orange-600 hover:via-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+              <router-link v-if="carPartsEnabled" to="/car-parts" class="group p-6 bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 rounded-2xl text-white hover:from-orange-600 hover:via-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
                 <div class="flex flex-col items-center text-center">
                   <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-200">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -569,6 +568,7 @@ import { useRouter } from 'vue-router'
 import { authAPI, carsAPI, diagnosisAPI, dashboardAPI } from '../services/api'
 import { useAuth } from '../composables/useAuth'
 import LiveChatWidget from '../components/LiveChatWidget.vue'
+import { features } from '../config/features'
 
 export default {
   name: 'Dashboard',
@@ -943,7 +943,7 @@ export default {
           router.push('/diagnose')
           break
         case 'cost':
-          router.push('/car-parts')
+          if (features.carParts) router.push('/car-parts')
           break
         default:
           console.log('Insight action:', insight.action)
@@ -973,6 +973,7 @@ export default {
     })
 
     return {
+      carPartsEnabled: features.carParts,
       user,
       userInitials,
       stats,

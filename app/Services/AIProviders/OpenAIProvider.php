@@ -92,8 +92,12 @@ class OpenAIProvider implements AIProviderInterface
                 throw new \Exception('Failed to parse OpenAI API response.');
             }
             
-            // Add AI provider to the result for tracking
             $parsedResult['ai_provider'] = $this->getProviderName();
+            $parsedResult['usage'] = [
+                'model' => $responseData['model'] ?? $this->model,
+                'input_tokens' => (int) ($responseData['usage']['prompt_tokens'] ?? 0),
+                'output_tokens' => (int) ($responseData['usage']['completion_tokens'] ?? 0),
+            ];
 
             return $parsedResult;
 

@@ -153,6 +153,7 @@
               <!-- Quick Actions -->
               <div class="space-y-2">
                 <button
+                  v-if="carPartsEnabled"
                   @click="sendQuickMessage('I need help finding car parts')"
                   class="block w-full text-left p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
@@ -326,6 +327,9 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from 'vue'
 import { useLiveChat } from '../composables/useLiveChat'
+import { features } from '../config/features'
+
+const carPartsEnabled = features.carParts
 
 const props = defineProps({
   isCartOpen: {

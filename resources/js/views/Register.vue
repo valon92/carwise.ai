@@ -23,7 +23,7 @@
         </p>
         <p class="mt-1 text-center text-sm text-secondary-500 dark:text-secondary-500">
           Already have an account?
-          <router-link to="/login" class="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors duration-200">
+          <router-link :to="{ path: '/login', query: $route.query }" class="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors duration-200">
             Sign in here
           </router-link>
         </p>
@@ -507,13 +507,14 @@
 
 <script>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { authAPI } from '../services/api'
 
 export default {
   name: 'Register',
   setup() {
     const router = useRouter()
+    const route = useRoute()
     const isLoading = ref(false)
     const errorMessage = ref('')
     const successMessage = ref('')
@@ -639,7 +640,11 @@ export default {
           
           // Redirect after a short delay
           setTimeout(() => {
-            router.push('/dashboard')
+            const redirect = route.query.redirect
+            const nextPath = typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')
+              ? redirect
+              : '/dashboard'
+            router.push(nextPath)
           }, 1500)
         }
         

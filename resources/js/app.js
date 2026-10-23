@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import './assets/main.css'
 import { useAnalytics } from './composables/useAnalytics'
+import { features } from './config/features'
 
 // Lazy load views for better performance
 const Home = () => import('./views/Home.vue')
@@ -212,6 +213,11 @@ const router = createRouter({
 
 // Router guards for authentication and meta management
 router.beforeEach((to, from, next) => {
+  if (!features.carParts && to.path.startsWith('/car-parts')) {
+    next('/')
+    return
+  }
+
   // Update page title and meta description
   if (to.meta.title) {
     document.title = to.meta.title
@@ -243,6 +249,11 @@ router.beforeEach((to, from, next) => {
 
   // Redirect authenticated users away from auth pages
   if ((to.name === 'Login' || to.name === 'Register') && localStorage.getItem('token')) {
+    const redirect = to.query.redirect
+    if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')) {
+      next(redirect)
+      return
+    }
     next('/dashboard')
     return
   }

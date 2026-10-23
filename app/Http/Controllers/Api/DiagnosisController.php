@@ -7,6 +7,7 @@ use App\Models\DiagnosisSession;
 use App\Models\DiagnosisMedia;
 use App\Models\DiagnosisResult;
 use App\Services\AIDiagnosisService;
+use App\Services\CustomerServicePricing;
 use App\Services\DiagnosisEnhancementService;
 use App\Jobs\ProcessAIDiagnosis;
 use Illuminate\Http\Request;
@@ -19,11 +20,16 @@ class DiagnosisController extends Controller
 {
     protected $aiService;
     protected $enhancementService;
+    protected CustomerServicePricing $pricing;
 
-    public function __construct(AIDiagnosisService $aiService, DiagnosisEnhancementService $enhancementService)
-    {
+    public function __construct(
+        AIDiagnosisService $aiService,
+        DiagnosisEnhancementService $enhancementService,
+        CustomerServicePricing $pricing
+    ) {
         $this->aiService = $aiService;
         $this->enhancementService = $enhancementService;
+        $this->pricing = $pricing;
     }
 
     /**
@@ -238,40 +244,23 @@ class DiagnosisController extends Controller
                 ], 404);
             }
 
-            // Check if result needs translation to user's language
             $result = $session->result;
-            $userLanguage = auth()->user()?->language ?? 'en';
-            
-            // If user language is not English and result might be in English, translate it
-            if ($userLanguage !== 'en' && $this->needsTranslation($result)) {
-                $result = $this->translateExistingResult($result, $userLanguage);
-            }
+            $unlocked = (bool) ($session->ai_response['unlocked'] ?? false);
+            $amount = $this->pricing->quoteFromUsage($session->ai_response['usage'] ?? null);
 
-            // Enhance result with additional data if not already enhanced
-            if (!isset($result->suggested_parts_for_purchase) && !isset($result->repair_videos)) {
-                $enhancedResult = $this->enhancementService->enhanceDiagnosisResults(
-                    $result->toArray(), 
-                    $session->make, 
-                    $session->model, 
-                    $session->year
-                );
-                $result = (object) array_merge($result->toArray(), $enhancedResult);
+            if ($unlocked) {
+                $userLanguage = auth()->user()?->language ?? 'en';
+                if ($userLanguage !== 'en' && $this->needsTranslation($result)) {
+                    $result = $this->translateExistingResult($result, $userLanguage);
+                }
             }
 
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'session' => $session,
-                    'result' => $result,
-                    'media' => $session->media->map(function ($media) {
-                        return [
-                            'id' => $media->id,
-                            'file_name' => $media->file_name,
-                            'url' => $media->url,
-                            'type' => $media->file_type,
-                            'size' => $media->formatted_size
-                        ];
-                    })
+                    'result' => $unlocked ? $this->fullResult($result) : $this->previewResult($result),
+                    'amount' => $amount,
+                    'locked' => ! $unlocked,
                 ]
             ])->withHeaders([
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
@@ -286,6 +275,60 @@ class DiagnosisController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function continueDiagnosis(string $sessionId): JsonResponse
+    {
+        $session = DiagnosisSession::where('session_id', $sessionId)
+            ->with('result')
+            ->first();
+
+        if (! $session || ! $session->result || (int) $session->user_id !== (int) auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Diagnosis result not available',
+            ], 404);
+        }
+
+        $meta = $session->ai_response ?? [];
+        $meta['unlocked'] = true;
+        $session->update(['ai_response' => $meta]);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'result' => $this->fullResult($session->result),
+                'amount' => $this->pricing->quoteFromUsage($meta['usage'] ?? null),
+                'locked' => false,
+            ],
+        ]);
+    }
+
+    private function previewResult($result): array
+    {
+        return [
+            'problem_title' => $result->problem_title ?? null,
+            'severity' => $result->severity ?? null,
+            'confidence_score' => $result->confidence_score ?? null,
+            'locked' => true,
+        ];
+    }
+
+    private function fullResult($result): array
+    {
+        $data = $result instanceof DiagnosisResult ? $result->toArray() : (array) $result;
+
+        return [
+            'problem_title' => $data['problem_title'] ?? null,
+            'problem_description' => $data['problem_description'] ?? null,
+            'severity' => $data['severity'] ?? null,
+            'confidence_score' => $data['confidence_score'] ?? null,
+            'likely_causes' => $data['likely_causes'] ?? [],
+            'recommended_actions' => $data['recommended_actions'] ?? [],
+            'estimated_costs' => $data['estimated_costs'] ?? [],
+            'ai_insights' => $data['ai_insights'] ?? [],
+            'locked' => false,
+        ];
     }
 
     /**
@@ -526,6 +569,8 @@ class DiagnosisController extends Controller
 
             // Call AI service
             $aiResult = $this->aiService->analyzeDiagnosis($analysisData);
+            $usage = $aiResult['usage'] ?? null;
+            unset($aiResult['usage']);
 
             // Enhance results with part images, videos, and purchase links
             $aiResult = $this->enhancementService->enhanceDiagnosisResults(
@@ -539,7 +584,9 @@ class DiagnosisController extends Controller
             DiagnosisResult::create([
                 'diagnosis_session_id' => $session->id,
                 'problem_title' => $aiResult['problem_title'],
-                'problem_description' => $aiResult['problem_summary'] ?? $aiResult['primary_diagnosis']['description'] ?? 'No description available',
+                'problem_description' => $aiResult['problem_description']
+                    ?? $aiResult['problem_summary']
+                    ?? ($aiResult['primary_diagnosis']['description'] ?? null),
                 'severity' => $aiResult['severity'],
                 'confidence_score' => $aiResult['confidence_score'],
                 'likely_causes' => $aiResult['secondary_causes'] ?? $aiResult['likely_causes'] ?? [],
@@ -557,7 +604,11 @@ class DiagnosisController extends Controller
                 'status' => 'completed',
                 'confidence_score' => $aiResult['confidence_score'],
                 'severity' => $aiResult['severity'],
-                'processed_at' => now()
+                'processed_at' => now(),
+                'ai_response' => [
+                    'usage' => $usage,
+                    'unlocked' => false,
+                ],
             ]);
 
         } catch (\Exception $e) {

@@ -13,7 +13,7 @@
             <span class="ml-3 text-xl font-bold text-white">CarWise.ai</span>
           </div>
           <p class="text-secondary-300 mb-6 leading-relaxed">
-            Smart car diagnosis platform powered by AI. Get instant, accurate vehicle diagnostics and find quality car parts.
+            Smart car diagnosis platform powered by AI. Get instant, accurate vehicle diagnostics<span v-if="carPartsEnabled"> and find quality car parts</span>.
           </p>
           <div class="flex space-x-4">
             <a href="#" class="social-link" title="Facebook">
@@ -90,7 +90,7 @@
                 AI Diagnosis
               </router-link>
             </li>
-            <li>
+            <li v-if="carPartsEnabled">
               <router-link to="/car-parts" class="footer-link">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
@@ -176,7 +176,7 @@
               class="flex-1 md:w-64 px-4 py-2 bg-secondary-800 border border-secondary-700 rounded-l-lg text-white placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
             <button class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-r-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500">
-              Subscribe
+              Send
             </button>
           </div>
         </div>
@@ -212,6 +212,7 @@
 
 <script>
 import { computed } from 'vue'
+import { features } from '../config/features'
 
 export default {
   name: 'Footer',
@@ -219,7 +220,8 @@ export default {
     const currentYear = computed(() => new Date().getFullYear())
 
     return {
-      currentYear
+      currentYear,
+      carPartsEnabled: features.carParts,
     }
   }
 }

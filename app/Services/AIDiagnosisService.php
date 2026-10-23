@@ -206,6 +206,121 @@ class AIDiagnosisService
         return $data;
     }
 
+    private function symptomText(string $description): string
+    {
+        $text = mb_strtolower($description);
+
+        return strtr($text, [
+            'ë' => 'e',
+            'ç' => 'c',
+            'é' => 'e',
+            'á' => 'a',
+            'í' => 'i',
+            'ó' => 'o',
+            'ú' => 'u',
+        ]);
+    }
+
+    private function engineNoiseAndConsumption(array $data, string $userLanguage): array
+    {
+        $mileage = (int) ($data['mileage'] ?? 0);
+        $highMileage = $mileage >= 150000;
+
+        if ($userLanguage === 'sq') {
+            $description = 'Motori po bën zhurmë dhe po harxhon më shumë sesa duhet. Kontrollo nivelin e vajit dhe të ujit të ftohjes. Te një diesel me shumë kilometra, kjo zakonisht vjen nga vaji ose nga ftohja.';
+            if ($highMileage) {
+                $description .= ' Me '.$mileage.' km, mos e lër për më vonë nëse niveli bie shpejt.';
+            }
+
+            return [
+                'problem_title' => 'Zhurmë në motor dhe konsum i lartë',
+                'problem_description' => $description,
+                'severity' => 'medium',
+                'confidence_score' => 74,
+                'likely_causes' => [
+                    [
+                        'title' => 'Konsum i vajit',
+                        'description' => 'Unazat ose gasketa lënë vajin të ulet. Motori fillon të bëjë zhurmë kur vaji është pak.',
+                        'probability' => 62,
+                    ],
+                    [
+                        'title' => 'Uji i ftohjes',
+                        'description' => 'Një rrjedhje e vogël ose pompa e ujit ul nivelin dhe mund të shoqërohet me zhurmë.',
+                        'probability' => 28,
+                    ],
+                ],
+                'recommended_actions' => [
+                    [
+                        'title' => 'Kontrollo vajin dhe ujin',
+                        'description' => 'Nëse ndonjëri është nën minimum, mos nisu për një rrugë të gjatë.',
+                        'urgency' => 'Sot',
+                    ],
+                    [
+                        'title' => 'Dëgjoje motorin të ngrohtë',
+                        'description' => 'Mekaniku duhet ta dëgjojë zhurmën kur motori është në temperaturë.',
+                        'urgency' => 'Këtë javë',
+                    ],
+                ],
+                'estimated_costs' => $this->convertCosts([
+                    ['service' => 'Kontroll i motorit', 'min' => 40, 'max' => 90],
+                    ['service' => 'Vaj dhe filtra', 'min' => 70, 'max' => 160],
+                ], $data['user_currency_id'] ?? null),
+                'requires_immediate_attention' => false,
+                'model_version' => '1.0',
+                'ai_provider' => 'fallback',
+                'ai_insights' => [
+                    'Nëse zhurma rritet ose niveli bie brenda pak ditësh, çoje më shpejt te mekaniku.',
+                ],
+            ];
+        }
+
+        $description = 'The engine is noisy and using more fluid than it should. Check the oil and the coolant. On a high-mileage diesel this usually comes from the oil or the cooling system.';
+        if ($highMileage) {
+            $description .= ' At '.$mileage.' km, do not wait if the level drops quickly.';
+        }
+
+        return [
+            'problem_title' => 'Engine noise and high consumption',
+            'problem_description' => $description,
+            'severity' => 'medium',
+            'confidence_score' => 74,
+            'likely_causes' => [
+                [
+                    'title' => 'Oil consumption',
+                    'description' => 'Rings or a gasket let the oil level fall. The engine gets noisy when the oil is low.',
+                    'probability' => 62,
+                ],
+                [
+                    'title' => 'Coolant loss',
+                    'description' => 'A small leak or the water pump can drop the coolant and add noise.',
+                    'probability' => 28,
+                ],
+            ],
+            'recommended_actions' => [
+                [
+                    'title' => 'Check the oil and coolant',
+                    'description' => 'If either is under the minimum, do not take a long trip.',
+                    'urgency' => 'Today',
+                ],
+                [
+                    'title' => 'Listen to the engine warm',
+                    'description' => 'A mechanic should hear the noise once the engine is at temperature.',
+                    'urgency' => 'This week',
+                ],
+            ],
+            'estimated_costs' => $this->convertCosts([
+                ['service' => 'Engine check', 'min' => 40, 'max' => 90],
+                ['service' => 'Oil and filters', 'min' => 70, 'max' => 160],
+            ], $data['user_currency_id'] ?? null),
+            'requires_immediate_attention' => false,
+            'model_version' => '1.0',
+            'ai_provider' => 'fallback',
+            'ai_insights' => [
+                'If the noise grows or the level drops within a few days, take it in sooner.',
+            ],
+        ];
+    }
+
     /**
      * Generate enhanced mock AI response for demo purposes.
      */
@@ -213,8 +328,16 @@ class AIDiagnosisService
     {
         $symptoms = $data['symptoms'] ?? [];
         $description = strtolower($data['description'] ?? $data['problem_description'] ?? '');
+        $normalized = $this->symptomText($description);
         $vehicleInfo = $data['vehicle_info'] ?? [];
         $userLanguage = $data['user_language'] ?? 'en';
+
+        $hasNoise = str_contains($normalized, 'zhurm') || str_contains($normalized, 'noise') || str_contains($normalized, 'sound');
+        $usesALot = str_contains($normalized, 'harxhon') || str_contains($normalized, 'konsumon') || str_contains($normalized, 'consum');
+
+        if ($hasNoise && $usesALot) {
+            return $this->engineNoiseAndConsumption($data, $userLanguage);
+        }
         
         // Enhanced rule-based mock responses with more sophisticated analysis
         if (str_contains($description, 'engine') && (str_contains($description, 'start') || str_contains($description, 'won\'t start'))) {
@@ -269,7 +392,7 @@ class AIDiagnosisService
             return $this->translateResponse($response, $userLanguage);
         }
         
-        if (str_contains($description, 'noise') || str_contains($description, 'sound')) {
+        if (str_contains($description, 'noise') || str_contains($description, 'sound') || str_contains($normalized, 'zhurm')) {
             $response = [
                 'problem_title' => 'Unusual Engine Noises',
                 'problem_description' => 'The vehicle is producing unusual sounds that may indicate mechanical issues requiring attention.',
@@ -734,7 +857,7 @@ class AIDiagnosisService
         if ($userLanguage === 'sq') {
             return [
                 'problem_title' => 'Probleme Elektrike',
-                'problem_description' => 'Simptomat tregojnë probleme të mundshme me sistemin elektrik të vozilës.',
+                'problem_description' => 'Simptomat tregojnë probleme të mundshme me sistemin elektrik të veturës.',
                 'severity' => 'medium',
                 'confidence_score' => 70,
                 'likely_causes' => [
@@ -933,13 +1056,13 @@ class AIDiagnosisService
                 'Fuel Economy Issues' => 'Probleme me Konsumin e Karburantit',
                 'Overheating Issues' => 'Probleme me Shtimin e Temperaturës',
                 'General Maintenance' => 'Mirëmbajtje e Përgjithshme',
-                'Vehicle Diagnostic Required' => 'Kërkohet Diagnostikimi i Vozilës',
+                'Vehicle Diagnostic Required' => 'Kërkohet Diagnostikimi i veturës',
                 
                 // Problem descriptions
-                'The vehicle is experiencing difficulty starting, which could be related to the ignition system, fuel delivery, or battery.' => 'Vozila po përjeton vështirësi në fillim, e cila mund të jetë e lidhur me sistemin e ndezjes, furnizimin me karburant, ose baterinë.',
-                'The vehicle is showing signs of poor engine performance, including rough idle, poor acceleration, or strange noises.' => 'Vozila po tregon shenja të performancës së dobët të motorit, duke përfshirë funksionimin e ashpër, përshpejtim të dobët, ose zhurma të çuditshme.',
+                'The vehicle is experiencing difficulty starting, which could be related to the ignition system, fuel delivery, or battery.' => 'Vetura po përjeton vështirësi në fillim, e cila mund të jetë e lidhur me sistemin e ndezjes, furnizimin me karburant, ose baterinë.',
+                'The vehicle is showing signs of poor engine performance, including rough idle, poor acceleration, or strange noises.' => 'Vetura po tregon shenja të performancës së dobët të motorit, duke përfshirë funksionimin e ashpër, përshpejtim të dobët, ose zhurma të çuditshme.',
                 'Warning lights are illuminated on the dashboard, indicating potential system issues that require attention.' => 'Dritat e paralajmërimit janë të ndezura në panel, duke treguar probleme të mundshme të sistemit që kërkojnë vëmendje.',
-                'The vehicle is consuming more fuel than expected, which could indicate various engine or driving issues.' => 'Vozila po konsumon më shumë karburant sesa pritej, e cila mund të tregojë probleme të ndryshme të motorit ose të vozitjes.',
+                'The vehicle is consuming more fuel than expected, which could indicate various engine or driving issues.' => 'Vetura po konsumon më shumë karburant sesa pritej, e cila mund të tregojë probleme të ndryshme të motorit ose të vozitjes.',
                 'The engine is overheating, which is a serious issue that requires immediate attention to prevent damage.' => 'Motori po nxehet shumë, e cila është një problem serioz që kërkon vëmendje të menjëhershme për të parandaluar dëmtimin.',
                 'Based on the symptoms described, this appears to be a general maintenance issue that can be addressed with routine service.' => 'Bazuar në simptomat e përshkruara, kjo duket të jetë një problem i mirëmbajtjes së përgjithshme që mund të adresohet me shërbim rutinor.',
                 'Based on the symptoms described, a comprehensive diagnostic is recommended to identify the root cause.' => 'Bazuar në simptomat e përshkruara, rekomandohet një diagnostikim i plotë për të identifikuar shkakun rrënjësor.',
@@ -992,7 +1115,7 @@ class AIDiagnosisService
                 'Analyze fuel consumption patterns and driving habits.' => 'Analizo modelet e konsumit të karburantit dhe zakonet e vozitjes.',
                 'Check cooling system components and fluid levels.' => 'Kontrollo komponentët e sistemit të ftohjes dhe nivelet e lëngut.',
                 'Consider routine maintenance to prevent future issues.' => 'Konsidero mirëmbajtjen rutinore për të parandaluar problemet e ardhshme.',
-                'Schedule a full vehicle inspection with diagnostic equipment.' => 'Programo një inspektim të plotë të vozilës me pajisje diagnostikuese.',
+                'Schedule a full vehicle inspection with diagnostic equipment.' => 'Programo një inspektim të plotë të veturës me pajisje diagnostikuese.',
                 
                 // Urgency levels
                 'Immediate' => 'I Menjëhershëm',
@@ -1001,19 +1124,19 @@ class AIDiagnosisService
                 'Within 1 month' => 'Brenda 1 muajit',
                 
                 // AI insights
-                'Based on vehicle age and mileage, consider preventive maintenance.' => 'Bazuar në moshën dhe kilometrazhin e vozilës, konsidero mirëmbajtjen parandaluese.',
+                'Based on vehicle age and mileage, consider preventive maintenance.' => 'Bazuar në moshën dhe kilometrazhin e veturës, konsidero mirëmbajtjen parandaluese.',
                 'Regular diagnostic checks can prevent costly repairs.' => 'Kontrollet diagnostikuese të rregullta mund të parandalojnë riparime të shtrenjta.',
                 'Document symptoms for better diagnostic accuracy.' => 'Dokumento simptomat për saktësi më të mirë diagnostikuese.',
                 
                 // Additional translations for mixed language issue
-                'Vehicle Diagnostic Required' => 'Kërkohet Diagnostikimi i Vozilës',
+                'Vehicle Diagnostic Required' => 'Kërkohet Diagnostikimi i veturës',
                 'Based on the symptoms described, a comprehensive diagnostic is recommended to identify the root cause.' => 'Bazuar në simptomat e përshkruara, rekomandohet një diagnostikim i plotë për të identifikuar shkakun rrënjësor.',
                 'Multiple System Analysis' => 'Analiza e Sistemeve të Shumta',
                 'Symptoms may be related to engine, transmission, electrical, or other systems.' => 'Simptomat mund të jenë të lidhura me motorin, transmetimin, sistemin elektrik, ose sisteme të tjera.',
                 'Wear and Tear' => 'Konsumim dhe Veshje',
                 'Normal aging components may require maintenance or replacement.' => 'Komponentët e moshës normale mund të kërkojnë mirëmbajtje ose zëvendësim.',
                 'Comprehensive Diagnostic' => 'Diagnostikim i Plotë',
-                'Schedule a full vehicle inspection with diagnostic equipment.' => 'Programo një inspektim të plotë të vozilës me pajisje diagnostikuese.',
+                'Schedule a full vehicle inspection with diagnostic equipment.' => 'Programo një inspektim të plotë të veturës me pajisje diagnostikuese.',
                 'Preventive Maintenance' => 'Mirëmbajtje Parandaluese',
                 'Consider routine maintenance to prevent future issues.' => 'Konsidero mirëmbajtjen rutinore për të parandaluar problemet e ardhshme.',
                 'Within 1 week' => 'Brenda 1 javës',
@@ -1035,7 +1158,7 @@ class AIDiagnosisService
                 'Diagnostic Fee' => 'Tarifa Diagnostikuese',
                 'Maintenance Service' => 'Shërbimi i Mirëmbajtjes',
                 'Estimated Costs' => 'Kostot e Vlerësuara',
-                'Cost estimates are approximate and may vary based on location and specific vehicle requirements.' => 'Vlerësimet e kostove janë të përafërta dhe mund të ndryshojnë bazuar në vendndodhjen dhe kërkesat specifike të vozilës.',
+                'Cost estimates are approximate and may vary based on location and specific vehicle requirements.' => 'Vlerësimet e kostove janë të përafërta dhe mund të ndryshojnë bazuar në vendndodhjen dhe kërkesat specifike të veturës.',
                 
                 // Additional common phrases
                 'probability' => 'probabilitet',

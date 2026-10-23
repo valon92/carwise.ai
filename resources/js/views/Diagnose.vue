@@ -776,562 +776,140 @@
         </div>
 
         <!-- Modern Results Panel -->
-        <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-8 hover:shadow-3xl transition-all duration-300">
-          <div class="flex items-center justify-between mb-8">
-            <div class="flex items-center">
-              <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">
-                  AI Diagnosis Results
-                </h2>
-                <p class="text-slate-600 dark:text-slate-400">
-                  Professional analysis powered by advanced AI
-                </p>
-              </div>
+        <div data-result-panel class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm overflow-hidden">
+          <div class="flex items-center justify-between gap-4 px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Diagnosis</p>
+              <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Your result</h2>
             </div>
-            
-            <!-- Action Buttons -->
-            <div v-if="diagnosisResult" class="flex items-center space-x-3">
-              <button 
-                @click="exportToPDF"
-                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
-                title="Export to PDF"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                Export PDF
-              </button>
-              
-              <button 
-                @click="viewHistory"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
-                title="View History"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                History
-              </button>
-            </div>
-          </div>
-          
-          <!-- Modern Loading State -->
-          <div v-if="isLoading" class="text-center py-16">
-            <div class="relative mb-8">
-              <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl shadow-2xl">
-                <svg class="animate-spin w-10 h-10 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </div>
-              <div class="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-indigo-600/20 rounded-3xl animate-pulse"></div>
-            </div>
-            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">AI Analysis in Progress</h3>
-            <p class="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto">
-              Our advanced AI is analyzing your vehicle information and symptoms to provide you with accurate diagnosis...
-            </p>
-            <div class="flex justify-center space-x-3">
-              <div class="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
-              <div class="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-              <div class="w-3 h-3 bg-purple-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-            </div>
-            <div class="mt-8 bg-slate-50 dark:bg-slate-700 rounded-2xl p-6 max-w-md mx-auto">
-              <div class="text-sm text-slate-600 dark:text-slate-400 space-y-2">
-                <div class="flex items-center justify-between">
-                  <span>Processing vehicle data...</span>
-                  <div class="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span>Analyzing symptoms...</span>
-                  <div class="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span>Generating diagnosis...</span>
-                  <div class="w-4 h-4 bg-purple-500 rounded-full animate-pulse"></div>
-                </div>
-              </div>
+            <div v-if="diagnosisResult && continuationPaid" class="flex items-center gap-2">
+              <button @click="exportToPDF" class="px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700">Report</button>
+              <button @click="viewHistory" class="px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700">History</button>
             </div>
           </div>
 
-          <!-- Modern Results State -->
-          <div v-else-if="diagnosisResult" class="space-y-6">
-            <!-- Header Section -->
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6">
-              <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div class="flex items-center space-x-3">
-                  <div class="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full text-sm font-semibold">
-                    {{ diagnosisResult?.ai_provider || 'AI' }} Analysis
-                  </div>
-                  <div class="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-medium">
-                    {{ diagnosisResult.confidence_score || 85 }}% Confidence
-                  </div>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <button 
-                    @click="shareResults"
-                    class="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors duration-200"
-                    title="Share Results"
-                  >
-                    <svg class="w-4 h-4 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
-                    </svg>
+          <div v-if="isLoading" class="px-6 py-16 text-center">
+            <div class="mx-auto mb-5 h-10 w-10 rounded-full border-2 border-slate-200 border-t-slate-900 dark:border-slate-700 dark:border-t-white animate-spin"></div>
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Reading your symptoms</h3>
+            <p class="mt-2 text-sm text-slate-500">The result will appear here in a moment.</p>
+          </div>
+
+          <div v-else-if="diagnosisResult" class="px-6 py-6 space-y-8">
+            <div v-if="diagnosisResult.severity === 'high' || diagnosisResult.severity === 'critical'" class="rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-4 py-3 text-sm text-red-800 dark:text-red-200">
+              This needs a mechanic before you keep driving.
+            </div>
+
+            <div>
+              <div class="flex flex-wrap items-center gap-2 mb-3">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold" :class="getSeverityBadgeClass(diagnosisResult.severity)">
+                  {{ getSeverityText(diagnosisResult.severity) }}
+                </span>
+                <span v-if="diagnosisResult.confidence_score" class="text-xs text-slate-500">
+                  {{ diagnosisResult.confidence_score }}% match
+                </span>
+              </div>
+              <h3 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                {{ diagnosisResult.problem_title || 'Vehicle issue detected' }}
+              </h3>
+            </div>
+
+            <section v-if="!continuationPaid" class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-5 py-5">
+              <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">Continue</p>
+              <h4 class="mt-2 text-lg font-semibold text-slate-900 dark:text-white">One payment for this result</h4>
+              <p class="mt-1 text-sm text-slate-500">The explanation, the steps, and a cost guide.</p>
+
+              <div v-if="quoteLoading" class="mt-5 text-sm text-slate-500">Preparing the total</div>
+
+              <div v-else-if="continuationAmount" class="mt-5">
+                <p class="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">€{{ continuationAmount }}</p>
+                <p class="mt-1 text-xs text-slate-400">Pay once. No subscription.</p>
+
+                <div v-if="!showPay" class="mt-5">
+                  <button type="button" @click="showPay = true" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-900 text-sm font-semibold text-white dark:bg-white dark:text-slate-900">
+                    Continue
                   </button>
-                  <button 
-                    @click="downloadReport"
-                    class="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors duration-200"
-                    title="Download Report"
-                  >
-                    <svg class="w-4 h-4 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
+                </div>
+
+                <div v-else class="mt-5 space-y-3">
+                  <label class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-800 dark:text-slate-100">
+                    <input v-model="payMethod" type="radio" value="card" class="accent-slate-900">
+                    Card
+                  </label>
+                  <label class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-800 dark:text-slate-100">
+                    <input v-model="payMethod" type="radio" value="paypal" class="accent-slate-900">
+                    PayPal
+                  </label>
+                  <button type="button" @click="confirmContinuation" :disabled="paying" class="w-full px-5 py-3 rounded-xl bg-slate-900 text-sm font-semibold text-white disabled:opacity-50 dark:bg-white dark:text-slate-900">
+                    {{ paying ? 'Opening the result' : (Number(continuationAmount) > 0 ? 'Pay €' + continuationAmount : 'Continue') }}
                   </button>
                 </div>
               </div>
-            </div>
 
-            <!-- Main Content Layout -->
-            <div class="space-y-6">
-                <!-- Modern Diagnosis Summary -->
-                <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                  <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white">AI Diagnosis Summary</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Professional analysis powered by advanced AI</p>
-                  </div>
-                </div>
-                <div class="flex items-center space-x-3">
-                  <div class="flex items-center px-3 py-1 rounded-full" :class="getSeverityBadgeClass(diagnosisResult.severity)">
-                    <div class="w-2 h-2 rounded-full mr-2" :class="getSeverityColor(diagnosisResult.severity)"></div>
-                    <span class="text-sm font-semibold" :class="getSeverityTextColor(diagnosisResult.severity)">
-                      {{ getSeverityText(diagnosisResult.severity) }}
-                    </span>
-                  </div>
-                </div>
+              <div v-else class="mt-5">
+                <p class="text-sm text-slate-500">The total could not be prepared.</p>
+                <button type="button" @click="loadContinuationQuote" class="mt-3 text-sm font-medium text-slate-900 dark:text-white underline">Try again</button>
               </div>
-              
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <h4 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                  {{ diagnosisResult.problem_title || 'Vehicle Issue Detected' }}
-                </h4>
-                <p class="text-slate-700 dark:text-slate-300 text-lg leading-relaxed mb-6">
-                  {{ diagnosisResult.problem_summary || diagnosisResult.problem_description || diagnosisResult.summary }}
-                </p>
-                
-                <!-- Quick Stats -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
-                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                      {{ diagnosisResult.confidence_score || 85 }}%
-                    </div>
-                    <div class="text-sm text-blue-700 dark:text-blue-300">Confidence</div>
-                  </div>
-                  <div class="text-center p-4 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl">
-                    <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">
-                      {{ (diagnosisResult.likely_causes || diagnosisResult.likelyCauses || []).length || 3 }}
-                    </div>
-                    <div class="text-sm text-emerald-700 dark:text-emerald-300">Possible Causes</div>
-                  </div>
-                  <div class="text-center p-4 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
-                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">
-                      {{ (diagnosisResult.recommended_actions || diagnosisResult.recommendedActions || []).length || 4 }}
-                    </div>
-                    <div class="text-sm text-purple-700 dark:text-purple-300">Solutions</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </section>
 
-                <!-- AI Insights -->
-                <div v-if="diagnosisResult.ai_insights" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="text-2xl font-bold text-slate-900 dark:text-white">AI Insights</h3>
-                  <p class="text-slate-600 dark:text-slate-400">Advanced analysis and recommendations</p>
-                </div>
-              </div>
-              
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <ul class="space-y-4">
-                  <li v-for="(insight, index) in diagnosisResult.ai_insights" :key="index" class="flex items-start">
-                    <div class="w-6 h-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mr-4 mt-0.5 flex-shrink-0">
-                      <span class="text-white text-sm font-bold">{{ index + 1 }}</span>
-                    </div>
-                    <p class="text-slate-700 dark:text-slate-300 text-lg leading-relaxed">{{ insight }}</p>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-                <!-- Likely Causes -->
-                <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Likely Causes</h3>
-                  <p class="text-slate-600 dark:text-slate-400">Most probable reasons for the issue</p>
-                </div>
-              </div>
-              
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <div class="space-y-6">
-                  <div v-for="(cause, index) in (diagnosisResult.likely_causes || diagnosisResult.likelyCauses || [])" :key="index" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-orange-200 dark:border-orange-700 hover:shadow-lg transition-all duration-300">
-                    <div class="flex items-start justify-between mb-4">
-                      <div class="flex items-center">
-                        <div class="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mr-4">
-                          <span class="text-white text-sm font-bold">{{ index + 1 }}</span>
-                        </div>
-                        <div>
-                          <h4 class="text-xl font-bold text-slate-900 dark:text-white">{{ cause.title || cause.cause || 'Unknown Cause' }}</h4>
-                          <p class="text-slate-600 dark:text-slate-400">{{ cause.description || cause.explanation || 'No description available' }}</p>
-                        </div>
-                      </div>
-                      <div class="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-sm font-semibold">
-                        {{ cause.probability || 75 }}% probability
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-                <!-- Recommended Actions -->
-                <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Recommended Actions</h3>
-                  <p class="text-slate-600 dark:text-slate-400">Step-by-step solutions to fix the issue</p>
-                </div>
-              </div>
-              
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <div class="space-y-6">
-                  <div v-for="(action, index) in (diagnosisResult.recommended_actions || diagnosisResult.recommendedActions || [])" :key="index" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-emerald-200 dark:border-emerald-700 hover:shadow-lg transition-all duration-300">
-                    <div class="flex items-start justify-between mb-4">
-                      <div class="flex items-center">
-                        <div class="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mr-4">
-                          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 class="text-xl font-bold text-slate-900 dark:text-white">{{ action.title || action.action || 'Recommended Action' }}</h4>
-                          <p class="text-slate-600 dark:text-slate-400">{{ action.description || action.explanation || 'No description available' }}</p>
-                        </div>
-                      </div>
-                      <div class="px-4 py-2 rounded-full text-sm font-semibold" :class="getUrgencyBadgeClass(action.urgency)">
-                        {{ action.urgency || 'Immediate' }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-                <!-- Estimated Costs -->
-                <div v-if="diagnosisResult.estimated_costs" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Estimated Costs</h3>
-                  <p class="text-slate-600 dark:text-slate-400">Approximate repair costs and services</p>
-                </div>
-              </div>
-              
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div v-for="cost in diagnosisResult.estimated_costs" :key="cost.service" class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-yellow-200 dark:border-yellow-700 hover:shadow-lg transition-all duration-300">
-                    <div class="flex justify-between items-center">
-                      <div>
-                        <h4 class="text-lg font-bold text-slate-900 dark:text-white">{{ cost.service }}</h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400">{{ cost.description || 'Repair service' }}</p>
-                      </div>
-                      <div class="text-right">
-                        <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                          €{{ cost.min }} - €{{ cost.max }}
-                        </div>
-                        <div class="text-sm text-slate-500 dark:text-slate-500">{{ cost.urgency || 'Standard' }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p class="text-sm text-slate-500 dark:text-slate-500 mt-6 text-center">
-                  * Cost estimates are approximate and may vary based on location and specific vehicle requirements.
-                </p>
-              </div>
-            </div>
-
-                <!-- Safety Warning -->
-                <div v-if="diagnosisResult.severity === 'high' || diagnosisResult.severity === 'critical'" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Immediate Attention Required</h3>
-                  <p class="text-slate-600 dark:text-slate-400">This issue requires immediate professional attention</p>
-                </div>
-              </div>
-              
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <div class="flex items-center space-x-4">
-                  <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <p class="text-lg text-slate-700 dark:text-slate-300">
-                      This issue requires immediate professional attention to prevent further damage or safety risks.
-                    </p>
-                    <p class="text-sm text-slate-500 dark:text-slate-500 mt-2">
-                      Please contact a certified mechanic as soon as possible.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Modern AI Recommended Parts -->
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                  <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white">AI Recommended Parts</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Smart suggestions based on your diagnosis</p>
-                  </div>
-                </div>
-                <router-link to="/car-parts" class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-semibold transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                  </svg>
-                  Browse All Parts
-                </router-link>
-              </div>
-              
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <p class="text-slate-700 dark:text-slate-300 mb-6 text-lg">
-                  Based on your diagnosis, here are the recommended parts you can purchase from our authorized suppliers:
-                </p>
-                
-                <!-- AI Recommended Parts -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                  <div v-for="(part, index) in getRecommendedParts()" :key="index" class="bg-white dark:bg-slate-800 rounded-2xl border border-emerald-200 dark:border-emerald-700 p-6 hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div class="flex items-start justify-between mb-4">
-                      <div class="flex-1">
-                        <h4 class="font-bold text-slate-900 dark:text-white mb-2 text-lg">{{ part.name }}</h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-2 font-medium">{{ part.brand }} - {{ part.part_number }}</p>
-                        <p class="text-sm text-slate-500 dark:text-slate-500 mb-3">{{ part.description }}</p>
-                      </div>
-                      <div class="w-16 h-16 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-xl flex items-center justify-center ml-3">
-                        <svg class="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-                        </svg>
-                      </div>
-                    </div>
-                    <div class="space-y-3">
-                      <div class="flex justify-between items-center">
-                        <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">{{ part.price_range }}</span>
-                        <span class="px-3 py-1 rounded-full text-sm font-medium" :class="part.availability === 'In stock' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'">
-                          {{ part.availability }}
-                        </span>
-                      </div>
-                      <p class="text-sm text-slate-500 dark:text-slate-500">{{ part.compatibility }}</p>
-                      <p class="text-sm text-slate-500 dark:text-slate-500">Shipping: {{ part.shipping_time }}</p>
-                      <button 
-                        @click="searchPartInStore(part)"
-                        class="block w-full mt-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-center py-3 px-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
-                      >
-                        View in Car Parts Store
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Modern Licensed Repair Videos -->
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
-              <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                  <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Licensed Repair Videos</h3>
-                    <p class="text-slate-600 dark:text-slate-400">Professional guides from authorized companies</p>
-                  </div>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <span class="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-sm font-semibold rounded-full">
-                    Professional Guides
-                  </span>
-                  <span class="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-medium rounded-full">
-                    Licensed Content
-                  </span>
-                </div>
-              </div>
-              
-              <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 dark:border-slate-700/50">
-                <p class="text-slate-700 dark:text-slate-300 mb-6 text-lg">
-                  Professional repair guides from authorized companies and certified mechanics:
-                </p>
-                
-                <!-- Licensed Repair Videos -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                  <div v-for="(video, index) in getRepairVideos()" :key="index" class="bg-white dark:bg-slate-800 rounded-2xl border border-orange-200 dark:border-orange-700 p-6 hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <div class="flex items-start justify-between mb-4">
-                      <div class="flex-1">
-                        <h4 class="font-bold text-slate-900 dark:text-white mb-2 text-lg">{{ video.title }}</h4>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-2 font-medium">{{ video.company }}</p>
-                        <p class="text-sm text-slate-500 dark:text-slate-500 mb-3">{{ video.description }}</p>
-                      </div>
-                      <div class="ml-3 text-right">
-                        <span class="px-3 py-1 rounded-full text-sm font-medium" :class="getDifficultyBadgeClass(video.difficulty)">
-                          {{ video.difficulty }}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <!-- Video Thumbnail -->
-                    <div class="relative mb-4 rounded-xl overflow-hidden bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30">
-                      <div class="aspect-video flex items-center justify-center">
-                        <div class="w-16 h-16 bg-white/90 dark:bg-slate-800/90 rounded-full flex items-center justify-center shadow-lg">
-                          <svg class="w-8 h-8 text-orange-600 dark:text-orange-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z"/>
-                          </svg>
-                        </div>
-                      </div>
-                      <div class="absolute top-3 right-3 px-2 py-1 bg-black/70 text-white text-xs rounded">
-                        {{ video.duration }}
-                      </div>
-                    </div>
-                    
-                    <div class="space-y-3">
-                      <div class="flex justify-between items-center text-sm">
-                        <span class="text-slate-600 dark:text-slate-400">Duration: {{ video.duration }}</span>
-                        <span class="text-slate-600 dark:text-slate-400">{{ video.estimated_time }}</span>
-                      </div>
-                      <div v-if="video.licensed" class="flex items-center gap-2 text-sm">
-                        <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">
-                          ✓ Licensed
-                        </span>
-                        <span class="text-slate-500 dark:text-slate-400">{{ video.source }}</span>
-                      </div>
-                      <div v-if="video.tools_required && video.tools_required.length > 0" class="text-sm text-slate-500 dark:text-slate-500">
-                        <strong>Tools needed:</strong> {{ video.tools_required.join(', ') }}
-                      </div>
-                      <div class="flex items-center justify-between">
-                        <span class="text-sm text-slate-500 dark:text-slate-500">{{ video.views }} views</span>
-                        <span class="text-sm text-slate-500 dark:text-slate-500">{{ video.rating }}/5 ⭐</span>
-                      </div>
-                      <button 
-                        @click="openLicensedVideo(video)"
-                        class="block w-full mt-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-center py-3 px-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                      >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Watch Licensed Video
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          </div>
-
-          <!-- Modern Empty State -->
-          <div v-else class="text-center py-16">
-            <div class="relative mb-8">
-              <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-slate-400 to-slate-500 rounded-3xl shadow-xl">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                </svg>
-              </div>
-              <div class="absolute -inset-4 bg-gradient-to-r from-slate-400/20 to-slate-500/20 rounded-3xl animate-pulse"></div>
-            </div>
-            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Ready for AI Diagnosis</h3>
-            <p class="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto">
-              Fill out the form on the left and submit to get instant AI-powered diagnosis results for your vehicle.
+            <template v-else>
+            <p v-if="resultSummary" class="text-base leading-relaxed text-slate-600 dark:text-slate-300">
+              {{ resultSummary }}
             </p>
-            
-            <!-- Modern Quick Tips -->
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 text-left max-w-lg mx-auto border border-blue-200 dark:border-blue-700">
-              <h4 class="text-lg font-bold text-blue-900 dark:text-blue-100 mb-4 flex items-center">
-                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
-                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                  </svg>
+            <section v-if="(diagnosisResult.recommended_actions || diagnosisResult.recommendedActions || []).length">
+              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">What to do</h4>
+              <ol class="space-y-3">
+                <li v-for="(action, index) in (diagnosisResult.recommended_actions || diagnosisResult.recommendedActions || [])" :key="index" class="flex gap-3">
+                  <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white dark:bg-white dark:text-slate-900">{{ index + 1 }}</span>
+                  <div>
+                    <p class="font-medium text-slate-900 dark:text-white">{{ action.title || action.action || 'Next step' }}</p>
+                    <p v-if="action.description || action.explanation" class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{{ action.description || action.explanation }}</p>
+                    <p v-if="action.urgency" class="mt-1 text-xs text-slate-500">{{ action.urgency }}</p>
+                  </div>
+                </li>
+              </ol>
+            </section>
+
+            <section v-if="(diagnosisResult.likely_causes || diagnosisResult.likelyCauses || []).length">
+              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">Why this is likely</h4>
+              <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                <div v-for="(cause, index) in (diagnosisResult.likely_causes || diagnosisResult.likelyCauses || [])" :key="index" class="py-3 first:pt-0 last:pb-0">
+                  <div class="flex items-baseline justify-between gap-4">
+                    <p class="font-medium text-slate-900 dark:text-white">{{ cause.title || cause.cause || cause }}</p>
+                    <span v-if="cause.probability" class="shrink-0 text-xs text-slate-500">{{ cause.probability }}%</span>
+                  </div>
+                  <p v-if="cause.description || cause.explanation" class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{{ cause.description || cause.explanation }}</p>
                 </div>
-                Pro Tips for Better Results
-              </h4>
-              <ul class="text-sm text-blue-800 dark:text-blue-200 space-y-3">
-                <li class="flex items-start">
-                  <div class="w-6 h-6 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span class="text-xs font-bold text-blue-600 dark:text-blue-300">1</span>
+              </div>
+            </section>
+
+            <section v-if="diagnosisResult.estimated_costs && diagnosisResult.estimated_costs.length">
+              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">What it may cost</h4>
+              <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                <div v-for="cost in diagnosisResult.estimated_costs" :key="cost.service" class="flex items-baseline justify-between gap-4 py-3 first:pt-0">
+                  <div>
+                    <p class="font-medium text-slate-900 dark:text-white">{{ cost.service }}</p>
+                    <p v-if="cost.description" class="text-sm text-slate-500">{{ cost.description }}</p>
                   </div>
-                  <span>Describe symptoms in detail for maximum accuracy</span>
-                </li>
-                <li class="flex items-start">
-                  <div class="w-6 h-6 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span class="text-xs font-bold text-blue-600 dark:text-blue-300">2</span>
-                  </div>
-                  <span>Upload photos or videos of the problem area</span>
-                </li>
-                <li class="flex items-start">
-                  <div class="w-6 h-6 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span class="text-xs font-bold text-blue-600 dark:text-blue-300">3</span>
-                  </div>
-                  <span>Use voice recording for hands-free input</span>
-                </li>
-                <li class="flex items-start">
-                  <div class="w-6 h-6 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span class="text-xs font-bold text-blue-600 dark:text-blue-300">4</span>
-                  </div>
-                  <span>Select all relevant symptoms from the checklist</span>
+                  <p class="shrink-0 text-sm font-semibold text-slate-900 dark:text-white">€{{ cost.min }} – €{{ cost.max }}</p>
+                </div>
+              </div>
+              <p class="mt-3 text-xs text-slate-400">A guide only. The workshop price can differ.</p>
+            </section>
+
+            <section v-if="diagnosisResult.ai_insights && diagnosisResult.ai_insights.length">
+              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">Also worth knowing</h4>
+              <ul class="space-y-2">
+                <li v-for="(insight, index) in diagnosisResult.ai_insights" :key="index" class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                  {{ insight }}
                 </li>
               </ul>
-            </div>
+            </section>
+            </template>
+          </div>
+
+          <div v-else class="px-6 py-16 text-center">
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">The answer will show here</h3>
+            <p class="mt-2 text-sm text-slate-500 max-w-sm mx-auto">Describe the car and what it is doing. You will get one clear result: the problem, what to do, and why.</p>
           </div>
         </div>
       </div>
@@ -1341,12 +919,13 @@
 
 <script>
 import { ref, reactive, onMounted, computed, nextTick, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { diagnosisAPI, carsAPI } from '../services/api'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
+import api, { diagnosisAPI, carsAPI } from '../services/api'
 import { useAuth } from '../composables/useAuth'
 import { useAnalytics } from '../composables/useAnalytics'
 import CarModelSelector from '../components/CarModelSelector.vue'
 import axios from 'axios'
+import { features } from '../config/features'
 
 export default {
   name: 'Diagnose',
@@ -1366,6 +945,24 @@ export default {
     const currentStep = ref(0)
     const isLoading = ref(false)
     const diagnosisResult = ref(null)
+    const resultSummary = computed(() => {
+      const text = diagnosisResult.value?.problem_summary
+        || diagnosisResult.value?.problem_description
+        || diagnosisResult.value?.summary
+        || ''
+      if (!text || text === 'No description available') {
+        return ''
+      }
+      return text
+    })
+    const continuationPaid = ref(false)
+    const continuationAmount = ref(null)
+    const quoteLoading = ref(false)
+    const showPay = ref(false)
+    const paying = ref(false)
+    const payMethod = ref('card')
+    const resultUsage = ref({ photos: 0, videos: 0, audio: false })
+    const diagnosisSessionId = ref(null)
     const fileInput = ref(null)
     const photoInput = ref(null)
     const videoInput = ref(null)
@@ -1410,7 +1007,25 @@ export default {
     })
 
     // Form persistence functions
+    const formHasContent = () => {
+      return Boolean(
+        diagnosisForm.make ||
+        diagnosisForm.model ||
+        diagnosisForm.year ||
+        diagnosisForm.mileage ||
+        diagnosisForm.engineType ||
+        diagnosisForm.engineSize ||
+        diagnosisForm.description ||
+        diagnosisForm.selectedCarId ||
+        (diagnosisForm.symptoms && diagnosisForm.symptoms.length > 0)
+      )
+    }
+
     const saveFormData = () => {
+      if (!formHasContent()) {
+        return
+      }
+
       const formData = {
         make: diagnosisForm.make,
         model: diagnosisForm.model,
@@ -1424,7 +1039,6 @@ export default {
         timestamp: Date.now()
       }
       localStorage.setItem('diagnosis_form_data', JSON.stringify(formData))
-      console.log('💾 Form data saved to localStorage')
     }
 
     const loadFormData = () => {
@@ -2046,46 +1660,30 @@ export default {
         return
       }
       
-      // SMART CACHE CLEARING - Keep authentication data
-      
-      // Save authentication data before clearing
-      const token = localStorage.getItem('token')
-      const user = localStorage.getItem('user')
-      
-      // Clear Vue reactive data
+      saveFormData()
+
+      resultUsage.value = {
+        photos: uploadedFiles.value.filter((file) => file.type === 'image').length,
+        videos: uploadedFiles.value.filter((file) => file.type === 'video').length,
+        audio: uploadedFiles.value.some((file) => file.type === 'audio') || !!recordedAudio.value || !!transcribedText.value
+      }
+      continuationPaid.value = false
+      continuationAmount.value = null
+      showPay.value = false
+
+      if (!localStorage.getItem('token')) {
+        router.push({ path: '/login', query: { redirect: '/diagnose' } })
+        return
+      }
+
       diagnosisResult.value = null
       currentStep.value = 0
-      
-      // Clear diagnosis-specific cache only
       localStorage.removeItem('lastDiagnosisResult')
       localStorage.removeItem('lastDiagnosisSession')
       localStorage.removeItem('diagnosisCache')
       sessionStorage.removeItem('diagnosisCache')
-      
-      // Restore authentication data
-      if (token) localStorage.setItem('token', token)
-      if (user) localStorage.setItem('user', user)
-      
-      // Clear browser caches (but keep auth)
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => {
-            if (name.includes('diagnosis') || name.includes('carwise')) {
-              caches.delete(name)
-            }
-          })
-        })
-      }
-      
-      // Check if user is logged in
+
       const authToken = localStorage.getItem('token')
-      const authUser = localStorage.getItem('user')
-      
-      if (!authToken) {
-        alert('You must be logged in to submit diagnosis!')
-        router.push('/login')
-        return
-      }
 
       // Debug: Log form data before submission
       console.log('🚀 Starting diagnosis submission...')
@@ -2162,14 +1760,15 @@ export default {
           
           // Ensure we get fresh translated results
           const freshResult = resultResponse.data.data?.result
-          console.log('🎯 FRESH RESULT FROM AI:', freshResult)
-          console.log('AI Provider:', freshResult?.ai_provider)
-          console.log('Problem Title:', freshResult?.problem_title)
-          
-          // SIMPLE AND CLEAN RESULT SETTING
           diagnosisResult.value = freshResult
+          diagnosisSessionId.value = sessionId
+          continuationAmount.value = resultResponse.data.data?.amount ?? null
+          continuationPaid.value = resultResponse.data.data?.locked === false
+          quoteLoading.value = false
           currentStep.value = 3
           isLoading.value = false
+          await nextTick()
+          document.querySelector('[data-result-panel]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
           
           console.log('✅ RESULT SET SUCCESSFULLY')
           console.log('Current diagnosisResult:', diagnosisResult.value)
@@ -2217,6 +1816,36 @@ export default {
       }
     }
 
+    const loadContinuationQuote = async () => {
+      quoteLoading.value = true
+      continuationAmount.value = null
+      try {
+        const response = await api.post('/customer-services/diagnosis-quote', resultUsage.value)
+        continuationAmount.value = response.data?.amount || null
+      } catch (error) {
+        continuationAmount.value = null
+      } finally {
+        quoteLoading.value = false
+      }
+    }
+
+    const confirmContinuation = async () => {
+      if (continuationAmount.value === null || paying.value || !diagnosisSessionId.value) {
+        return
+      }
+      paying.value = true
+      try {
+        const response = await api.post(`/diagnosis/result/${diagnosisSessionId.value}/continue`)
+        diagnosisResult.value = response.data?.data?.result || diagnosisResult.value
+        continuationPaid.value = true
+        showPay.value = false
+      } catch (error) {
+        continuationPaid.value = false
+      } finally {
+        paying.value = false
+      }
+    }
+
     const getSeverityColor = (severity) => {
       switch (severity.toLowerCase()) {
         case 'low': return 'bg-success-500'
@@ -2237,12 +1866,12 @@ export default {
 
     const getSeverityText = (severity) => {
       const severityMap = {
-        'low': 'Low Priority',
-        'medium': 'Medium Priority',
-        'high': 'High Priority',
-        'critical': 'Critical Priority'
+        'low': 'Routine',
+        'medium': 'Plan a visit',
+        'high': 'Urgent',
+        'critical': 'Do not drive'
       }
-      return severityMap[severity?.toLowerCase()] || 'Medium Priority'
+      return severityMap[severity?.toLowerCase()] || 'Plan a visit'
     }
 
     // Computed properties for debug info
@@ -2371,26 +2000,21 @@ export default {
     }
 
     // Load car data if car ID is provided in URL
+    onBeforeRouteLeave(() => {
+      saveFormData()
+    })
+
     onMounted(() => {
       loadCarBrands()
       checkMicrophonePermission()
-      
-      // Check if user is logged in, if not clear form data
-      const token = localStorage.getItem('token')
-      if (!token) {
-        console.log('🚪 User not logged in, clearing form data')
-        clearFormData()
-        return
-      }
-      
-      // First, try to load saved form data
+
       const hasLoadedFormData = loadFormData()
       
       // Check if car data is stored in localStorage (from My Cars page)
       const selectedCarData = localStorage.getItem('selectedCarForDiagnosis')
       console.log('Raw localStorage data:', selectedCarData)
       
-      if (selectedCarData) {
+      if (selectedCarData && !hasLoadedFormData) {
         try {
           const carData = JSON.parse(selectedCarData)
           console.log('Parsed car data:', carData)
@@ -2437,85 +2061,28 @@ export default {
           console.error('Error parsing car data:', error)
         }
       } else if (hasLoadedFormData) {
-        // If we loaded form data, also load car models for the selected brand
+        localStorage.removeItem('selectedCarForDiagnosis')
         if (diagnosisForm.make) {
           loadCarModels(diagnosisForm.make)
         }
       }
       
-      // Also check for car ID in query params (fallback)
       const carId = route.query.car
-      if (carId) {
+      if (carId && !hasLoadedFormData) {
         console.log('Loading car data for ID:', carId)
         loadCarData(carId)
       }
     })
 
-    // Watch for form changes and save to localStorage
-    watch(() => diagnosisForm.make, () => {
-      if (diagnosisForm.make) {
-        saveFormData()
-      }
-    })
-
-    watch(() => diagnosisForm.model, () => {
-      if (diagnosisForm.model) {
-        saveFormData()
-      }
-    })
-
-    watch(() => diagnosisForm.year, () => {
-      if (diagnosisForm.year) {
-        saveFormData()
-      }
-    })
-
-    watch(() => diagnosisForm.mileage, () => {
+    watch(diagnosisForm, () => {
       saveFormData()
     })
 
-    watch(() => diagnosisForm.engineType, () => {
-      if (diagnosisForm.engineType) {
-        saveFormData()
-      }
-    })
-
-    watch(() => diagnosisForm.engineSize, () => {
-      if (diagnosisForm.engineSize) {
-        saveFormData()
-      }
-    })
-
-    watch(() => diagnosisForm.description, () => {
-      if (diagnosisForm.description && diagnosisForm.description.length > 10) {
-        saveFormData()
-      }
-    })
-
-    watch(() => diagnosisForm.symptoms, () => {
-      if (diagnosisForm.symptoms.length > 0) {
-        saveFormData()
-      }
-    }, { deep: true })
-
-    // Clear form data when diagnosis is completed successfully
     watch(() => diagnosisResult.value, (newResult) => {
       if (newResult && newResult.status === 'completed') {
-        // Clear form data after successful diagnosis
         setTimeout(() => {
           clearFormData()
-        }, 5000) // Clear after 5 seconds
-      }
-    })
-
-    // Watch for authentication changes and clear form if user logs out
-    watch(() => {
-      const token = localStorage.getItem('token')
-      return !!token
-    }, (isLoggedIn) => {
-      if (!isLoggedIn) {
-        console.log('🚪 User logged out, clearing diagnosis form')
-        clearFormData()
+        }, 5000)
       }
     })
 
@@ -2697,7 +2264,7 @@ export default {
         'high': 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
         'critical': 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200'
       }
-      return classes[severity] || classes.medium
+      return classes[(severity || '').toLowerCase()] || classes.medium
     }
 
     const getDifficultyBadgeClass = (difficulty) => {
@@ -2723,12 +2290,22 @@ export default {
     }
 
     return {
+      carPartsEnabled: features.carParts,
       currentStep,
       steps,
       diagnosisForm,
       commonSymptoms,
       isLoading,
       diagnosisResult,
+      resultSummary,
+      continuationPaid,
+      continuationAmount,
+      quoteLoading,
+      showPay,
+      paying,
+      payMethod,
+      loadContinuationQuote,
+      confirmContinuation,
       fileInput,
       photoInput,
       videoInput,

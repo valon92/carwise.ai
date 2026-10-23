@@ -23,7 +23,7 @@
         </p>
         <p class="mt-1 text-center text-sm text-secondary-500 dark:text-secondary-500">
           Don't have an account?
-          <router-link to="/register" class="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors duration-200">
+          <router-link :to="{ path: '/register', query: $route.query }" class="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors duration-200">
             Create one here
           </router-link>
         </p>
@@ -243,7 +243,7 @@
 
 <script>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { authAPI } from '../services/api'
 import { useAnalytics } from '../composables/useAnalytics'
 
@@ -251,6 +251,7 @@ export default {
   name: 'Login',
   setup() {
     const router = useRouter()
+    const route = useRoute()
     const { trackUserRegistration, trackEvent } = useAnalytics()
     const isLoading = ref(false)
     const errorMessage = ref('')
@@ -291,8 +292,11 @@ export default {
             window.$notify.success('Welcome back!', `Hello ${response.data.user.first_name || response.data.user.name}`)
           }
           
-          // Redirect to dashboard
-          router.push('/dashboard')
+          const redirect = route.query.redirect
+          const nextPath = typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')
+            ? redirect
+            : '/dashboard'
+          router.push(nextPath)
         }
       } catch (error) {
         if (error.response?.data?.message) {

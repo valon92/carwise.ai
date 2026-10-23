@@ -79,9 +79,6 @@
       </div>
     </section>
 
-    <!-- Latest Vehicles Carousel -->
-    <LatestVehiclesCarousel />
-
     <!-- How It Works Section -->
     <section class="py-24 bg-white/90 backdrop-blur-xl">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -264,7 +261,7 @@
     </section>
 
     <!-- Car Parts Marketplace Section -->
-    <section class="py-24 bg-white/90 backdrop-blur-xl">
+    <section v-if="carPartsEnabled" class="py-24 bg-white/90 backdrop-blur-xl">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-20">
           <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 rounded-full border border-orange-200 dark:border-orange-700 mb-6">
@@ -409,13 +406,10 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import LatestVehiclesCarousel from '@/components/LatestVehiclesCarousel.vue'
+import { features } from '../config/features'
 
 export default {
   name: 'Home',
-  components: {
-    LatestVehiclesCarousel
-  },
   setup() {
     const isVisible = ref(false)
 
@@ -424,7 +418,8 @@ export default {
     })
 
     return {
-      isVisible
+      isVisible,
+      carPartsEnabled: features.carParts,
     }
   }
 }
