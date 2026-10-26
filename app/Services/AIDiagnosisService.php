@@ -327,7 +327,10 @@ class AIDiagnosisService
     private function generateMockAIResponse(array $data): array
     {
         $symptoms = $data['symptoms'] ?? [];
-        $description = strtolower($data['description'] ?? $data['problem_description'] ?? '');
+        $symptomText = is_array($symptoms)
+            ? implode(' ', array_filter($symptoms, 'is_string'))
+            : (is_string($symptoms) ? $symptoms : '');
+        $description = strtolower(trim(($data['description'] ?? $data['problem_description'] ?? '').' '.$symptomText));
         $normalized = $this->symptomText($description);
         $vehicleInfo = $data['vehicle_info'] ?? [];
         $userLanguage = $data['user_language'] ?? 'en';
@@ -340,7 +343,14 @@ class AIDiagnosisService
         }
         
         // Enhanced rule-based mock responses with more sophisticated analysis
-        if (str_contains($description, 'engine') && (str_contains($description, 'start') || str_contains($description, 'won\'t start'))) {
+        $mentionsEngine = str_contains($normalized, 'engine') || str_contains($normalized, 'motor');
+        $wontStart = str_contains($normalized, 'wont start')
+            || str_contains($normalized, "won't start")
+            || str_contains($normalized, 'nuk ndez')
+            || str_contains($normalized, 'nuk po dhez')
+            || str_contains($normalized, 'nuk fillon');
+
+        if ($mentionsEngine && $wontStart) {
             $response = [
                 'problem_title' => 'Engine Starting Issues',
                 'problem_description' => 'The vehicle is experiencing difficulty starting, which could be related to the ignition system, fuel delivery, or battery.',
@@ -580,6 +590,10 @@ class AIDiagnosisService
                 'ai_provider' => 'fallback'
             ];
             return $this->translateResponse($response, $userLanguage);
+        }
+
+        if ($mentionsEngine) {
+            return $this->getEngineDiagnosis($data, (string) ($data['car_brand'] ?? ''));
         }
 
         // Default enhanced response

@@ -38,16 +38,26 @@ class CustomerServicePricing
 
     public function quoteFromUsage(?array $usage): string
     {
-        $spent = 0.0;
+        return $this->customerPrice($this->usageCost($usage), (float) config('customer-services.margin'));
+    }
 
-        if (is_array($usage)) {
-            $rate = $this->tokenRate((string) ($usage['model'] ?? 'default'));
-            $spent += ((int) ($usage['input_tokens'] ?? 0) / 1000000) * (float) $rate['input'];
-            $spent += ((int) ($usage['output_tokens'] ?? 0) / 1000000) * (float) $rate['output'];
-            $spent += ((float) ($usage['whisper_seconds'] ?? 0) / 60) * (float) config('customer-services.whisper_per_minute');
+    public function costFromUsage(?array $usage): string
+    {
+        return number_format($this->usageCost($usage), 6, '.', '');
+    }
+
+    public function usageCost(?array $usage): float
+    {
+        if (! is_array($usage)) {
+            return 0.0;
         }
 
-        return $this->customerPrice($spent, (float) config('customer-services.margin'));
+        $rate = $this->tokenRate((string) ($usage['model'] ?? 'default'));
+        $spent = ((int) ($usage['input_tokens'] ?? 0) / 1000000) * (float) $rate['input'];
+        $spent += ((int) ($usage['output_tokens'] ?? 0) / 1000000) * (float) $rate['output'];
+        $spent += ((float) ($usage['whisper_seconds'] ?? 0) / 60) * (float) config('customer-services.whisper_per_minute');
+
+        return $spent;
     }
 
     private function tokenRate(string $model): array

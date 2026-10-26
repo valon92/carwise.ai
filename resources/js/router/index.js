@@ -144,6 +144,33 @@ const routes = [
     }
   },
   {
+    path: '/admin/api-credits',
+    name: 'ApiCredits',
+    component: lazyRoute('ApiCredits'),
+    meta: {
+      requiresAuth: true,
+      requiresRole: 'admin'
+    }
+  },
+  {
+    path: '/admin/visitors',
+    name: 'Visitors',
+    component: lazyRoute('Visitors'),
+    meta: {
+      requiresAuth: true,
+      requiresRole: 'admin'
+    }
+  },
+  {
+    path: '/admin/statistics',
+    name: 'Statistics',
+    component: lazyRoute('Statistics'),
+    meta: {
+      requiresAuth: true,
+      requiresRole: 'admin'
+    }
+  },
+  {
     path: '/privacy-policy',
     name: 'PrivacyPolicy',
     component: lazyRoute('PrivacyPolicy'),

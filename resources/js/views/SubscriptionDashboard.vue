@@ -1,5 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+  <AdminTesting v-if="isAdmin" />
+  <div v-else class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
     <!-- Modern Header with Enhanced User Experience -->
     <div class="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -514,11 +515,16 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSubscription } from '../composables/useSubscription'
+import { useAuth } from '../composables/useAuth'
+import AdminTesting from './AdminTesting.vue'
 
 export default {
   name: 'SubscriptionDashboard',
+  components: { AdminTesting },
   setup() {
     const router = useRouter()
+    const { user } = useAuth()
+    const isAdmin = computed(() => user.value?.role === 'admin')
     const { getSubscriptionStatus, getBillingHistory, checkUsageLimits } = useSubscription()
     
     // Tab management
@@ -722,7 +728,9 @@ export default {
     }
 
     onMounted(() => {
-      loadSubscriptionData()
+      if (!isAdmin.value) {
+        loadSubscriptionData()
+      }
     })
 
     return {
@@ -731,6 +739,7 @@ export default {
       tabs,
       
       // User info
+      isAdmin,
       userType,
       subscriptionStatus,
       

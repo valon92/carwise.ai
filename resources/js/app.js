@@ -4,6 +4,7 @@ import App from './App.vue'
 import './assets/main.css'
 import { useAnalytics } from './composables/useAnalytics'
 import { features } from './config/features'
+import { authAPI } from './services/api'
 
 // Lazy load views for better performance
 const Home = () => import('./views/Home.vue')
@@ -14,6 +15,9 @@ const Login = () => import('./views/Login.vue')
 const Register = () => import('./views/Register.vue')
 const Dashboard = () => import('./views/Dashboard.vue')
 const Admin = () => import('./views/Admin.vue')
+const ApiCredits = () => import('./views/ApiCredits.vue')
+const Visitors = () => import('./views/Visitors.vue')
+const Statistics = () => import('./views/Statistics.vue')
 const ProfileEdit = () => import('./views/ProfileEdit.vue')
 const DiagnosisHistory = () => import('./views/DiagnosisHistory.vue')
 const PrivacyPolicy = () => import('./views/PrivacyPolicy.vue')
@@ -67,6 +71,39 @@ const routes = [
     meta: { 
       title: 'Admin Panel - CarWise AI',
       description: 'System administration panel',
+      requiresAuth: true,
+      requiresAdmin: true
+    }
+  },
+  {
+    path: '/admin/api-credits',
+    name: 'ApiCredits',
+    component: ApiCredits,
+    meta: {
+      title: 'API credits - CarWise AI',
+      description: 'Admin view of API credit balances and usage',
+      requiresAuth: true,
+      requiresAdmin: true
+    }
+  },
+  {
+    path: '/admin/visitors',
+    name: 'Visitors',
+    component: Visitors,
+    meta: {
+      title: 'Visitors - CarWise AI',
+      description: 'Admin view of visitors, registrations, requests, and spending',
+      requiresAuth: true,
+      requiresAdmin: true
+    }
+  },
+  {
+    path: '/admin/statistics',
+    name: 'Statistics',
+    component: Statistics,
+    meta: {
+      title: 'Statistics - CarWise AI',
+      description: 'Admin view of platform spend, user payments, and what is left',
       requiresAuth: true,
       requiresAdmin: true
     }
@@ -212,10 +249,31 @@ const router = createRouter({
 })
 
 // Router guards for authentication and meta management
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   if (!features.carParts && to.path.startsWith('/car-parts')) {
     next('/')
     return
+  }
+
+  if (to.meta.requiresAdmin) {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      next({ path: '/login', query: { redirect: to.fullPath } })
+      return
+    }
+
+    try {
+      const response = await authAPI.getUser()
+      const account = response.data?.user
+      if (!account || account.role !== 'admin') {
+        next('/')
+        return
+      }
+      localStorage.setItem('user', JSON.stringify(account))
+    } catch (error) {
+      next({ path: '/login', query: { redirect: to.fullPath } })
+      return
+    }
   }
 
   // Update page title and meta description
@@ -268,6 +326,38 @@ router.beforeResolve((to, from, next) => {
     // You can add a global loading state here if needed
   }
   next()
+})
+
+const visitorId = () => {
+  const existing = localStorage.getItem('carwise_visitor_id')
+  if (existing) return existing
+  const bytes = crypto.getRandomValues(new Uint8Array(16))
+  bytes[6] = (bytes[6] & 0x0f) | 0x40
+  bytes[8] = (bytes[8] & 0x3f) | 0x80
+  const hex = [...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('')
+  const created = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+  localStorage.setItem('carwise_visitor_id', created)
+  return created
+}
+
+let lastVisitPath = ''
+
+router.afterEach((to) => {
+  try {
+    if (!to.path || to.path === lastVisitPath) return
+    lastVisitPath = to.path
+    const headers = { 'Content-Type': 'application/json', Accept: 'application/json' }
+    const token = localStorage.getItem('token')
+    if (token) headers.Authorization = `Bearer ${token}`
+    fetch('/api/visits', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ path: to.path, visitor_id: visitorId() }),
+      keepalive: true,
+    }).catch(() => {})
+  } catch (error) {
+    // A missed visit must not interrupt the page.
+  }
 })
 
 const app = createApp(App)

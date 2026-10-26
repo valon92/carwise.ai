@@ -28,12 +28,14 @@ use App\Http\Controllers\Api\PriceController;
 use App\Http\Controllers\Api\PublicAPIController;
 use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\VisitController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/visits', [VisitController::class, 'store'])->middleware('throttle:60,1');
 
 // Car brands routes (public)
 Route::get('/car-brands', [CarBrandController::class, 'index']);
@@ -515,6 +517,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // System monitoring
         Route::get('/system-logs', [AdminController::class, 'systemLogs']);
+        Route::get('/api-credits', [AdminController::class, 'apiCredits']);
+        Route::post('/api-credits', [AdminController::class, 'buyApiCredits']);
+        Route::get('/visitors', [AdminController::class, 'visitors']);
+        Route::get('/statistics', [AdminController::class, 'statistics']);
+        Route::get('/testing-costs', [AdminController::class, 'testingCosts']);
     });
 });
 

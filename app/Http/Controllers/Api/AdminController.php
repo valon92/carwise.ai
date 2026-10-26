@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\ApiCreditReport;
+use App\Services\CustomerServicePricing;
+use App\Services\PlatformStatistics;
+use App\Services\PlatformVisitorReport;
 use App\Models\User;
 use App\Models\Car;
 use App\Models\DiagnosisSession;
@@ -359,6 +363,115 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'data' => $activities
+        ]);
+    }
+
+    public function apiCredits(ApiCreditReport $report): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $report->report(),
+        ]);
+    }
+
+    public function buyApiCredits(Request $request, ApiCreditReport $report): JsonResponse
+    {
+        $data = $request->validate([
+            'provider' => ['required', 'string', 'in:OpenAI,Gemini,Cohere'],
+            'amount' => ['required', 'numeric', 'min:5', 'max:5000'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $report->topUp($data['provider'], (float) $data['amount']),
+        ]);
+    }
+
+    public function visitors(Request $request, PlatformVisitorReport $report): JsonResponse
+    {
+        $data = $request->validate([
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date'],
+        ]);
+
+        $from = isset($data['from']) ? \Illuminate\Support\Carbon::parse($data['from'], 'Europe/Belgrade')->startOfDay() : null;
+        $to = isset($data['to']) ? \Illuminate\Support\Carbon::parse($data['to'], 'Europe/Belgrade')->endOfDay() : null;
+
+        if ($from && $to && $from->greaterThan($to)) {
+            [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $report->report($from, $to),
+        ]);
+    }
+
+    public function statistics(Request $request, PlatformStatistics $report): JsonResponse
+    {
+        $data = $request->validate([
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date'],
+        ]);
+
+        $from = isset($data['from']) ? \Illuminate\Support\Carbon::parse($data['from'], 'Europe/Belgrade')->startOfDay() : null;
+        $to = isset($data['to']) ? \Illuminate\Support\Carbon::parse($data['to'], 'Europe/Belgrade')->endOfDay() : null;
+
+        if ($from && $to && $from->greaterThan($to)) {
+            [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $report->report($from, $to),
+        ]);
+    }
+
+    public function testingCosts(CustomerServicePricing $pricing): JsonResponse
+    {
+        $sessions = DiagnosisSession::query()
+            ->where('user_id', auth()->id())
+            ->orderByDesc('id')
+            ->get();
+
+        $expense = 0.0;
+        $billed = 0;
+        $recent = [];
+
+        foreach ($sessions as $session) {
+            $usage = is_array($session->ai_response) ? ($session->ai_response['usage'] ?? null) : null;
+            $cost = $pricing->usageCost(is_array($usage) ? $usage : null);
+            $charged = is_array($usage) && (
+                ((int) ($usage['input_tokens'] ?? 0) + (int) ($usage['output_tokens'] ?? 0)) > 0
+                || (float) ($usage['whisper_seconds'] ?? 0) > 0
+            );
+
+            if ($charged) {
+                $billed++;
+                $expense += $cost;
+            }
+
+            if (count($recent) < 12) {
+                $text = trim(preg_replace('/\s+/', ' ', (string) $session->description) ?? '');
+                $recent[] = [
+                    'vehicle' => trim($session->make.' '.$session->model.' '.$session->year),
+                    'request' => mb_strlen($text) > 90 ? mb_substr($text, 0, 87).'...' : $text,
+                    'status' => $session->status,
+                    'tested_at' => optional($session->created_at)->toIso8601String(),
+                    'cost' => $pricing->costFromUsage(is_array($usage) ? $usage : null),
+                ];
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'tests' => $sessions->count(),
+                'expense' => number_format($expense, 6, '.', ''),
+                'billed_calls' => $billed,
+                'unbilled_calls' => $sessions->count() - $billed,
+                'recent' => $recent,
+            ],
         ]);
     }
 }

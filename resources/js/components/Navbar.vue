@@ -134,7 +134,7 @@
                     {{ user?.first_name || user?.name }}
                   </div>
                   <div class="text-xs text-secondary-500 dark:text-secondary-500">
-                    {{ user?.role === 'mechanic' ? 'Mechanic' : 'Car Owner' }}
+                    {{ user?.role === 'admin' ? 'Admin' : user?.role === 'mechanic' ? 'Mechanic' : 'Car Owner' }}
                   </div>
                 </div>
                 
@@ -168,7 +168,7 @@
                   <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                   </svg>
-                  My Subscription
+                  {{ user?.role === 'admin' ? 'Testing costs' : 'My Subscription' }}
                 </router-link>
                 
                 <router-link 
@@ -182,6 +182,43 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                   </svg>
                   Admin Panel
+                </router-link>
+
+                <router-link
+                  v-if="user?.role === 'admin'"
+                  to="/admin/api-credits"
+                  class="flex items-center px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors duration-200"
+                  @click="userDropdownOpen = false"
+                >
+                  <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                  </svg>
+                  API credits
+                </router-link>
+
+                <router-link
+                  v-if="user?.role === 'admin'"
+                  to="/admin/visitors"
+                  class="flex items-center px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors duration-200"
+                  @click="userDropdownOpen = false"
+                >
+                  <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  Visitors
+                </router-link>
+
+                <router-link
+                  v-if="user?.role === 'admin'"
+                  to="/admin/statistics"
+                  class="flex items-center px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors duration-200"
+                  @click="userDropdownOpen = false"
+                >
+                  <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3v18M3 13h18M7 17l4 4 4-4"></path>
+                  </svg>
+                  Statistics
                 </router-link>
                 
                 <button 
@@ -331,7 +368,7 @@
                   {{ user?.first_name || user?.name }}
                 </div>
                 <div class="text-xs text-secondary-500 dark:text-secondary-500">
-                  {{ user?.role === 'mechanic' ? 'Mechanic' : 'Car Owner' }}
+                  {{ user?.role === 'admin' ? 'Admin' : user?.role === 'mechanic' ? 'Mechanic' : 'Car Owner' }}
                 </div>
               </div>
             </div>
@@ -358,6 +395,54 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
               Admin Panel
+            </router-link>
+
+            <router-link
+              v-if="user?.role === 'admin'"
+              to="/admin/api-credits"
+              class="flex items-center px-4 py-3 rounded-lg text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-200"
+              @click="mobileMenuOpen = false"
+            >
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+              </svg>
+              API credits
+            </router-link>
+
+            <router-link
+              v-if="user?.role === 'admin'"
+              to="/admin/visitors"
+              class="flex items-center px-4 py-3 rounded-lg text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-200"
+              @click="mobileMenuOpen = false"
+            >
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+              Visitors
+            </router-link>
+
+            <router-link
+              v-if="user?.role === 'admin'"
+              to="/admin/statistics"
+              class="flex items-center px-4 py-3 rounded-lg text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-200"
+              @click="mobileMenuOpen = false"
+            >
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3v18M3 13h18M7 17l4 4 4-4"></path>
+              </svg>
+              Statistics
+            </router-link>
+
+            <router-link
+              to="/subscription/dashboard"
+              class="flex items-center px-4 py-3 rounded-lg text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-200"
+              @click="mobileMenuOpen = false"
+            >
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+              </svg>
+              {{ user?.role === 'admin' ? 'Testing costs' : 'My Subscription' }}
             </router-link>
             
             <!-- Pricing - Only for authenticated users, positioned before Logout -->
