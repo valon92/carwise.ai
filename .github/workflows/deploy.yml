@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
 jobs:
   tests:
     uses: ./.github/workflows/tests.yml
@@ -13,6 +17,7 @@ jobs:
     needs: tests
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    environment: production
 
     steps:
     - uses: actions/checkout@v4
@@ -22,6 +27,7 @@ jobs:
       with:
         php-version: '8.2'
         extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
+        tools: composer:v2
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -30,7 +36,7 @@ jobs:
         cache: 'npm'
 
     - name: Install PHP Dependencies
-      run: composer install --no-dev --optimize-autoloader
+      run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
     - name: Install Node Dependencies
       run: npm ci
@@ -38,31 +44,75 @@ jobs:
     - name: Build Assets
       run: npm run build
 
-    - name: Create deployment artifact
-      env:
-        GITHUB_SHA: ${{ github.sha }}
-      run: tar -czf "${GITHUB_SHA}".tar.gz --exclude=*.git --exclude=node_modules --exclude=tests *
-
-    - name: Store artifact for distribution
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-build
-        path: ${{ github.sha }}.tar.gz
-
-    # Add your deployment steps here
-    # For example, deploy to your server via SSH, or to a cloud provider
-    
-    - name: Deploy notification
+    - name: Pack release
       run: |
-        echo "Deployment artifact created: ${{ github.sha }}.tar.gz"
-        echo "Add your deployment steps here (SSH, cloud deployment, etc.)"
+        RELEASE="carwise-${GITHUB_SHA}"
+        mkdir -p "/tmp/${RELEASE}"
+        rsync -a \
+          --exclude='.git' \
+          --exclude='node_modules' \
+          --exclude='tests' \
+          --exclude='.env' \
+          --exclude='.env.*' \
+          --exclude='public/hot' \
+          --exclude='storage/logs/*' \
+          --exclude='storage/framework/cache/*' \
+          --exclude='storage/framework/sessions/*' \
+          --exclude='storage/framework/views/*' \
+          --exclude='carwise-cpanel-upload-*' \
+          ./ "/tmp/${RELEASE}/"
+        tar -C /tmp -czf "/tmp/${RELEASE}.tar.gz" "${RELEASE}"
+        echo "RELEASE=${RELEASE}" >> "$GITHUB_ENV"
 
+    - name: Prepare SSH
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_PORT: ${{ secrets.SSH_PORT }}
+      run: |
+        test -n "$SSH_PRIVATE_KEY"
+        test -n "$SSH_HOST"
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts
 
+    - name: Upload and activate release
+      env:
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+        SSH_PORT: ${{ secrets.SSH_PORT }}
+        APP_DIR: ${{ secrets.APP_DIR }}
+      run: |
+        PORT="${SSH_PORT:-22}"
+        USER_NAME="${SSH_USER:-deploy}"
+        DIR="${APP_DIR:-/var/www/carwise.ai}"
+        KEY=~/.ssh/deploy_key
+        RELEASE="${RELEASE}"
 
+        ssh -i "$KEY" -p "$PORT" -o StrictHostKeyChecking=yes \
+          "${USER_NAME}@${SSH_HOST}" "mkdir -p '${DIR}/releases' '${DIR}/shared/storage'"
 
+        scp -i "$KEY" -P "$PORT" -o StrictHostKeyChecking=yes \
+          "/tmp/${RELEASE}.tar.gz" \
+          "${USER_NAME}@${SSH_HOST}:${DIR}/releases/${RELEASE}.tar.gz"
 
+        ssh -i "$KEY" -p "$PORT" -o StrictHostKeyChecking=yes \
+          "${USER_NAME}@${SSH_HOST}" bash -s <<EOF
+        set -euo pipefail
+        APP_DIR='${DIR}'
+        RELEASE='${RELEASE}'
+        cd "\$APP_DIR/releases"
+        tar -xzf "\${RELEASE}.tar.gz"
+        rm -f "\${RELEASE}.tar.gz"
+        chmod +x "\${RELEASE}/scripts/deploy-remote.sh"
+        APP_DIR="\$APP_DIR" "\${RELEASE}/scripts/deploy-remote.sh" "\$APP_DIR/releases/\${RELEASE}"
+        EOF
 
-
-
-
-
+    - name: Health check
+      env:
+        APP_URL: ${{ secrets.APP_URL }}
+      run: |
+        URL="${APP_URL:-https://carwise.ai}"
+        curl -fsSL --retry 5 --retry-delay 3 "$URL" >/dev/null
+        echo "Production responded at $URL"
