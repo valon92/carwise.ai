@@ -48,7 +48,7 @@ class PartsMarketplaceAdapter implements MarketplaceIntegrationInterface
         }
 
         if ($parts === []) {
-            $recommended = is_array($query) ? $query : preg_split('/[\s,;]+/', $query) ?: [];
+            $recommended = is_array($query) ? $query : (preg_split('/[\s,;]+/', (string) $query) ?: []);
             foreach (array_filter($recommended) as $term) {
                 $parts[] = [
                     'id' => null,

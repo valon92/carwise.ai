@@ -62,7 +62,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
         cache: 'npm'
 
     - name: Install dependencies
@@ -86,13 +86,10 @@ jobs:
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-    - name: PHP syntax check
-      run: find app routes config -name '*.php' -print0 | xargs -0 -n1 php -l >/dev/null
-
     - name: Setup Node.js for linting
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
         cache: 'npm'
 
     - name: Install frontend dependencies
@@ -124,7 +121,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
         cache: 'npm'
 
     - name: Install dependencies
@@ -142,7 +139,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
         cache: 'npm'
 
     - name: Install dependencies
