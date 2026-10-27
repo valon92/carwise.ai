@@ -6,6 +6,7 @@ import path from 'path'
 export default defineConfig({
   plugins: [vue()],
   test: {
+    globals: true,
     environment: 'jsdom',
     include: [
       'tests/frontend/**/*.test.js',

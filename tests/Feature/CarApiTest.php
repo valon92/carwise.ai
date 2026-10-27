@@ -21,9 +21,12 @@ class CarApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
+        $currency = $this->createDefaultCurrency();
+
         $this->user = User::factory()->create([
-            'role' => 'customer'
+            'role' => 'customer',
+            'preferred_currency_id' => $currency->id,
         ]);
 
         $this->brand = CarBrand::factory()->create([

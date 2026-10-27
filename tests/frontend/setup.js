@@ -1,4 +1,5 @@
 // Vitest setup file
+import { vi } from 'vitest'
 import { config } from '@vue/test-utils'
 
 // Global configuration for Vue Test Utils

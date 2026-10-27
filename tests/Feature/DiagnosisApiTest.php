@@ -17,11 +17,13 @@ class DiagnosisApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
+        $currency = $this->createDefaultCurrency();
+
         $this->user = User::factory()->create([
             'role' => 'customer',
-            'preferred_currency_id' => 1,
-            'language' => 'en'
+            'preferred_currency_id' => $currency->id,
+            'language' => 'en',
         ]);
     }
 
