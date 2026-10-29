@@ -34,6 +34,16 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
+    // FormData must keep the browser-generated multipart boundary
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData && config.headers) {
+      if (typeof config.headers.delete === 'function') {
+        config.headers.delete('Content-Type')
+      } else {
+        delete config.headers['Content-Type']
+      }
+    }
+
     console.log('API Request:', config.method?.toUpperCase(), config.url, config.data)
     return config
   },
@@ -87,16 +97,7 @@ export const authAPI = {
   
   logout: () => api.post('/logout'),
   getUser: () => api.get('/user'),
-  updateProfile: (data) => {
-    const isFormData = data instanceof FormData
-    return api.post('/user/profile', data, {
-      headers: isFormData ? {
-        'Content-Type': 'multipart/form-data',
-      } : {
-        'Content-Type': 'application/json',
-      }
-    })
-  },
+  updateProfile: (data) => api.post('/user/profile', data),
 }
 
 // Cars API

@@ -199,16 +199,16 @@ class AuthController extends Controller
         $user = $request->user();
         
         $validator = Validator::make($request->all(), [
-            'first_name' => 'sometimes|string|max:255',
-            'last_name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $user->id,
-            'phone' => 'sometimes|string|max:20',
-            'location' => 'sometimes|string|max:255',
-            'password' => 'sometimes|string|min:8|confirmed',
-            'experience_years' => 'sometimes|integer|min:0|max:50',
-            'hourly_rate' => 'sometimes|numeric|min:0',
-            'bio' => 'sometimes|string|max:1000',
-            'avatar' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+            'first_name' => 'sometimes|nullable|string|max:255',
+            'last_name' => 'sometimes|nullable|string|max:255',
+            'email' => 'sometimes|nullable|email|unique:users,email,' . $user->id,
+            'phone' => 'sometimes|nullable|string|max:30',
+            'location' => 'sometimes|nullable|string|max:255',
+            'password' => 'sometimes|nullable|string|min:8|confirmed',
+            'experience_years' => 'sometimes|nullable|integer|min:0|max:50',
+            'hourly_rate' => 'sometimes|nullable|numeric|min:0',
+            'bio' => 'sometimes|nullable|string|max:1000',
+            'avatar' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max
         ]);
 
         if ($validator->fails()) {
