@@ -21,21 +21,29 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:30',
             'location' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
-            'role' => 'required|in:customer',
+            'role' => 'required|in:customer,mechanic',
+            'experience_years' => 'nullable|integer|min:0|max:50',
+            'hourly_rate' => 'nullable|numeric|min:0',
+            'expertise' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
+            $errors = $validator->errors();
+            $first = $errors->first();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Validation errors',
-                'errors' => $validator->errors()
+                'message' => $first ?: 'Validation errors',
+                'errors' => $errors,
             ], 422);
         }
+
+        $role = $request->role === 'mechanic' ? 'mechanic' : 'customer';
 
         $user = User::create([
             'name' => $request->name,
@@ -46,7 +54,7 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'location' => $request->location,
             'bio' => $request->bio,
-            'role' => $request->role,
+            'role' => $role,
             'status' => 'active',
             'timezone' => $request->timezone ?? 'UTC',
             'language' => $request->language ?? 'en',
@@ -64,16 +72,6 @@ class AuthController extends Controller
                 'allow_contact' => true
             ]
         ]);
-
-        if ($request->role === 'mechanic') {
-            Mechanic::create([
-                'user_id' => $user->id,
-                'experience_years' => $request->experience_years,
-                'expertise' => $request->expertise,
-                'location' => $request->location,
-                'hourly_rate' => $request->hourly_rate ?? 25.00,
-            ]);
-        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

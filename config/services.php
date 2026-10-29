@@ -55,7 +55,10 @@ return [
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
         'api_url' => env('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta'),
-        'model' => env('GEMINI_MODEL', 'gemini-pro'),
+        // Alias used by GeminiProvider
+        'base_url' => env('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+        // New Google AI keys require current flash models (gemini-pro / 1.5 / 2.0 retired for new keys)
+        'model' => env('GEMINI_MODEL', 'gemini-3.5-flash'),
         'temperature' => env('GEMINI_TEMPERATURE', 0.7),
         'max_tokens' => env('GEMINI_MAX_TOKENS', 2000),
     ],

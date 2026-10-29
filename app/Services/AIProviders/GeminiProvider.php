@@ -16,8 +16,13 @@ class GeminiProvider implements AIProviderInterface
     public function __construct()
     {
         $this->apiKey = Config::get('services.gemini.api_key') ?? '';
-        $this->baseUrl = Config::get('services.gemini.base_url') ?? 'https://generativelanguage.googleapis.com/v1beta';
-        $this->model = Config::get('services.gemini.model') ?? 'gemini-1.5-flash';
+        $this->baseUrl = rtrim(
+            (string) (Config::get('services.gemini.api_url')
+                ?? Config::get('services.gemini.base_url')
+                ?? 'https://generativelanguage.googleapis.com/v1beta'),
+            '/'
+        );
+        $this->model = Config::get('services.gemini.model') ?? 'gemini-3.5-flash';
 
         if (empty($this->apiKey)) {
             Log::warning('Gemini API key is not configured');

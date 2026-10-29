@@ -535,7 +535,7 @@ export default {
       location: '',
       
       // Account Type
-      role: '',
+      role: 'customer',
       
       // Mechanic Information
       experience_years: '',
@@ -602,43 +602,40 @@ export default {
 
       try {
         const registrationData = {
-          // Basic user info
-          name: `${form.value.first_name} ${form.value.last_name}`,
-          first_name: form.value.first_name,
-          last_name: form.value.last_name,
-          email: form.value.email,
+          name: `${form.value.first_name} ${form.value.last_name}`.trim(),
+          first_name: form.value.first_name.trim(),
+          last_name: form.value.last_name.trim(),
+          email: form.value.email.trim(),
           password: form.value.password,
           password_confirmation: form.value.password_confirmation,
-          phone: form.value.phone,
-          role: form.value.role,
-          
-          // Profile information
-          location: form.value.location,
-          bio: form.value.bio,
-          
-          // Mechanic specific
-          ...(form.value.role === 'mechanic' && {
-            experience_years: parseInt(form.value.experience_years),
-            expertise: form.value.expertise,
-            hourly_rate: parseFloat(form.value.hourly_rate) || 25.00
-          })
+          role: form.value.role || 'customer',
+        }
+
+        const phone = (form.value.phone || '').trim()
+        const location = (form.value.location || '').trim()
+        const bio = (form.value.bio || '').trim()
+        if (phone) registrationData.phone = phone
+        if (location) registrationData.location = location
+        if (bio) registrationData.bio = bio
+
+        if (form.value.role === 'mechanic') {
+          registrationData.experience_years = parseInt(form.value.experience_years, 10) || 0
+          registrationData.expertise = form.value.expertise
+          registrationData.hourly_rate = parseFloat(form.value.hourly_rate) || 25.00
         }
 
         const response = await authAPI.register(registrationData)
 
         if (response.data.success) {
-          // Store user data and token
           localStorage.setItem('token', response.data.token)
           localStorage.setItem('user', JSON.stringify(response.data.user))
-          
+
           successMessage.value = 'Account created successfully! Redirecting...'
-          
-          // Show success notification
+
           if (window.$notify) {
             window.$notify.success('Welcome to CarWise!', `Account created for ${response.data.user.first_name || response.data.user.name}`)
           }
-          
-          // Redirect after a short delay
+
           setTimeout(() => {
             const redirect = route.query.redirect
             const nextPath = typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')
@@ -647,17 +644,16 @@ export default {
             router.push(nextPath)
           }, 1500)
         }
-        
       } catch (error) {
-        if (error.response?.data?.message) {
-          errorMessage.value = error.response.data.message
-        } else if (error.response?.data?.errors) {
-          // Handle validation errors
-          const errors = error.response.data.errors
-          const firstError = Object.values(errors)[0]
-          errorMessage.value = Array.isArray(firstError) ? firstError[0] : firstError
+        const errors = error.response?.data?.errors
+        if (errors && typeof errors === 'object') {
+          errorMessage.value = Object.values(errors).flat().join(' ')
         } else {
-          errorMessage.value = 'An error occurred during registration. Please try again.'
+          errorMessage.value = error.response?.data?.message || 'An error occurred during registration. Please try again.'
+        }
+
+        if (String(errorMessage.value).toLowerCase().includes('already been taken')) {
+          errorMessage.value = 'This email is already registered. Sign in instead, or use a different email.'
         }
       } finally {
         isLoading.value = false

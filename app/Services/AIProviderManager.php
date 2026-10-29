@@ -24,12 +24,11 @@ class AIProviderManager
     private function initializeProviders(): void
     {
         $this->providers = [
-            'openai' => new OpenAIProvider(),      // Professional: ~$0.08 per diagnosis - PAID FOR
-            // Other providers disabled - only OpenAI is paid for
-            // 'mistral' => new MistralProvider(),    // Very cheap: ~$0.015 per diagnosis
-            // 'gemini' => new GeminiProvider(),      // Free (if available in your region)
-            // 'claude' => new ClaudeProvider(),      // Professional: ~$0.06 per diagnosis
-            // 'cohere' => new CohereProvider(),      // Free tier: 1000 requests/month (deprecated models)
+            'openai' => new OpenAIProvider(),      // Primary for Diagnose (GPT)
+            'gemini' => new GeminiProvider(),      // Fallback / secondary (current Google key)
+            // 'mistral' => new MistralProvider(),
+            // 'claude' => new ClaudeProvider(),
+            // 'cohere' => new CohereProvider(),
         ];
     }
 
@@ -49,16 +48,19 @@ class AIProviderManager
 
     public function getBestProvider(): AIProviderInterface
     {
-        // Use only OpenAI since it's the only paid provider
-        $preferredOrder = ['openai'];
-        
+        $preferredOrder = array_values(array_unique(array_filter([
+            $this->defaultProvider,
+            'openai',
+            'gemini',
+        ])));
+
         foreach ($preferredOrder as $providerName) {
             if (isset($this->providers[$providerName]) && $this->providers[$providerName]->isAvailable()) {
                 Log::info("Using AI provider: {$providerName}");
                 return $this->providers[$providerName];
             }
         }
-        
+
         throw new \Exception('No AI providers are available');
     }
 
