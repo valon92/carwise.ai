@@ -1,58 +1,55 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
     <!-- Modern Header Section -->
-    <div class="relative overflow-hidden">
-      <!-- Animated Background -->
-      <div class="absolute inset-0">
-        <div class="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-indigo-600/5 to-purple-600/5"></div>
-        <div class="absolute top-0 left-1/4 w-72 h-72 bg-blue-400/10 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div class="absolute top-0 right-1/4 w-72 h-72 bg-purple-400/10 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
-        <div class="absolute -bottom-8 left-1/3 w-72 h-72 bg-indigo-400/10 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
+    <div class="relative overflow-hidden border-b border-slate-200/80">
+      <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div class="absolute top-0 left-1/4 h-72 w-72 rounded-full bg-slate-200/50 blur-3xl"></div>
+        <div class="absolute top-0 right-1/4 h-72 w-72 rounded-full bg-slate-300/40 blur-3xl"></div>
       </div>
       
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div class="text-center">
-          <!-- Modern Title with Icon -->
           <div class="flex items-center justify-center mb-6">
-            <div class="p-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
+            <div class="p-4 bg-slate-900 rounded-2xl shadow-lg">
               <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
               </svg>
             </div>
           </div>
           
-          <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 dark:from-white dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent mb-6">
+          <h1 class="text-5xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
             My Garage
           </h1>
-          <p class="text-xl text-slate-600 dark:text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Your personal vehicle management hub. Track maintenance, monitor health, and get AI-powered insights for all your cars.
+          <p class="text-xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+            Keep every vehicle ready for AI diagnosis. Jump to Diagnose for a dated PDF evidence report, or open Vehicle Twin for VIN-backed profiles.
           </p>
           
-          <!-- Modern Action Buttons -->
-          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <button 
+              type="button"
               @click="showAddCarModal = true"
-              class="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+              class="px-8 py-3.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors"
             >
-              <div class="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div class="relative flex items-center">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                Add New Vehicle
-              </div>
+              Add vehicle
             </button>
-            
-            <button 
-              @click="refreshData"
-              class="group px-6 py-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-slate-700 dark:text-slate-300 font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-slate-200 dark:border-slate-700"
+            <router-link
+              to="/diagnose"
+              class="px-6 py-3.5 bg-white text-slate-800 font-semibold rounded-xl border border-slate-200 hover:bg-slate-50"
             >
-              <div class="flex items-center">
-                <svg class="w-5 h-5 mr-3 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-                Refresh
-              </div>
+              AI Diagnosis
+            </router-link>
+            <router-link
+              to="/vehicle-twin"
+              class="px-6 py-3.5 bg-white text-slate-800 font-semibold rounded-xl border border-slate-200 hover:bg-slate-50"
+            >
+              Vehicle Twin
+            </router-link>
+            <button 
+              type="button"
+              @click="refreshData"
+              class="px-6 py-3.5 bg-white text-slate-700 font-semibold rounded-xl border border-slate-200 hover:bg-slate-50"
+            >
+              Refresh
             </button>
           </div>
         </div>
@@ -103,7 +100,7 @@
               </div>
             </div>
             <div class="text-slate-600 dark:text-slate-300 text-sm">
-              AI-powered health checks performed
+              Unlocked AI checks with downloadable evidence
             </div>
           </div>
         </div>

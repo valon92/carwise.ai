@@ -9,6 +9,7 @@ use App\Models\DiagnosisResult;
 use App\Services\AIDiagnosisService;
 use App\Services\CustomerServicePricing;
 use App\Services\DiagnosisEnhancementService;
+use App\Services\DiagnosisIllustrationService;
 use App\Jobs\ProcessAIDiagnosis;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -21,13 +22,16 @@ class DiagnosisController extends Controller
     protected $aiService;
     protected $enhancementService;
     protected CustomerServicePricing $pricing;
+    protected DiagnosisIllustrationService $illustrations;
 
     public function __construct(
         AIDiagnosisService $aiService,
         DiagnosisEnhancementService $enhancementService,
-        CustomerServicePricing $pricing
+        CustomerServicePricing $pricing,
+        DiagnosisIllustrationService $illustrations
     ) {
         $this->aiService = $aiService;
+        $this->illustrations = $illustrations;
         $this->enhancementService = $enhancementService;
         $this->pricing = $pricing;
     }
@@ -258,7 +262,7 @@ class DiagnosisController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'result' => $unlocked ? $this->fullResult($result) : $this->previewResult($result),
+                    'result' => $unlocked ? $this->fullResult($result, $session) : $this->previewResult($result),
                     'amount' => $amount,
                     'locked' => ! $unlocked,
                 ]
@@ -279,6 +283,8 @@ class DiagnosisController extends Controller
 
     public function continueDiagnosis(string $sessionId): JsonResponse
     {
+        @set_time_limit(120);
+
         $session = DiagnosisSession::where('session_id', $sessionId)
             ->with('result')
             ->first();
@@ -292,12 +298,19 @@ class DiagnosisController extends Controller
 
         $meta = $session->ai_response ?? [];
         $meta['unlocked'] = true;
+        if (empty($meta['unlocked_at'])) {
+            $meta['unlocked_at'] = now()->toIso8601String();
+        }
         $session->update(['ai_response' => $meta]);
+        $session->refresh();
+
+        $images = $this->illustrations->forSession($session);
+        $session->refresh();
 
         return response()->json([
             'success' => true,
             'data' => [
-                'result' => $this->fullResult($session->result),
+                'result' => $this->fullResult($session->result, $session, $images),
                 'amount' => $this->pricing->quoteFromUsage($meta['usage'] ?? null),
                 'locked' => false,
             ],
@@ -314,9 +327,11 @@ class DiagnosisController extends Controller
         ];
     }
 
-    private function fullResult($result): array
+    private function fullResult($result, ?DiagnosisSession $session = null, ?array $images = null): array
     {
         $data = $result instanceof DiagnosisResult ? $result->toArray() : (array) $result;
+        $meta = is_array($session?->ai_response) ? $session->ai_response : [];
+        $illustrations = $images ?? ($meta['illustrations'] ?? []);
 
         return [
             'problem_title' => $data['problem_title'] ?? null,
@@ -327,6 +342,15 @@ class DiagnosisController extends Controller
             'recommended_actions' => $data['recommended_actions'] ?? [],
             'estimated_costs' => $data['estimated_costs'] ?? [],
             'ai_insights' => $data['ai_insights'] ?? [],
+            'illustrations' => is_array($illustrations) ? array_values($illustrations) : [],
+            'evidence' => [
+                'session_id' => $session?->session_id,
+                'diagnosed_at' => optional($session?->created_at)?->toIso8601String()
+                    ?? ($data['analysis_completed_at'] ?? null),
+                'unlocked_at' => $meta['unlocked_at'] ?? null,
+                'ai_provider' => $meta['provider'] ?? ($data['ai_model_version'] ?? 'openai'),
+                'report_id' => substr(hash('sha256', ($session?->session_id ?? '').'|'.($meta['unlocked_at'] ?? '')), 0, 12),
+            ],
             'locked' => false,
         ];
     }

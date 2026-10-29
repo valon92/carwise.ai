@@ -2,347 +2,295 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title }}</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            color: #333;
+            font-family: DejaVu Sans, sans-serif;
+            line-height: 1.55;
+            color: #0f172a;
             margin: 0;
-            padding: 20px;
-            background: #fff;
+            padding: 28px;
+            font-size: 12px;
         }
-        
         .header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 3px solid #3B82F6;
-            padding-bottom: 20px;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 16px;
+            margin-bottom: 22px;
         }
-        
-        .logo {
-            font-size: 28px;
+        .brand {
+            font-size: 22px;
             font-weight: bold;
-            color: #3B82F6;
-            margin-bottom: 10px;
+            letter-spacing: 0.04em;
+            color: #0f172a;
         }
-        
         .subtitle {
-            color: #6B7280;
-            font-size: 16px;
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 4px;
         }
-        
+        .meta-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            font-size: 10px;
+        }
+        .meta-grid td {
+            padding: 6px 8px;
+            border: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        .meta-grid .label {
+            width: 28%;
+            background: #f8fafc;
+            color: #475569;
+            font-weight: bold;
+        }
         .section {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             page-break-inside: avoid;
         }
-        
         .section-title {
-            font-size: 18px;
+            font-size: 13px;
             font-weight: bold;
-            color: #1F2937;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #F3F4F6;
-            border-left: 4px solid #3B82F6;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            margin-bottom: 10px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e2e8f0;
         }
-        
-        .vehicle-info {
-            display: table;
-            width: 100%;
-            margin-bottom: 20px;
+        .vehicle-info { width: 100%; border-collapse: collapse; }
+        .vehicle-info td {
+            padding: 7px 8px;
+            border: 1px solid #e2e8f0;
         }
-        
-        .vehicle-row {
-            display: table-row;
-        }
-        
         .vehicle-label {
-            display: table-cell;
-            font-weight: bold;
-            padding: 8px;
             width: 30%;
-            background: #F9FAFB;
-            border: 1px solid #E5E7EB;
-        }
-        
-        .vehicle-value {
-            display: table-cell;
-            padding: 8px;
-            border: 1px solid #E5E7EB;
-        }
-        
-        .symptoms-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .symptoms-list li {
-            padding: 5px 0;
-            border-bottom: 1px solid #E5E7EB;
-        }
-        
-        .symptoms-list li:before {
-            content: "• ";
-            color: #3B82F6;
+            background: #f8fafc;
             font-weight: bold;
+            color: #334155;
         }
-        
-        .diagnosis-result {
-            background: #F0F9FF;
-            border: 1px solid #0EA5E9;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 15px 0;
-        }
-        
-        .confidence-badge {
+        .badge {
             display: inline-block;
-            background: #10B981;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
+            background: #0f172a;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 10px;
             font-weight: bold;
-            margin-bottom: 15px;
-        }
-        
-        .problem-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #1F2937;
             margin-bottom: 10px;
         }
-        
-        .causes-list {
-            margin: 15px 0;
-        }
-        
-        .cause-item {
-            background: #FEF3C7;
-            border: 1px solid #F59E0B;
-            border-radius: 6px;
-            padding: 15px;
-            margin: 10px 0;
-        }
-        
-        .cause-title {
+        .problem-title {
+            font-size: 16px;
             font-weight: bold;
-            color: #92400E;
-            margin-bottom: 8px;
+            margin: 0 0 8px;
         }
-        
-        .cause-description {
-            color: #78350F;
-            margin-bottom: 8px;
+        .box {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8fafc;
         }
-        
-        .probability {
-            font-size: 12px;
-            color: #B45309;
-            font-weight: bold;
-        }
-        
-        .solutions-list {
-            margin: 15px 0;
-        }
-        
-        .solution-item {
-            background: #ECFDF5;
-            border: 1px solid #10B981;
-            border-radius: 6px;
-            padding: 15px;
-            margin: 10px 0;
-        }
-        
-        .solution-title {
-            font-weight: bold;
-            color: #065F46;
-            margin-bottom: 8px;
-        }
-        
-        .solution-description {
-            color: #047857;
-        }
-        
-        .urgency {
-            background: #FEE2E2;
-            border: 1px solid #EF4444;
-            border-radius: 6px;
-            padding: 15px;
-            margin: 15px 0;
-        }
-        
-        .urgency-title {
-            font-weight: bold;
-            color: #991B1B;
-            margin-bottom: 8px;
-        }
-        
-        .urgency-text {
-            color: #B91C1C;
-        }
-        
-        .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #E5E7EB;
+        .cause-item { border-left: 3px solid #f59e0b; background: #fffbeb; }
+        .solution-item { border-left: 3px solid #10b981; background: #ecfdf5; }
+        .muted { color: #64748b; }
+        .illustration {
+            margin: 12px 0;
             text-align: center;
-            color: #6B7280;
-            font-size: 12px;
+            page-break-inside: avoid;
         }
-        
-        .generated-info {
-            background: #F3F4F6;
-            padding: 10px;
-            border-radius: 6px;
-            margin: 20px 0;
-            font-size: 12px;
-            color: #6B7280;
+        .illustration img {
+            max-width: 420px;
+            max-height: 420px;
+            border: 1px solid #e2e8f0;
         }
-        
-        @media print {
-            body {
-                margin: 0;
-                padding: 15px;
-            }
-            
-            .section {
-                page-break-inside: avoid;
-            }
+        .illustration .caption {
+            margin-top: 6px;
+            font-size: 10px;
+            color: #64748b;
         }
+        .footer {
+            margin-top: 28px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 9px;
+            color: #64748b;
+            text-align: center;
+        }
+        ul { margin: 0; padding-left: 18px; }
+        li { margin-bottom: 4px; }
     </style>
 </head>
 <body>
+    @php
+        $diagnosedAt = $evidence['diagnosed_at'] ?? $generated_at ?? null;
+        $unlockedAt = $evidence['unlocked_at'] ?? null;
+        $fmt = function ($value) {
+            if (! $value) {
+                return '—';
+            }
+            try {
+                return \Carbon\Carbon::parse($value)->timezone(config('app.timezone'))->format('d.m.Y H:i:s T');
+            } catch (\Throwable $e) {
+                return (string) $value;
+            }
+        };
+    @endphp
+
     <div class="header">
-        <div class="logo">CarWise.ai</div>
-        <div class="subtitle">AI-Powered Vehicle Diagnosis Report</div>
+        <div class="brand">CarWise.ai</div>
+        <div class="subtitle">AI vehicle diagnosis evidence report</div>
+
+        <table class="meta-grid">
+            <tr>
+                <td class="label">Report generated</td>
+                <td>{{ $fmt($generated_at) }}</td>
+                <td class="label">Diagnosis started</td>
+                <td>{{ $fmt($diagnosedAt) }}</td>
+            </tr>
+            <tr>
+                <td class="label">Unlocked / full result</td>
+                <td>{{ $fmt($unlockedAt) }}</td>
+                <td class="label">Report ID</td>
+                <td>{{ $evidence['report_id'] ?? '—' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Session ID</td>
+                <td>{{ $evidence['session_id'] ?? '—' }}</td>
+                <td class="label">AI provider</td>
+                <td>{{ strtoupper((string) ($evidence['ai_provider'] ?? ($result['ai_provider'] ?? 'openai'))) }}</td>
+            </tr>
+        </table>
     </div>
 
     <div class="section">
-        <div class="section-title">Vehicle Information</div>
-        <div class="vehicle-info">
-            <div class="vehicle-row">
-                <div class="vehicle-label">Make</div>
-                <div class="vehicle-value">{{ $vehicle['make'] }}</div>
-            </div>
-            <div class="vehicle-row">
-                <div class="vehicle-label">Model</div>
-                <div class="vehicle-value">{{ $vehicle['model'] }}</div>
-            </div>
-            <div class="vehicle-row">
-                <div class="vehicle-label">Year</div>
-                <div class="vehicle-value">{{ $vehicle['year'] }}</div>
-            </div>
-            @if(isset($vehicle['mileage']) && $vehicle['mileage'])
-            <div class="vehicle-row">
-                <div class="vehicle-label">Mileage</div>
-                <div class="vehicle-value">{{ number_format($vehicle['mileage']) }} km</div>
-            </div>
+        <div class="section-title">Vehicle</div>
+        <table class="vehicle-info">
+            <tr>
+                <td class="vehicle-label">Make</td>
+                <td>{{ $vehicle['make'] }}</td>
+            </tr>
+            <tr>
+                <td class="vehicle-label">Model</td>
+                <td>{{ $vehicle['model'] }}</td>
+            </tr>
+            <tr>
+                <td class="vehicle-label">Year</td>
+                <td>{{ $vehicle['year'] }}</td>
+            </tr>
+            @if(!empty($vehicle['mileage']))
+            <tr>
+                <td class="vehicle-label">Mileage</td>
+                <td>{{ number_format((int) $vehicle['mileage']) }} km</td>
+            </tr>
             @endif
-            @if(isset($vehicle['engine_type']) && $vehicle['engine_type'])
-            <div class="vehicle-row">
-                <div class="vehicle-label">Engine Type</div>
-                <div class="vehicle-value">{{ $vehicle['engine_type'] }}</div>
-            </div>
+            @if(!empty($vehicle['engine_type']))
+            <tr>
+                <td class="vehicle-label">Engine type</td>
+                <td>{{ $vehicle['engine_type'] }}</td>
+            </tr>
             @endif
-            @if(isset($vehicle['engine_size']) && $vehicle['engine_size'])
-            <div class="vehicle-row">
-                <div class="vehicle-label">Engine Size</div>
-                <div class="vehicle-value">{{ $vehicle['engine_size'] }}</div>
-            </div>
+            @if(!empty($vehicle['engine_size']))
+            <tr>
+                <td class="vehicle-label">Engine size</td>
+                <td>{{ $vehicle['engine_size'] }}</td>
+            </tr>
             @endif
-        </div>
+        </table>
     </div>
 
     <div class="section">
-        <div class="section-title">Reported Symptoms</div>
-        @if(count($symptoms) > 0)
-            <ul class="symptoms-list">
+        <div class="section-title">Reported symptoms</div>
+        @if(!empty($symptoms))
+            <ul>
                 @foreach($symptoms as $symptom)
-                    <li>{{ $symptom }}</li>
+                    <li>{{ is_array($symptom) ? ($symptom['label'] ?? json_encode($symptom)) : $symptom }}</li>
                 @endforeach
             </ul>
         @else
-            <p>No specific symptoms reported.</p>
+            <p class="muted">No checklist symptoms selected.</p>
+        @endif
+        @if(!empty($description))
+            <p style="margin-top:10px;"><strong>Description:</strong> {{ $description }}</p>
         @endif
     </div>
 
     <div class="section">
-        <div class="section-title">Problem Description</div>
-        <p>{{ $description }}</p>
-    </div>
+        <div class="section-title">Diagnosis result</div>
+        @if(isset($result['confidence']) || isset($result['confidence_score']))
+            <div class="badge">{{ $result['confidence'] ?? $result['confidence_score'] }}% match</div>
+        @endif
+        @if(!empty($result['severity']))
+            <div class="badge" style="background:#b45309;">Severity: {{ $result['severity'] }}</div>
+        @endif
 
-    <div class="section">
-        <div class="section-title">AI Diagnosis Results</div>
-        <div class="diagnosis-result">
-            @if(isset($result['confidence']))
-                <div class="confidence-badge">{{ $result['confidence'] }}% Confidence</div>
-            @endif
-            
-            @if(isset($result['problem_title']))
-                <div class="problem-title">{{ $result['problem_title'] }}</div>
-            @endif
-            
-            @if(isset($result['problem_description']))
-                <p>{{ $result['problem_description'] }}</p>
-            @endif
-            
-            @if(isset($result['likely_causes']) && count($result['likely_causes']) > 0)
-                <div class="causes-list">
-                    <h4>Likely Causes:</h4>
-                    @foreach($result['likely_causes'] as $cause)
-                        <div class="cause-item">
-                            <div class="cause-title">{{ $cause['cause'] ?? 'Unknown Cause' }}</div>
-                            <div class="cause-description">{{ $cause['description'] ?? 'No description available' }}</div>
-                            @if(isset($cause['probability']))
-                                <div class="probability">{{ $cause['probability'] }}% probability</div>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-            
-            @if(isset($result['recommended_actions']) && count($result['recommended_actions']) > 0)
-                <div class="solutions-list">
-                    <h4>Recommended Actions:</h4>
-                    @foreach($result['recommended_actions'] as $action)
-                        <div class="solution-item">
-                            <div class="solution-title">{{ $action['action'] ?? 'Recommended Action' }}</div>
-                            <div class="solution-description">{{ $action['description'] ?? 'No description available' }}</div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-            
-            @if(isset($result['urgency']) && $result['urgency'] === 'high')
-                <div class="urgency">
-                    <div class="urgency-title">⚠️ Immediate Attention Required</div>
-                    <div class="urgency-text">This issue requires immediate professional attention to prevent further damage or safety risks. Please contact a certified mechanic as soon as possible.</div>
-                </div>
-            @endif
-        </div>
-    </div>
+        @if(!empty($result['problem_title']))
+            <div class="problem-title">{{ $result['problem_title'] }}</div>
+        @endif
+        @if(!empty($result['problem_description']))
+            <p>{{ $result['problem_description'] }}</p>
+        @endif
 
-    <div class="generated-info">
-        <strong>Report Generated:</strong> {{ date('F j, Y \a\t g:i A', strtotime($generated_at)) }}<br>
-        <strong>AI Provider:</strong> {{ $result['ai_provider'] ?? 'CarWise AI' }}<br>
-        <strong>Report ID:</strong> {{ substr(md5($generated_at . $vehicle['make'] . $vehicle['model']), 0, 8) }}
+        @if(!empty($illustrations))
+            @foreach($illustrations as $image)
+                <div class="illustration">
+                    <img src="{{ $image['src'] }}" alt="{{ $image['caption'] }}">
+                    <div class="caption">{{ $image['caption'] }} — AI technical illustration</div>
+                </div>
+            @endforeach
+        @endif
+
+        @if(!empty($result['likely_causes']))
+            <p><strong>Why this is likely</strong></p>
+            @foreach($result['likely_causes'] as $cause)
+                <div class="box cause-item">
+                    <strong>{{ $cause['cause'] ?? $cause['title'] ?? 'Cause' }}</strong>
+                    <div>{{ $cause['description'] ?? $cause['explanation'] ?? '' }}</div>
+                    @if(isset($cause['probability']))
+                        <div class="muted">{{ $cause['probability'] }}% probability</div>
+                    @endif
+                </div>
+            @endforeach
+        @endif
+
+        @if(!empty($result['recommended_actions']))
+            <p><strong>What to do</strong></p>
+            @foreach($result['recommended_actions'] as $action)
+                <div class="box solution-item">
+                    <strong>{{ $action['action'] ?? $action['title'] ?? 'Action' }}</strong>
+                    <div>{{ $action['description'] ?? $action['explanation'] ?? '' }}</div>
+                    @if(!empty($action['urgency']))
+                        <div class="muted">{{ $action['urgency'] }}</div>
+                    @endif
+                </div>
+            @endforeach
+        @endif
+
+        @if(!empty($result['estimated_costs']))
+            <p><strong>Guide costs</strong></p>
+            <ul>
+                @foreach($result['estimated_costs'] as $cost)
+                    <li>
+                        {{ $cost['service'] ?? 'Service' }}:
+                        €{{ $cost['min'] ?? '?' }} – €{{ $cost['max'] ?? '?' }}
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+
+        @if(!empty($result['ai_insights']))
+            <p><strong>Also worth knowing</strong></p>
+            <ul>
+                @foreach($result['ai_insights'] as $insight)
+                    <li>{{ is_array($insight) ? ($insight['text'] ?? json_encode($insight)) : $insight }}</li>
+                @endforeach
+            </ul>
+        @endif
     </div>
 
     <div class="footer">
-        <p>This report was generated by CarWise.ai - Your AI-powered vehicle diagnosis assistant.</p>
-        <p>For professional repair services, please consult a certified mechanic.</p>
-        <p>© {{ date('Y') }} CarWise.ai. All rights reserved.</p>
+        <p>This document is an AI-assisted diagnosis evidence record from CarWise.ai. It is not a workshop invoice or legal certification.</p>
+        <p>Always confirm repairs with a qualified technician. © {{ date('Y') }} CarWise.ai</p>
     </div>
 </body>
 </html>
-
-
-
-
-
-
-
-

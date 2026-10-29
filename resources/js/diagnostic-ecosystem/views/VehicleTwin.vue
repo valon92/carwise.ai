@@ -1,30 +1,45 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-secondary-50 via-white to-primary-50 dark:from-secondary-950 dark:via-secondary-900 dark:to-primary-950">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
         <div>
-          <h1 class="text-3xl sm:text-4xl font-bold text-secondary-900 dark:text-white flex items-center gap-3">
-            <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/40 rounded-xl flex items-center justify-center">
-              <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 flex items-center gap-3 tracking-tight">
+            <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
               </svg>
             </div>
             Vehicle Twin
           </h1>
-          <p class="mt-2 text-secondary-600 dark:text-secondary-400">
-            Your digital vehicle profiles — powered by VIN identification
+          <p class="mt-2 text-slate-600 max-w-2xl">
+            VIN-backed digital profiles for the Diagnostic Ecosystem — identify the car, keep connector context, then run AI diagnosis with PDF evidence from Diagnose.
           </p>
         </div>
-        <button
-          @click="showRegisterModal = true"
-          class="mt-4 sm:mt-0 inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl shadow-lg shadow-primary-500/25 transition-all duration-200"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Add Vehicle
-        </button>
+        <div class="flex flex-wrap items-center gap-2">
+          <router-link
+            to="/diagnose"
+            class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-800 font-medium rounded-xl hover:bg-slate-50"
+          >
+            AI Diagnosis
+          </router-link>
+          <router-link
+            to="/my-cars"
+            class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-800 font-medium rounded-xl hover:bg-slate-50"
+          >
+            My Garage
+          </router-link>
+          <button
+            type="button"
+            @click="showRegisterModal = true"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Vehicle
+          </button>
+        </div>
       </div>
 
       <!-- Loading -->
@@ -39,13 +54,14 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
           </svg>
         </div>
-        <h3 class="text-xl font-semibold text-secondary-900 dark:text-white mb-2">No vehicles yet</h3>
-        <p class="text-secondary-500 dark:text-secondary-400 max-w-md mx-auto mb-6">
-          Add your first vehicle using its VIN to create a digital twin — a permanent, intelligent profile for diagnostics and maintenance.
+        <h3 class="text-xl font-semibold text-slate-900 mb-2">No vehicles yet</h3>
+        <p class="text-slate-500 max-w-md mx-auto mb-6">
+          Register a VIN to create a digital twin — then diagnose from the same account and download dated PDF evidence when you unlock a result.
         </p>
         <button
+          type="button"
           @click="showRegisterModal = true"
-          class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl shadow-lg shadow-primary-500/25 transition-all duration-200"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition-colors"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

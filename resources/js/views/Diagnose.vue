@@ -1,14 +1,14 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-800">
-    <!-- Background Elements -->
-    <div class="absolute inset-0 overflow-hidden">
+    <!-- Background Elements (must not block clicks) -->
+    <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
       <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-200 dark:bg-primary-800 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl opacity-70 animate-blob"></div>
       <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary-200 dark:bg-secondary-700 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
       <div class="absolute top-40 left-40 w-80 h-80 bg-accent-200 dark:bg-accent-800 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
     </div>
 
     <!-- Modern Header Section -->
-    <div class="relative overflow-hidden">
+    <div class="relative z-10 overflow-hidden">
       
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div class="text-center">
@@ -47,7 +47,7 @@
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
 
       <!-- Modern Progress Steps -->
       <div class="mb-12">
@@ -782,9 +782,22 @@
               <p class="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Diagnosis</p>
               <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Your result</h2>
             </div>
-            <div v-if="diagnosisResult && continuationPaid" class="flex items-center gap-2">
-              <button @click="exportToPDF" class="px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700">Report</button>
-              <button @click="viewHistory" class="px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700">History</button>
+            <div v-if="diagnosisResult && continuationPaid" class="relative z-20 flex items-center gap-2">
+              <button
+                type="button"
+                @click="exportToPDF"
+                :disabled="exportingPdf"
+                class="relative z-20 cursor-pointer px-3 py-2 text-sm font-medium text-white bg-slate-900 rounded-lg hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900"
+              >
+                {{ exportingPdf ? 'Preparing PDF…' : 'Download PDF' }}
+              </button>
+              <button
+                type="button"
+                @click="viewHistory"
+                class="relative z-20 cursor-pointer px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
+              >
+                History
+              </button>
             </div>
           </div>
 
@@ -813,36 +826,26 @@
               </h3>
             </div>
 
-            <section v-if="!continuationPaid" class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-5 py-5">
+            <section v-if="!continuationPaid" class="relative z-10 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-5 py-5">
               <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">Continue</p>
               <h4 class="mt-2 text-lg font-semibold text-slate-900 dark:text-white">One payment for this result</h4>
               <p class="mt-1 text-sm text-slate-500">The explanation, the steps, and a cost guide.</p>
 
               <div v-if="quoteLoading" class="mt-5 text-sm text-slate-500">Preparing the total</div>
 
-              <div v-else-if="continuationAmount" class="mt-5">
+              <div v-else-if="continuationAmount !== null" class="mt-5">
                 <p class="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">€{{ continuationAmount }}</p>
                 <p class="mt-1 text-xs text-slate-400">Pay once. No subscription.</p>
 
-                <div v-if="!showPay" class="mt-5">
-                  <button type="button" @click="showPay = true" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-900 text-sm font-semibold text-white dark:bg-white dark:text-slate-900">
-                    Continue
-                  </button>
-                </div>
-
-                <div v-else class="mt-5 space-y-3">
-                  <label class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-800 dark:text-slate-100">
-                    <input v-model="payMethod" type="radio" value="card" class="accent-slate-900">
-                    Card
-                  </label>
-                  <label class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-800 dark:text-slate-100">
-                    <input v-model="payMethod" type="radio" value="paypal" class="accent-slate-900">
-                    PayPal
-                  </label>
-                  <button type="button" @click="confirmContinuation" :disabled="paying" class="w-full px-5 py-3 rounded-xl bg-slate-900 text-sm font-semibold text-white disabled:opacity-50 dark:bg-white dark:text-slate-900">
-                    {{ paying ? 'Opening the result' : (Number(continuationAmount) > 0 ? 'Pay €' + continuationAmount : 'Continue') }}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  class="relative z-10 mt-5 w-full cursor-pointer px-5 py-3 rounded-xl bg-slate-900 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900 sm:w-auto"
+                  :disabled="paying || !diagnosisSessionId"
+                  @click="confirmContinuation"
+                >
+                  {{ paying ? 'Preparing result & visuals…' : (Number(continuationAmount) > 0 ? 'Continue · €' + continuationAmount : 'Continue') }}
+                </button>
+                <p v-if="payError" class="mt-3 text-sm text-red-700 dark:text-red-300">{{ payError }}</p>
               </div>
 
               <div v-else class="mt-5">
@@ -852,9 +855,36 @@
             </section>
 
             <template v-else>
+            <p v-if="diagnosisResult.evidence" class="text-xs text-slate-500 dark:text-slate-400">
+              Evidence ·
+              <span v-if="diagnosisResult.evidence.diagnosed_at">Diagnosis {{ formatEvidenceTime(diagnosisResult.evidence.diagnosed_at) }}</span>
+              <span v-if="diagnosisResult.evidence.unlocked_at"> · Unlocked {{ formatEvidenceTime(diagnosisResult.evidence.unlocked_at) }}</span>
+              <span v-if="diagnosisResult.evidence.report_id"> · ID {{ diagnosisResult.evidence.report_id }}</span>
+            </p>
             <p v-if="resultSummary" class="text-base leading-relaxed text-slate-600 dark:text-slate-300">
               {{ resultSummary }}
             </p>
+
+            <section v-if="(diagnosisResult.illustrations || []).length" class="space-y-3">
+              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400">Problem visual</h4>
+              <figure
+                v-for="(image, index) in diagnosisResult.illustrations"
+                :key="image.path || image.url || index"
+                class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40"
+              >
+                <img
+                  :src="image.url"
+                  :alt="image.caption || diagnosisResult.problem_title || 'Problem illustration'"
+                  class="w-full max-h-80 object-cover object-center"
+                  loading="lazy"
+                />
+                <figcaption class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">
+                  {{ image.caption || diagnosisResult.problem_title }}
+                  <span class="block text-xs text-slate-400 mt-1">AI technical illustration to clarify the fault area</span>
+                </figcaption>
+              </figure>
+            </section>
+
             <section v-if="(diagnosisResult.recommended_actions || diagnosisResult.recommendedActions || []).length">
               <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">What to do</h4>
               <ol class="space-y-3">
@@ -957,6 +987,7 @@ export default {
     })
     const continuationPaid = ref(false)
     const continuationAmount = ref(null)
+    const payError = ref('')
     const quoteLoading = ref(false)
     const showPay = ref(false)
     const paying = ref(false)
@@ -1175,55 +1206,73 @@ export default {
       }
     }
 
+    const exportingPdf = ref(false)
+
+    const formatEvidenceTime = (value) => {
+      if (!value) return ''
+      try {
+        return new Date(value).toLocaleString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      } catch (_) {
+        return String(value)
+      }
+    }
+
     // Export diagnosis to PDF
     const exportToPDF = async () => {
-      try {
-        if (!diagnosisResult.value) {
-          alert('No diagnosis result to export')
-          return
-        }
+      if (!diagnosisResult.value || !continuationPaid.value) {
+        return
+      }
 
-        // Create PDF content
+      exportingPdf.value = true
+      try {
+        const stamp = new Date()
         const pdfContent = {
-          title: 'CarWise.ai - AI Diagnosis Report',
+          title: 'CarWise.ai — Diagnosis Evidence Report',
+          session_id: diagnosisSessionId.value,
           vehicle: {
             make: diagnosisForm.make,
             model: diagnosisForm.model,
-            year: diagnosisForm.year,
-            mileage: diagnosisForm.mileage,
+            year: Number(diagnosisForm.year) || new Date().getFullYear(),
+            mileage: diagnosisForm.mileage ? Number(diagnosisForm.mileage) : null,
             engine_type: diagnosisForm.engineType,
             engine_size: diagnosisForm.engineSize
           },
-          symptoms: diagnosisForm.symptoms,
-          description: diagnosisForm.description,
+          symptoms: diagnosisForm.symptoms || [],
+          description: diagnosisForm.description || '',
           result: diagnosisResult.value,
-          generated_at: new Date().toISOString()
+          generated_at: stamp.toISOString()
         }
 
-        // Call backend to generate PDF
-        const response = await axios.post('/api/diagnosis/export-pdf', pdfContent, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          },
+        const response = await api.post('/diagnosis/export-pdf', pdfContent, {
           responseType: 'blob'
         })
 
-        // Create download link
         const blob = new Blob([response.data], { type: 'application/pdf' })
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.download = `CarWise_Diagnosis_${diagnosisForm.make}_${diagnosisForm.model}_${new Date().toISOString().split('T')[0]}.pdf`
+        const day = stamp.toISOString().slice(0, 10)
+        const time = stamp.toTimeString().slice(0, 8).replace(/:/g, '')
+        link.download = `CarWise_Diagnosis_${diagnosisForm.make}_${diagnosisForm.model}_${day}_${time}.pdf`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
         window.URL.revokeObjectURL(url)
-
-        console.log('PDF exported successfully')
       } catch (error) {
         console.error('Error exporting PDF:', error)
-        alert('Failed to export PDF. Please try again.')
+        if (window.$notify) {
+          window.$notify.error('PDF export failed', 'Could not download the diagnosis document. Try again.')
+        } else {
+          alert('Failed to export PDF. Please try again.')
+        }
+      } finally {
+        exportingPdf.value = false
       }
     }
 
@@ -1669,6 +1718,7 @@ export default {
       }
       continuationPaid.value = false
       continuationAmount.value = null
+      payError.value = ''
       showPay.value = false
 
       if (!localStorage.getItem('token')) {
@@ -1830,17 +1880,43 @@ export default {
     }
 
     const confirmContinuation = async () => {
-      if (continuationAmount.value === null || paying.value || !diagnosisSessionId.value) {
+      payError.value = ''
+
+      if (paying.value) {
         return
       }
+
+      if (continuationAmount.value === null) {
+        payError.value = 'The total could not be prepared. Try again.'
+        return
+      }
+
+      if (!diagnosisSessionId.value) {
+        payError.value = 'This diagnosis session expired. Run the diagnosis again.'
+        return
+      }
+
       paying.value = true
       try {
-        const response = await api.post(`/diagnosis/result/${diagnosisSessionId.value}/continue`)
+        const response = await api.post(
+          `/diagnosis/result/${diagnosisSessionId.value}/continue`,
+          {},
+          { timeout: 120000 }
+        )
         diagnosisResult.value = response.data?.data?.result || diagnosisResult.value
         continuationPaid.value = true
         showPay.value = false
+        payError.value = ''
       } catch (error) {
         continuationPaid.value = false
+        payError.value = error.response?.status === 401
+          ? 'Sign in again to open the full result.'
+          : (error.code === 'ECONNABORTED'
+            ? 'Still preparing visuals. Refresh the result in a moment, then download the PDF.'
+            : (error.response?.data?.message || 'The result could not be opened. Try again.'))
+        if (window.$notify) {
+          window.$notify.error('Continue failed', payError.value)
+        }
       } finally {
         paying.value = false
       }
@@ -2300,10 +2376,12 @@ export default {
       resultSummary,
       continuationPaid,
       continuationAmount,
+      payError,
       quoteLoading,
       showPay,
       paying,
       payMethod,
+      diagnosisSessionId,
       loadContinuationQuote,
       confirmContinuation,
       fileInput,
@@ -2359,6 +2437,8 @@ export default {
       getDifficultyBadgeClass,
       getUrgencyBadgeClass,
       saveDiagnosisToHistory,
+      exportingPdf,
+      formatEvidenceTime,
       exportToPDF,
       viewHistory,
       searchPartInStore,

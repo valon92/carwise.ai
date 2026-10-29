@@ -1,61 +1,44 @@
 <template>
   <AdminTesting v-if="isAdmin" />
-  <div v-else class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-    <!-- Modern Header with Enhanced User Experience -->
-    <div class="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-10">
+  <div v-else class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div class="bg-white/90 backdrop-blur-sm border-b border-slate-200/80 sticky top-0 z-10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <!-- User Info Section -->
           <div class="flex-1">
             <div class="flex items-center gap-4 mb-4">
-              <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+              <div class="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
               </div>
               <div>
-                <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  My CarWise Dashboard
+                <h1 class="text-3xl font-bold tracking-tight text-slate-900">
+                  My CarWise activity
                 </h1>
-                <p class="text-gray-600 mt-1">Manage your AI car diagnostics and subscription</p>
+                <p class="text-slate-600 mt-1">Diagnoses, evidence PDFs, and one-time services — no required monthly plan</p>
               </div>
             </div>
             
-            <!-- Status Badges -->
             <div class="flex flex-wrap items-center gap-3">
-              <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200">
-                <div class="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
-                {{ userType }} Account
+              <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-slate-100 text-slate-800 border border-slate-200">
+                {{ userType }} account
               </span>
-              <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium" 
-                    :class="subscriptionStatus === 'Active' ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200' : 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200'">
-                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                {{ subscriptionStatus }}
+              <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                Pay per unlock
               </span>
-              <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border border-purple-200">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-                AI Powered
+              <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                PDF evidence ready
               </span>
             </div>
           </div>
           
-          <!-- Quick Stats -->
           <div class="lg:text-right">
-            <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 shadow-lg">
-              <p class="text-sm font-medium text-gray-500 mb-1">This Month's Spending</p>
-              <p class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <p class="text-sm font-medium text-slate-500 mb-1">This month’s diagnosis spend</p>
+              <p class="text-3xl font-bold text-slate-900">
                 €{{ totalSpent.toLocaleString() }}
               </p>
-              <div class="flex items-center justify-center lg:justify-end mt-2">
-                <svg class="w-4 h-4 text-green-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                </svg>
-                <span class="text-sm text-green-600 font-medium">+{{ usageTrend }}% vs last month</span>
-              </div>
+              <p class="text-sm text-slate-500 mt-2">Usage-based unlocks + optional add-ons</p>
             </div>
           </div>
         </div>
@@ -88,44 +71,36 @@
                 </button>
               </div>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Current Plan</h3>
-            <p class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1">
-              {{ currentPlan?.name || 'Free Plan' }}
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Billing mode</h3>
+            <p class="text-2xl font-bold text-slate-900 mb-1">
+              {{ currentPlan?.name || 'Pay per diagnosis' }}
             </p>
-            <p class="text-sm text-gray-600 mb-3">€{{ currentPlan?.price || '0' }}/month</p>
+            <p class="text-sm text-gray-600 mb-3">Unlock when you need the full result</p>
             <div class="flex items-center text-xs text-gray-500">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              {{ currentPlan?.diagnoses_per_month || 0 }} diagnoses/month
+              Preview free · PDF + visuals on unlock
             </div>
           </div>
         </div>
 
-        <!-- API Usage Card -->
+        <!-- Garage & Twin Card -->
         <div class="group bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200/50 overflow-hidden">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div class="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
               </div>
-              <span class="text-xs font-medium px-2 py-1 rounded-full" 
-                    :class="(apiUsage.used / apiUsage.limit) > 0.8 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
-                {{ Math.round((apiUsage.used / apiUsage.limit) * 100) }}%
-              </span>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">API Usage</h3>
-            <p class="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-1">
-              {{ apiUsage.used }}/{{ apiUsage.limit }}
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Garage & Twin</h3>
+            <p class="text-2xl font-bold text-slate-900 mb-1">
+              Connected
             </p>
-            <p class="text-sm text-gray-600 mb-3">BMW CarData calls</p>
-            <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-              <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-500" 
-                   :style="{ width: `${(apiUsage.used / apiUsage.limit) * 100}%` }"></div>
+            <p class="text-sm text-gray-600 mb-3">My Cars + Vehicle Twin profiles</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" @click="router.push('/my-cars')" class="text-xs font-semibold text-slate-900 underline">My Garage</button>
+              <button type="button" @click="router.push('/vehicle-twin')" class="text-xs font-semibold text-slate-900 underline">Vehicle Twin</button>
             </div>
-            <p class="text-xs text-gray-500">{{ apiUsage.limit - apiUsage.used }} calls remaining</p>
           </div>
         </div>
 
@@ -143,16 +118,13 @@
                 <p class="text-sm font-medium text-green-600">+{{ usageTrend }}%</p>
               </div>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">AI Diagnostics</h3>
-            <p class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-1">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">AI Diagnoses</h3>
+            <p class="text-2xl font-bold text-slate-900 mb-1">
               {{ diagnosticsCount }}
             </p>
-            <p class="text-sm text-gray-600 mb-3">Completed diagnoses</p>
+            <p class="text-sm text-gray-600 mb-3">Unlocked this month</p>
             <div class="flex items-center text-xs text-gray-500">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-              {{ reportsGenerated }} reports generated
+              {{ reportsGenerated }} PDF / evidence exports
             </div>
           </div>
         </div>
@@ -172,17 +144,14 @@
                 </svg>
               </button>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Next Billing</h3>
-            <p class="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mb-1">
-              {{ nextBillingDate }}
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Next step</h3>
+            <p class="text-2xl font-bold text-slate-900 mb-1">
+              Diagnose
             </p>
-            <p class="text-sm text-gray-600 mb-3">Auto-renewal enabled</p>
-            <div class="flex items-center text-xs text-gray-500">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-              </svg>
-              €{{ currentPlan?.price || '0' }} will be charged
-            </div>
+            <p class="text-sm text-gray-600 mb-3">Preview free, unlock once</p>
+            <button type="button" @click="router.push('/diagnose')" class="text-xs font-semibold text-slate-900 underline">
+              Open AI Diagnosis
+            </button>
           </div>
         </div>
       </div>
@@ -228,60 +197,24 @@
             Quick Actions
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button @click="upgradePlan" class="group p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 hover:from-blue-100 hover:to-indigo-100 transition-all duration-300 hover:scale-105">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
-                  </svg>
-                </div>
-                <div class="text-left">
-                  <p class="font-medium text-gray-900">Upgrade Plan</p>
-                  <p class="text-sm text-gray-600">Get more features</p>
-                </div>
-              </div>
+            <button type="button" @click="router.push('/diagnose')" class="group p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors text-left">
+              <p class="font-medium text-gray-900">AI Diagnosis</p>
+              <p class="text-sm text-gray-600">Preview free · unlock full + PDF</p>
             </button>
             
-            <button @click="viewBillingHistory" class="group p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 hover:from-green-100 hover:to-emerald-100 transition-all duration-300 hover:scale-105">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                  </svg>
-                </div>
-                <div class="text-left">
-                  <p class="font-medium text-gray-900">Billing History</p>
-                  <p class="text-sm text-gray-600">View invoices</p>
-                </div>
-              </div>
+            <button type="button" @click="router.push('/my-cars')" class="group p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors text-left">
+              <p class="font-medium text-gray-900">My Garage</p>
+              <p class="text-sm text-gray-600">Vehicles ready for diagnosis</p>
             </button>
             
-            <button @click="updatePaymentMethod" class="group p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200 hover:from-purple-100 hover:to-pink-100 transition-all duration-300 hover:scale-105">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                  </svg>
-                </div>
-                <div class="text-left">
-                  <p class="font-medium text-gray-900">Payment Method</p>
-                  <p class="text-sm text-gray-600">Update card</p>
-                </div>
-              </div>
+            <button type="button" @click="router.push('/vehicle-twin')" class="group p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors text-left">
+              <p class="font-medium text-gray-900">Vehicle Twin</p>
+              <p class="text-sm text-gray-600">VIN digital profiles</p>
             </button>
             
-            <button @click="contactSupport" class="group p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200 hover:from-yellow-100 hover:to-orange-100 transition-all duration-300 hover:scale-105">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"></path>
-                  </svg>
-                </div>
-                <div class="text-left">
-                  <p class="font-medium text-gray-900">Support</p>
-                  <p class="text-sm text-gray-600">Get help</p>
-                </div>
-              </div>
+            <button type="button" @click="viewAllPlans" class="group p-4 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors text-left">
+              <p class="font-medium text-gray-900">Pricing</p>
+              <p class="text-sm text-gray-600">How unlock & add-ons work</p>
             </button>
           </div>
         </div>
@@ -307,24 +240,26 @@
             <div class="space-y-4">
               <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <h4 class="font-medium text-gray-900">{{ currentPlan?.name || 'Free Plan' }}</h4>
-                  <p class="text-sm text-gray-600">{{ currentPlan?.description || 'Basic diagnostics without BMW API' }}</p>
+                  <h4 class="font-medium text-gray-900">{{ currentPlan?.name || 'Pay per diagnosis' }}</h4>
+                  <p class="text-sm text-gray-600">{{ currentPlan?.description || 'Free preview · unlock full result with PDF evidence' }}</p>
                 </div>
-                <span class="text-2xl font-bold text-blue-600">€{{ currentPlan?.price || '0' }}</span>
+                <span class="text-2xl font-bold text-slate-900">Pay once</span>
               </div>
               
               <div class="grid grid-cols-2 gap-3">
                 <button 
-                  @click="upgradePlan"
-                  class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                  type="button"
+                  @click="router.push('/diagnose')"
+                  class="bg-slate-900 text-white px-4 py-2 rounded-md hover:bg-slate-800 transition-colors"
                 >
-                  Upgrade Plan
+                  Open Diagnose
                 </button>
                 <button 
-                  @click="viewBillingHistory"
+                  type="button"
+                  @click="viewAllPlans"
                   class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors"
                 >
-                  Billing History
+                  See pricing
                 </button>
       </div>
     </div>
@@ -335,16 +270,16 @@
             <h3 class="text-xl font-semibold text-gray-900 mb-4">Usage Analytics</h3>
             <div class="space-y-4">
               <div class="flex justify-between items-center">
-                <span class="text-sm font-medium text-gray-600">BMW API Calls</span>
-                <span class="text-sm font-bold">{{ apiUsage.used }}/{{ apiUsage.limit }}</span>
+                <span class="text-sm font-medium text-gray-600">Unlocked diagnoses</span>
+                <span class="text-sm font-bold">{{ diagnosticsCount }} this month</span>
               </div>
               <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-blue-500 h-2 rounded-full" :style="{ width: `${(apiUsage.used / apiUsage.limit) * 100}%` }"></div>
+                <div class="bg-slate-900 h-2 rounded-full" :style="{ width: `${Math.min(100, diagnosticsCount * 20)}%` }"></div>
               </div>
               
               <div class="flex justify-between items-center">
-                <span class="text-sm font-medium text-gray-600">AI Diagnostics</span>
-                <span class="text-sm font-bold">{{ diagnosticsCount }} this month</span>
+                <span class="text-sm font-medium text-gray-600">Evidence PDFs</span>
+                <span class="text-sm font-bold">{{ reportsGenerated }} exported</span>
               </div>
               
               <div class="flex justify-between items-center">
@@ -421,25 +356,21 @@
             <h3 class="text-xl font-semibold text-gray-900 mb-4">Usage This Month</h3>
             <div class="space-y-3">
               <div class="flex justify-between">
-                <span class="text-sm text-gray-600">AI Diagnoses</span>
-                <span class="text-sm font-bold">{{ diagnosticsCount }}/{{ currentPlan?.diagnoses_per_month || 'Unlimited' }}</span>
+                <span class="text-sm text-gray-600">Unlocked diagnoses</span>
+                <span class="text-sm font-bold">{{ diagnosticsCount }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-sm text-gray-600">BMW API Calls</span>
-                <span class="text-sm font-bold">{{ apiUsage.used }}/{{ apiUsage.limit }}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-sm text-gray-600">Reports Generated</span>
+                <span class="text-sm text-gray-600">Evidence PDFs</span>
                 <span class="text-sm font-bold">{{ reportsGenerated }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-sm text-gray-600">Service Requests</span>
+                <span class="text-sm text-gray-600">Optional add-ons</span>
                 <span class="text-sm font-bold">{{ serviceRequests }}</span>
               </div>
               <hr class="my-2">
               <div class="flex justify-between font-bold">
-                <span>Total Usage</span>
-                <span>{{ totalUsage }} actions</span>
+                <span>Total actions</span>
+                <span>{{ totalUsage }}</span>
               </div>
             </div>
           </div>
@@ -449,8 +380,8 @@
             <h3 class="text-xl font-semibold text-gray-900 mb-4">Cost Breakdown</h3>
             <div class="space-y-3">
               <div class="flex justify-between">
-                <span class="text-sm text-gray-600">Subscription</span>
-                <span class="text-sm font-bold">€{{ currentPlan?.price || '0' }}</span>
+                <span class="text-sm text-gray-600">Diagnosis unlocks</span>
+                <span class="text-sm font-bold">€{{ totalSpent || '0' }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-sm text-gray-600">Extra Diagnoses</span>
@@ -600,16 +531,16 @@ export default {
         } else {
           // No subscription - set default values
           currentPlan.value = {
-            name: 'Free Plan',
+            name: 'Pay per diagnosis',
             price: 0,
-            description: 'Basic features only',
-            features: ['1 manual diagnosis per month'],
-            diagnoses_per_month: 1
+            description: 'Free preview · unlock full result with PDF evidence',
+            features: ['Free preview', 'Usage-based unlock', 'PDF evidence report', 'AI problem visuals'],
+            diagnoses_per_month: 0
           }
           
-          apiUsage.value = { used: 0, limit: 1 }
+          apiUsage.value = { used: 0, limit: 0 }
           diagnosticsCount.value = 0
-          nextBillingDate.value = 'No active subscription'
+          nextBillingDate.value = 'No monthly billing'
           totalSpent.value = 0
           yearlyTotal.value = 0
           recentActivity.value = []
@@ -734,6 +665,8 @@ export default {
     })
 
     return {
+      router,
+
       // Tab management
       activeTab,
       tabs,
