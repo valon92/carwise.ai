@@ -36,6 +36,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/visits', [VisitController::class, 'store'])->middleware('throttle:60,1');
+Route::post('/stripe/webhook', \App\Http\Controllers\Api\StripeWebhookController::class)
+    ->middleware('throttle:120,1');
 
 // Car brands routes (public)
 Route::get('/car-brands', [CarBrandController::class, 'index']);
@@ -366,6 +368,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/diagnosis/start', [DiagnosisController::class, 'startDiagnosis']);
     Route::post('/diagnosis/submit', [DiagnosisController::class, 'submitDiagnosis']);
     Route::get('/diagnosis/result/{sessionId}', [DiagnosisController::class, 'getResult']);
+    Route::post('/diagnosis/result/{sessionId}/pay', [DiagnosisController::class, 'createUnlockPayment']);
     Route::post('/diagnosis/result/{sessionId}/continue', [DiagnosisController::class, 'continueDiagnosis']);
     Route::get('/diagnosis/history', [DiagnosisController::class, 'getHistory']);
     Route::get('/diagnosis/car/{carId}/history', [DiagnosisController::class, 'getCarDiagnosisHistory']);

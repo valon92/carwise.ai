@@ -1,7 +1,11 @@
 <?php
 
 return [
-    'margin' => 0.30,
+    // Platform markup on API spend. Never expose this rate to the client.
+    // customer_total = round(api_cost * (1 + margin), 2)
+    'margin' => (float) env('CUSTOMER_SERVICE_MARGIN', 0.30),
+    'currency' => env('CUSTOMER_SERVICE_CURRENCY', 'eur'),
+    'min_customer_amount' => (float) env('CUSTOMER_SERVICE_MIN_AMOUNT', 0.99),
     'costs' => [
         'diagnosis' => 7.99,
         'report' => 14.99,
@@ -15,7 +19,7 @@ return [
         'whisper' => 0.99,
         'video' => 2.49,
     ],
-    // USD per 1M tokens. Used only to price a real model call. Never send to the client.
+    // Per 1M tokens. Used only to price a real model call. Never send to the client.
     'token_rates' => [
         'gpt-4o' => ['input' => 2.50, 'output' => 10.00],
         'gpt-4o-mini' => ['input' => 0.15, 'output' => 0.60],

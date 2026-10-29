@@ -46,6 +46,11 @@ class PlatformStatistics
         $apiUsd = 0.0;
         $billed = 0;
         $paidResults = 0;
+        $diagnosisPaidEur = 0.0;
+        $diagnosisApiCostEur = 0.0;
+        $diagnosisProfitEur = 0.0;
+        $marginRate = $this->pricing->margin();
+
         $services = [
             'Diagnosis' => $this->blankService('Diagnosis'),
             'Subscriptions' => $this->blankService('Subscriptions'),
@@ -55,8 +60,9 @@ class PlatformStatistics
         $rows = [];
 
         foreach ($requests as $session) {
-            $usage = is_array($session->ai_response) ? ($session->ai_response['usage'] ?? null) : null;
-            $cost = $this->pricing->usageCost(is_array($usage) ? $usage : null);
+            $meta = is_array($session->ai_response) ? $session->ai_response : [];
+            $usage = is_array($meta['usage'] ?? null) ? $meta['usage'] : null;
+            $cost = $this->pricing->usageCost($usage);
             $charged = $this->billed($usage);
             if ($charged) {
                 $billed++;
@@ -65,23 +71,29 @@ class PlatformStatistics
 
             $services['Diagnosis']['count']++;
             $payment = $this->diagnosisPayment($session, $payments);
-            $paid = 0.0;
+            $economics = $this->diagnosisEconomics($session, $payment);
+            $paid = $economics['paid_eur'];
+            $apiCost = $economics['api_cost_eur'];
+            $profit = $economics['profit_eur'];
+
+            if ($paid > 0) {
+                $paidResults++;
+                $services['Diagnosis']['eur'] += $paid;
+                $diagnosisPaidEur += $paid;
+                $diagnosisApiCostEur += $apiCost;
+                $diagnosisProfitEur += $profit;
+            }
+
             if ($payment && $this->currency($payment->currency) !== 'EUR') {
                 $services['Diagnosis']['other'] += $this->net($payment);
                 $services['Diagnosis']['other_currency'] = $this->currency($payment->currency);
-                $paidResults++;
-            } else {
-                $paid = $this->collectedFor($session, $payments);
-                if ($paid > 0) {
-                    $paidResults++;
-                    $services['Diagnosis']['eur'] += $paid;
-                }
             }
 
             $row = &$this->account($rows, $accounts, $session->user_id);
             $row['requests']++;
             $row['api_usd'] += $cost;
             $row['eur'] += $paid;
+            $row['profit_eur'] += $profit;
             if ($payment && $this->currency($payment->currency) !== 'EUR') {
                 $row['other'] += $this->net($payment);
                 $row['other_currency'] = $this->currency($payment->currency);
@@ -115,7 +127,10 @@ class PlatformStatistics
         }
 
         foreach ($orders as $order) {
-            if ($payments->contains(fn (Payment $payment) => $payment->related_type === 'order' && (int) $payment->related_id === (int) $order->id)) {
+            if ($payments->contains(fn (Payment $payment) => (
+                $payment->related_type === 'order'
+                || $payment->related_type === Order::class
+            ) && (int) $payment->related_id === (int) $order->id)) {
                 continue;
             }
 
@@ -140,7 +155,9 @@ class PlatformStatistics
         }
 
         foreach ($invoices as $invoice) {
-            if ($payments->contains(fn (Payment $payment) => $payment->related_type === 'subscription' && (int) $payment->related_id === (int) $invoice->subscription_id)) {
+            if ($payments->contains(fn (Payment $payment) => (
+                $payment->related_type === 'subscription'
+            ) && (int) $payment->related_id === (int) $invoice->subscription_id)) {
                 continue;
             }
 
@@ -177,10 +194,16 @@ class PlatformStatistics
 
         $userEur = array_sum(array_column($services, 'eur')) + $commissionEur;
         $otherIncome = array_sum(array_column($services, 'other')) + $commissionOther;
-        $rate = ($apiUsd > 0 || $otherIncome > 0) ? $this->usdPerEur() : null;
+        $rate = ($apiUsd > 0 || $otherIncome > 0 || $diagnosisApiCostEur > 0) ? $this->usdPerEur() : null;
         $apiEur = $apiUsd > 0 && $rate ? $apiUsd / $rate['rate'] : ($apiUsd > 0 ? null : 0.0);
         $otherEur = $otherIncome > 0 && $rate ? $otherIncome / $rate['rate'] : ($otherIncome > 0 ? null : 0.0);
         $known = $apiEur !== null && $otherEur !== null;
+
+        // CEO profit from diagnosis markup (30% over API). Prefer session economics; fallback to paid - converted API spend.
+        $profitEur = $diagnosisProfitEur;
+        if ($profitEur <= 0 && $known) {
+            $profitEur = max(0, ($userEur + ($otherEur ?? 0)) - (float) $apiEur);
+        }
 
         $accountRows = array_values(array_map(function (array $row) use ($rate) {
             $apiEur = $row['api_usd'] > 0 && $rate ? $row['api_usd'] / $rate['rate'] : ($row['api_usd'] > 0 ? null : 0.0);
@@ -192,17 +215,28 @@ class PlatformStatistics
                 'requests' => $row['requests'],
                 'api_usd' => $this->precise($row['api_usd']),
                 'paid' => $this->money($row['eur']),
+                'profit' => $this->money($row['profit_eur']),
                 'left' => $apiEur === null || ! is_float($paidEur) ? null : $this->money($paidEur - $apiEur),
             ];
         }, $rows));
 
-        usort($accountRows, fn (array $left, array $right) => ((float) $right['paid']) <=> ((float) $left['paid']));
+        usort($accountRows, fn (array $left, array $right) => ((float) $right['profit']) <=> ((float) $left['profit']));
 
         return [
             'period' => [
                 'from' => $from?->toDateString(),
                 'to' => $to?->toDateString(),
                 'label' => $this->periodLabel($from, $to),
+            ],
+            'profit' => [
+                'eur' => $this->money($profitEur),
+                'margin_rate' => $marginRate,
+                'margin_percent' => (int) round($marginRate * 100),
+                'from_diagnosis' => $this->money($diagnosisProfitEur),
+                'diagnosis_paid' => $this->money($diagnosisPaidEur),
+                'diagnosis_api_cost' => $this->money($diagnosisApiCostEur),
+                'paid_unlocks' => $paidResults,
+                'detail' => 'Platform profit = what users paid minus API cost (markup '.((int) round($marginRate * 100)).'%).',
             ],
             'platform' => [
                 'api_usd' => $this->precise($apiUsd),
@@ -215,11 +249,11 @@ class PlatformStatistics
                 'eur' => $this->money($userEur - $commissionEur),
                 'payments' => $payments->count() + $orders->count() + $invoices->count(),
                 'paid_results' => $paidResults,
-                'unpaid_requests' => $requests->count() - $paidResults,
+                'unpaid_requests' => max(0, $requests->count() - $paidResults),
             ],
             'left' => [
-                'eur' => $known ? $this->money(($userEur + ($otherEur ?? 0)) - $apiEur) : null,
-                'known' => $known,
+                'eur' => $known ? $this->money(($userEur + ($otherEur ?? 0)) - $apiEur) : $this->money($profitEur),
+                'known' => $known || $diagnosisProfitEur > 0,
                 'rate' => $rate['rate'] ?? null,
                 'rate_date' => $rate['date'] ?? null,
             ],
@@ -230,6 +264,55 @@ class PlatformStatistics
                 'other' => $service['other'] > 0 ? $this->money($service['other']).' '.$service['other_currency'] : null,
             ], $services)),
             'accounts' => $accountRows,
+        ];
+    }
+
+    /**
+     * Paid amount, API cost, and platform profit for one diagnosis unlock.
+     * Profit is the margin portion (default 30% of API cost / ~23.08% of invoice).
+     */
+    private function diagnosisEconomics(DiagnosisSession $session, ?Payment $payment): array
+    {
+        $meta = is_array($session->ai_response) ? $session->ai_response : [];
+        $unlocked = (bool) ($meta['unlocked'] ?? false);
+        $paid = 0.0;
+
+        if ($payment && $this->currency($payment->currency) === 'EUR') {
+            $paid = $this->net($payment);
+        } elseif ($unlocked) {
+            $paid = (float) (
+                $meta['paid_amount']
+                ?? $meta['customer_amount']
+                ?? 0
+            );
+            if ($paid <= 0) {
+                $paid = (float) $this->pricing->quoteForSession($session)['amount'];
+            }
+        }
+
+        if ($paid <= 0) {
+            return ['paid_eur' => 0.0, 'api_cost_eur' => 0.0, 'profit_eur' => 0.0];
+        }
+
+        $apiCost = null;
+        if (isset($meta['pricing']['api_cost']) && is_numeric($meta['pricing']['api_cost'])) {
+            $apiCost = (float) $meta['pricing']['api_cost'];
+        } elseif ($payment && is_array($payment->metadata) && isset($payment->metadata['api_cost'])) {
+            $apiCost = (float) $payment->metadata['api_cost'];
+        }
+
+        $margin = $this->pricing->margin();
+        if ($apiCost === null || $apiCost < 0) {
+            // Invert customer_total = api_cost × (1 + margin)
+            $apiCost = $margin > -1 ? $paid / (1 + $margin) : $paid;
+        }
+
+        $profit = max(0, $paid - $apiCost);
+
+        return [
+            'paid_eur' => $paid,
+            'api_cost_eur' => $apiCost,
+            'profit_eur' => $profit,
         ];
     }
 
@@ -255,6 +338,7 @@ class PlatformStatistics
                 'requests' => 0,
                 'api_usd' => 0.0,
                 'eur' => 0.0,
+                'profit_eur' => 0.0,
                 'other' => 0.0,
                 'other_currency' => null,
             ];
@@ -282,36 +366,46 @@ class PlatformStatistics
         return 'Other services';
     }
 
-    private function diagnosisPayment(DiagnosisSession $session, $payments): ?Payment
+    private function isDiagnosisRelated(?string $relatedType): bool
     {
-        return $payments->first(fn (Payment $row) => (int) $row->related_id === (int) $session->id
-            && in_array($row->related_type, [null, '', 'diagnosis_session', 'diagnosis'], true));
+        $value = (string) $relatedType;
+
+        return in_array($value, [
+            '',
+            'diagnosis_session',
+            'diagnosis',
+            DiagnosisSession::class,
+        ], true) || str_ends_with($value, 'DiagnosisSession');
     }
 
-    private function collectedFor(DiagnosisSession $session, $payments): float
+    private function diagnosisPayment(DiagnosisSession $session, $payments): ?Payment
     {
-        $payment = $this->diagnosisPayment($session, $payments);
+        return $payments->first(function (Payment $row) use ($session) {
+            if ((int) $row->related_id === (int) $session->id && $this->isDiagnosisRelated($row->related_type)) {
+                return true;
+            }
 
-        if ($payment && $this->currency($payment->currency) === 'EUR') {
-            return $this->net($payment);
-        }
+            $metaSession = is_array($row->metadata) ? ($row->metadata['session_id'] ?? null) : null;
 
-        $response = $session->ai_response;
-
-        if (! is_array($response) || empty($response['unlocked'])) {
-            return 0.0;
-        }
-
-        return (float) $this->pricing->quoteFromUsage(is_array($response) ? ($response['usage'] ?? null) : null);
+            return $metaSession && $metaSession === $session->session_id;
+        });
     }
 
     private function linkedDiagnosis(Payment $payment, $requests): bool
     {
-        if (! in_array($payment->related_type, [null, '', 'diagnosis_session', 'diagnosis'], true)) {
+        if (! $this->isDiagnosisRelated($payment->related_type) && empty($payment->metadata['session_id'] ?? null)) {
             return false;
         }
 
-        return $requests->contains(fn (DiagnosisSession $session) => (int) $session->id === (int) $payment->related_id);
+        return $requests->contains(function (DiagnosisSession $session) use ($payment) {
+            if ((int) $session->id === (int) $payment->related_id && $this->isDiagnosisRelated($payment->related_type)) {
+                return true;
+            }
+
+            $metaSession = is_array($payment->metadata) ? ($payment->metadata['session_id'] ?? null) : null;
+
+            return $metaSession && $metaSession === $session->session_id;
+        });
     }
 
     private function paidOrder(Order $order): bool
@@ -343,20 +437,24 @@ class PlatformStatistics
 
     private function usdPerEur(): ?array
     {
-        $response = Http::timeout(8)->acceptJson()->get('https://api.frankfurter.app/latest', [
-            'from' => 'EUR',
-            'to' => 'USD',
-        ]);
-        $rate = $response->json('rates.USD');
+        try {
+            $response = Http::timeout(8)->acceptJson()->get('https://api.frankfurter.app/latest', [
+                'from' => 'EUR',
+                'to' => 'USD',
+            ]);
+            $rate = $response->json('rates.USD');
 
-        if (! $response->successful() || ! is_numeric($rate) || (float) $rate <= 0) {
+            if (! $response->successful() || ! is_numeric($rate) || (float) $rate <= 0) {
+                return null;
+            }
+
+            return [
+                'rate' => (float) $rate,
+                'date' => (string) $response->json('date'),
+            ];
+        } catch (\Throwable) {
             return null;
         }
-
-        return [
-            'rate' => (float) $rate,
-            'date' => (string) $response->json('date'),
-        ];
     }
 
     private function inPeriod($moment, ?Carbon $from, ?Carbon $to): bool

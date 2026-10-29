@@ -10,6 +10,7 @@ use App\Services\AIDiagnosisService;
 use App\Services\CustomerServicePricing;
 use App\Services\DiagnosisEnhancementService;
 use App\Services\DiagnosisIllustrationService;
+use App\Services\StripeDiagnosisPaymentService;
 use App\Jobs\ProcessAIDiagnosis;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -23,17 +24,20 @@ class DiagnosisController extends Controller
     protected $enhancementService;
     protected CustomerServicePricing $pricing;
     protected DiagnosisIllustrationService $illustrations;
+    protected StripeDiagnosisPaymentService $stripePayments;
 
     public function __construct(
         AIDiagnosisService $aiService,
         DiagnosisEnhancementService $enhancementService,
         CustomerServicePricing $pricing,
-        DiagnosisIllustrationService $illustrations
+        DiagnosisIllustrationService $illustrations,
+        StripeDiagnosisPaymentService $stripePayments
     ) {
         $this->aiService = $aiService;
         $this->illustrations = $illustrations;
         $this->enhancementService = $enhancementService;
         $this->pricing = $pricing;
+        $this->stripePayments = $stripePayments;
     }
 
     /**
@@ -250,7 +254,12 @@ class DiagnosisController extends Controller
 
             $result = $session->result;
             $unlocked = (bool) ($session->ai_response['unlocked'] ?? false);
-            $amount = $this->pricing->quoteFromUsage($session->ai_response['usage'] ?? null);
+            $quote = $this->pricing->quoteForSession($session);
+            // Persist quote server-side (incl. internal cost/margin) — client only gets amount.
+            $meta = is_array($session->ai_response) ? $session->ai_response : [];
+            $meta['customer_amount'] = $quote['amount'];
+            $meta['pricing'] = $quote['_internal'];
+            $session->update(['ai_response' => $meta]);
 
             if ($unlocked) {
                 $userLanguage = auth()->user()?->language ?? 'en';
@@ -263,8 +272,10 @@ class DiagnosisController extends Controller
                 'success' => true,
                 'data' => [
                     'result' => $unlocked ? $this->fullResult($result, $session) : $this->previewResult($result),
-                    'amount' => $amount,
+                    'amount' => $quote['amount'],
+                    'currency' => $quote['currency'],
                     'locked' => ! $unlocked,
+                    'payment_required' => ! $unlocked,
                 ]
             ])->withHeaders([
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
@@ -281,12 +292,14 @@ class DiagnosisController extends Controller
         }
     }
 
-    public function continueDiagnosis(string $sessionId): JsonResponse
+    /**
+     * Create a Stripe PaymentIntent for unlocking this diagnosis.
+     * Returns only the customer total + client_secret (no API cost / margin).
+     */
+    public function createUnlockPayment(string $sessionId): JsonResponse
     {
-        @set_time_limit(120);
-
         $session = DiagnosisSession::where('session_id', $sessionId)
-            ->with('result')
+            ->with(['result', 'media'])
             ->first();
 
         if (! $session || ! $session->result || (int) $session->user_id !== (int) auth()->id()) {
@@ -296,13 +309,93 @@ class DiagnosisController extends Controller
             ], 404);
         }
 
-        $meta = $session->ai_response ?? [];
-        $meta['unlocked'] = true;
-        if (empty($meta['unlocked_at'])) {
-            $meta['unlocked_at'] = now()->toIso8601String();
+        if ((bool) ($session->ai_response['unlocked'] ?? false)) {
+            $quote = $this->pricing->quoteForSession($session);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'already_unlocked' => true,
+                    'amount' => $quote['amount'],
+                    'currency' => $quote['currency'],
+                ],
+            ]);
         }
-        $session->update(['ai_response' => $meta]);
-        $session->refresh();
+
+        try {
+            $payment = $this->stripePayments->createPaymentIntent($session, auth()->user());
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'already_unlocked' => false,
+                    'mock' => $payment['mock'],
+                    'payment_intent_id' => $payment['payment_intent_id'],
+                    'client_secret' => $payment['client_secret'],
+                    'publishable_key' => $payment['publishable_key'] ?? null,
+                    'amount' => $payment['amount'],
+                    'currency' => $payment['currency'],
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage() ?: 'Could not start payment',
+            ], 422);
+        }
+    }
+
+    public function continueDiagnosis(Request $request, string $sessionId): JsonResponse
+    {
+        @set_time_limit(120);
+
+        $session = DiagnosisSession::where('session_id', $sessionId)
+            ->with(['result', 'media'])
+            ->first();
+
+        if (! $session || ! $session->result || (int) $session->user_id !== (int) auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Diagnosis result not available',
+            ], 404);
+        }
+
+        $meta = is_array($session->ai_response) ? $session->ai_response : [];
+        $quote = $this->pricing->quoteForSession($session);
+
+        if (! (bool) ($meta['unlocked'] ?? false)) {
+            $paymentIntentId = (string) $request->input('payment_intent_id', '');
+            if ($paymentIntentId === '') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment is required before unlocking the full diagnosis.',
+                    'amount' => $quote['amount'],
+                    'currency' => $quote['currency'],
+                ], 402);
+            }
+
+            try {
+                $payment = $this->stripePayments->assertPaid($session, auth()->user(), $paymentIntentId);
+                $meta['payment_id'] = $payment->payment_id;
+                $meta['paid_amount'] = (string) $payment->amount;
+            } catch (\Throwable $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage() ?: 'Payment verification failed',
+                    'amount' => $quote['amount'],
+                    'currency' => $quote['currency'],
+                ], 402);
+            }
+
+            $meta['unlocked'] = true;
+            if (empty($meta['unlocked_at'])) {
+                $meta['unlocked_at'] = now()->toIso8601String();
+            }
+            $meta['customer_amount'] = $quote['amount'];
+            $meta['pricing'] = $quote['_internal'];
+            $session->update(['ai_response' => $meta]);
+            $session->refresh();
+        }
 
         $images = $this->illustrations->forSession($session);
         $session->refresh();
@@ -311,7 +404,8 @@ class DiagnosisController extends Controller
             'success' => true,
             'data' => [
                 'result' => $this->fullResult($session->result, $session, $images),
-                'amount' => $this->pricing->quoteFromUsage($meta['usage'] ?? null),
+                'amount' => $quote['amount'],
+                'currency' => $quote['currency'],
                 'locked' => false,
             ],
         ]);

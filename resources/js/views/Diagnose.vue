@@ -829,28 +829,44 @@
             <section v-if="!continuationPaid" class="relative z-10 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-5 py-5">
               <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">Continue</p>
               <h4 class="mt-2 text-lg font-semibold text-slate-900 dark:text-white">One payment for this result</h4>
-              <p class="mt-1 text-sm text-slate-500">The explanation, the steps, and a cost guide.</p>
+              <p class="mt-1 text-sm text-slate-500">
+                Unlock steps, costs, problem visual, and the dated PDF. Pay once — no subscription.
+              </p>
 
-              <div v-if="quoteLoading" class="mt-5 text-sm text-slate-500">Preparing the total</div>
+              <div v-if="quoteLoading" class="mt-5 text-sm text-slate-500">Preparing the total…</div>
 
               <div v-else-if="continuationAmount !== null" class="mt-5">
-                <p class="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">€{{ continuationAmount }}</p>
-                <p class="mt-1 text-xs text-slate-400">Pay once. No subscription.</p>
+                <p class="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                  €{{ continuationAmount }}
+                </p>
+                <p class="mt-1 text-xs text-slate-400">Invoice total for this diagnosis · card via Stripe</p>
+
+                <div
+                  v-show="!paymentIsMock"
+                  ref="cardElementHost"
+                  class="mt-4 rounded-xl border border-slate-200 bg-white px-3 py-3"
+                ></div>
 
                 <button
                   type="button"
-                  class="relative z-10 mt-5 w-full cursor-pointer px-5 py-3 rounded-xl bg-slate-900 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900 sm:w-auto"
+                  class="relative z-10 mt-5 w-full cursor-pointer rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900 sm:w-auto"
                   :disabled="paying || !diagnosisSessionId"
                   @click="confirmContinuation"
                 >
-                  {{ paying ? 'Preparing result & visuals…' : (Number(continuationAmount) > 0 ? 'Continue · €' + continuationAmount : 'Continue') }}
+                  {{
+                    paying
+                      ? (paymentStep === 'paying' ? 'Confirming payment…' : 'Preparing result & visuals…')
+                      : (Number(continuationAmount) > 0 ? 'Pay & unlock · €' + continuationAmount : 'Continue')
+                  }}
                 </button>
                 <p v-if="payError" class="mt-3 text-sm text-red-700 dark:text-red-300">{{ payError }}</p>
               </div>
 
               <div v-else class="mt-5">
                 <p class="text-sm text-slate-500">The total could not be prepared.</p>
-                <button type="button" @click="loadContinuationQuote" class="mt-3 text-sm font-medium text-slate-900 dark:text-white underline">Try again</button>
+                <button type="button" class="mt-3 text-sm font-medium text-slate-900 underline dark:text-white" @click="refreshContinuationAmount">
+                  Try again
+                </button>
               </div>
             </section>
 
@@ -987,13 +1003,21 @@ export default {
     })
     const continuationPaid = ref(false)
     const continuationAmount = ref(null)
+    const continuationCurrency = ref('EUR')
     const payError = ref('')
     const quoteLoading = ref(false)
     const showPay = ref(false)
     const paying = ref(false)
+    const paymentStep = ref('')
+    const paymentIsMock = ref(true)
     const payMethod = ref('card')
     const resultUsage = ref({ photos: 0, videos: 0, audio: false })
     const diagnosisSessionId = ref(null)
+    const cardElementHost = ref(null)
+    const pendingPayment = ref({ payment_intent_id: null, client_secret: null })
+    let stripeInstance = null
+    let stripeElements = null
+    let stripeCardElement = null
     const fileInput = ref(null)
     const photoInput = ref(null)
     const videoInput = ref(null)
@@ -1813,12 +1837,16 @@ export default {
           diagnosisResult.value = freshResult
           diagnosisSessionId.value = sessionId
           continuationAmount.value = resultResponse.data.data?.amount ?? null
+          continuationCurrency.value = resultResponse.data.data?.currency || 'EUR'
           continuationPaid.value = resultResponse.data.data?.locked === false
           quoteLoading.value = false
           currentStep.value = 3
           isLoading.value = false
           await nextTick()
           document.querySelector('[data-result-panel]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          if (!continuationPaid.value && continuationAmount.value !== null) {
+            await prepareUnlockPayment()
+          }
           
           console.log('✅ RESULT SET SUCCESSFULLY')
           console.log('Current diagnosisResult:', diagnosisResult.value)
@@ -1866,16 +1894,95 @@ export default {
       }
     }
 
-    const loadContinuationQuote = async () => {
-      quoteLoading.value = true
-      continuationAmount.value = null
+    const loadStripeJs = () => new Promise((resolve, reject) => {
+      if (window.Stripe) {
+        resolve(window.Stripe)
+        return
+      }
+      const existing = document.querySelector('script[data-stripe-js]')
+      if (existing) {
+        existing.addEventListener('load', () => resolve(window.Stripe))
+        existing.addEventListener('error', reject)
+        return
+      }
+      const script = document.createElement('script')
+      script.src = 'https://js.stripe.com/v3/'
+      script.async = true
+      script.dataset.stripeJs = '1'
+      script.onload = () => resolve(window.Stripe)
+      script.onerror = reject
+      document.head.appendChild(script)
+    })
+
+    const destroyCardElement = () => {
       try {
-        const response = await api.post('/customer-services/diagnosis-quote', resultUsage.value)
-        continuationAmount.value = response.data?.amount || null
+        stripeCardElement?.unmount?.()
+      } catch (_) { /* noop */ }
+      stripeCardElement = null
+      stripeElements = null
+      stripeInstance = null
+    }
+
+    const refreshContinuationAmount = async () => {
+      if (!diagnosisSessionId.value) return
+      quoteLoading.value = true
+      payError.value = ''
+      try {
+        const resultResponse = await diagnosisAPI.getResult(diagnosisSessionId.value)
+        continuationAmount.value = resultResponse.data?.data?.amount ?? null
+        continuationCurrency.value = resultResponse.data?.data?.currency || 'EUR'
+        continuationPaid.value = resultResponse.data?.data?.locked === false
+        if (!continuationPaid.value && continuationAmount.value !== null) {
+          await prepareUnlockPayment()
+        }
       } catch (error) {
         continuationAmount.value = null
+        payError.value = 'The total could not be prepared. Try again.'
       } finally {
         quoteLoading.value = false
+      }
+    }
+
+    const prepareUnlockPayment = async () => {
+      if (!diagnosisSessionId.value || continuationPaid.value) return
+      payError.value = ''
+      try {
+        const { data } = await api.post(`/diagnosis/result/${diagnosisSessionId.value}/pay`)
+        const payload = data?.data || {}
+        if (payload.already_unlocked) {
+          continuationPaid.value = true
+          return
+        }
+        continuationAmount.value = payload.amount ?? continuationAmount.value
+        continuationCurrency.value = payload.currency || continuationCurrency.value
+        paymentIsMock.value = !!payload.mock
+
+        pendingPayment.value = {
+          payment_intent_id: payload.payment_intent_id || null,
+          client_secret: payload.client_secret || null,
+        }
+        destroyCardElement()
+        if (!payload.mock && payload.publishable_key && payload.client_secret) {
+          await nextTick()
+          const StripeCtor = await loadStripeJs()
+          stripeInstance = StripeCtor(payload.publishable_key)
+          stripeElements = stripeInstance.elements()
+          stripeCardElement = stripeElements.create('card', {
+            style: {
+              base: {
+                fontSize: '16px',
+                color: '#0f172a',
+                '::placeholder': { color: '#94a3b8' },
+              },
+            },
+          })
+          if (cardElementHost.value) {
+            stripeCardElement.mount(cardElementHost.value)
+          }
+        }
+      } catch (error) {
+        paymentIsMock.value = true
+        payError.value = error.response?.data?.message || 'Could not start Stripe payment.'
       }
     }
 
@@ -1897,28 +2004,59 @@ export default {
       }
 
       paying.value = true
+      paymentStep.value = 'paying'
       try {
+        let paymentIntentId = pendingPayment.value.payment_intent_id
+
+        if (!paymentIntentId) {
+          await prepareUnlockPayment()
+          paymentIntentId = pendingPayment.value.payment_intent_id
+        }
+
+        if (!paymentIntentId) {
+          throw new Error(payError.value || 'Payment could not be started.')
+        }
+
+        if (!paymentIsMock.value && stripeInstance && stripeCardElement) {
+          const clientSecret = pendingPayment.value.client_secret
+          const { error, paymentIntent } = await stripeInstance.confirmCardPayment(clientSecret, {
+            payment_method: { card: stripeCardElement },
+          })
+          if (error) {
+            throw new Error(error.message || 'Card payment failed.')
+          }
+          paymentIntentId = paymentIntent?.id || paymentIntentId
+          if (paymentIntent?.status !== 'succeeded') {
+            throw new Error('Payment was not completed.')
+          }
+        }
+
+        paymentStep.value = 'unlocking'
         const response = await api.post(
           `/diagnosis/result/${diagnosisSessionId.value}/continue`,
-          {},
+          { payment_intent_id: paymentIntentId },
           { timeout: 120000 }
         )
         diagnosisResult.value = response.data?.data?.result || diagnosisResult.value
         continuationPaid.value = true
         showPay.value = false
         payError.value = ''
+        destroyCardElement()
       } catch (error) {
         continuationPaid.value = false
         payError.value = error.response?.status === 401
           ? 'Sign in again to open the full result.'
-          : (error.code === 'ECONNABORTED'
-            ? 'Still preparing visuals. Refresh the result in a moment, then download the PDF.'
-            : (error.response?.data?.message || 'The result could not be opened. Try again.'))
+          : (error.response?.status === 402
+            ? (error.response?.data?.message || 'Payment is required to unlock this diagnosis.')
+            : (error.code === 'ECONNABORTED'
+              ? 'Still preparing visuals. Refresh the result in a moment, then download the PDF.'
+              : (error.message || error.response?.data?.message || 'The result could not be opened. Try again.')))
         if (window.$notify) {
-          window.$notify.error('Continue failed', payError.value)
+          window.$notify.error('Payment / unlock failed', payError.value)
         }
       } finally {
         paying.value = false
+        paymentStep.value = ''
       }
     }
 
@@ -2376,13 +2514,18 @@ export default {
       resultSummary,
       continuationPaid,
       continuationAmount,
+      continuationCurrency,
       payError,
       quoteLoading,
       showPay,
       paying,
+      paymentStep,
+      paymentIsMock,
+      cardElementHost,
+      refreshContinuationAmount,
+      prepareUnlockPayment,
       payMethod,
       diagnosisSessionId,
-      loadContinuationQuote,
       confirmContinuation,
       fileInput,
       photoInput,
