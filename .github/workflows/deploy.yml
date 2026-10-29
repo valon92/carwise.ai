@@ -69,11 +69,24 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SSH_HOST: ${{ secrets.SSH_HOST }}
         SSH_PORT: ${{ secrets.SSH_PORT }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+        APP_DIR: ${{ secrets.APP_DIR }}
+        APP_URL: ${{ secrets.APP_URL }}
       run: |
-        test -n "$SSH_PRIVATE_KEY"
-        test -n "$SSH_HOST"
+        missing=()
+        [[ -n "$SSH_PRIVATE_KEY" ]] || missing+=("SSH_PRIVATE_KEY")
+        [[ -n "$SSH_HOST" ]] || missing+=("SSH_HOST")
+        [[ -n "$SSH_USER" ]] || missing+=("SSH_USER")
+        if ((${#missing[@]})); then
+          echo "::error::Missing GitHub Environment secrets for 'production': ${missing[*]}"
+          echo "Add them at: Settings → Environments → production → Environment secrets"
+          echo "Required: SSH_PRIVATE_KEY, SSH_HOST, SSH_USER"
+          echo "Optional: SSH_PORT (default 22), APP_DIR (default /var/www/carwise.ai), APP_URL (default https://carwise.ai)"
+          echo "Note: this job uses environment: production, so Repository secrets alone are not enough."
+          exit 1
+        fi
         mkdir -p ~/.ssh
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+        printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
         chmod 600 ~/.ssh/deploy_key
         ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts
 
