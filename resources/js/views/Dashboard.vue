@@ -151,61 +151,88 @@
                 </div>
               </router-link>
 
-              <!-- Live Chat -->
-              <div @click="toggleLiveChat" class="group p-6 bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-600 rounded-2xl text-white hover:from-purple-600 hover:via-indigo-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl cursor-pointer">
+              <!-- History -->
+              <router-link to="/diagnosis-history" class="group p-6 bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 rounded-2xl text-white hover:from-slate-800 hover:via-slate-900 hover:to-black transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
                 <div class="flex flex-col items-center text-center">
                   <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-200">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                   </div>
-                  <h3 class="text-lg font-semibold mb-2">Live Chat</h3>
-                  <p class="text-purple-100 text-sm">Get support</p>
+                  <h3 class="text-lg font-semibold mb-2">History</h3>
+                  <p class="text-slate-200 text-sm">PDF downloads</p>
                 </div>
-              </div>
+              </router-link>
             </div>
           </div>
 
-          <!-- Recent Diagnoses -->
-          <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md rounded-2xl p-6 border border-white/20 dark:border-secondary-700/20">
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-semibold text-secondary-900 dark:text-white">Recent Diagnoses</h2>
-              <router-link to="/diagnose" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium">
-                View All
+          <!-- Diagnosis history + PDF downloads -->
+          <div class="bg-white/90 backdrop-blur-md rounded-2xl p-6 border border-white/30 shadow-xl">
+            <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Your history</p>
+                <h2 class="text-xl font-semibold text-slate-900">Diagnoses & PDF evidence</h2>
+              </div>
+              <div class="flex items-center gap-3">
+                <router-link to="/diagnose" class="text-sm font-semibold text-slate-700 underline">New diagnosis</router-link>
+                <router-link to="/diagnosis-history" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+                  Full history
+                </router-link>
+              </div>
+            </div>
+            <div v-if="historyLoading" class="py-10 text-center text-sm text-slate-500">Loading diagnoses…</div>
+            <div v-else-if="recentDiagnoses.length === 0" class="rounded-xl bg-slate-50 px-4 py-10 text-center">
+              <h3 class="text-sm font-medium text-slate-900">No diagnoses yet</h3>
+              <p class="mt-1 text-sm text-slate-500">Run an AI diagnosis to build downloadable evidence reports here.</p>
+              <router-link to="/diagnose" class="mt-4 inline-flex rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+                Start Diagnosis
               </router-link>
             </div>
-            <div class="space-y-4">
-              <div v-if="recentDiagnoses.length === 0" class="text-center py-8">
-                <svg class="mx-auto h-12 w-12 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-secondary-900 dark:text-white">No diagnoses yet</h3>
-                <p class="mt-1 text-sm text-secondary-500 dark:text-secondary-400">Start by diagnosing your first car issue.</p>
-                <div class="mt-4">
-                  <router-link to="/diagnose" class="btn-primary">
-                    Start Diagnosis
-                  </router-link>
-                </div>
-              </div>
-              <div v-else>
-                <div v-for="diagnosis in recentDiagnoses.slice(0, 3)" :key="diagnosis.id" class="flex items-center space-x-4 p-4 bg-secondary-50 dark:bg-secondary-700/50 rounded-lg">
-                  <div class="w-10 h-10 rounded-full flex items-center justify-center" :class="getDiagnosisStatusColor(diagnosis.status)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                  </div>
-                  <div class="flex-1">
-                    <h4 class="text-sm font-medium text-secondary-900 dark:text-white">{{ diagnosis.vehicle_info?.make }} {{ diagnosis.vehicle_info?.model }}</h4>
-                    <p class="text-xs text-secondary-600 dark:text-secondary-400">{{ diagnosis.description || 'No description' }}</p>
-                  </div>
-                  <div class="text-right">
-                    <div class="text-xs text-secondary-500 dark:text-secondary-500">
-                      {{ formatDate(diagnosis.created_at) }}
-                    </div>
-                    <div class="text-xs font-medium" :class="getDiagnosisStatusTextColor(diagnosis.status)">
+            <div v-else class="space-y-3">
+              <div
+                v-for="diagnosis in recentDiagnoses.slice(0, 5)"
+                :key="diagnosis.session_id || diagnosis.id"
+                class="flex flex-col gap-3 rounded-xl border border-slate-100 bg-slate-50/80 p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h4 class="text-sm font-semibold text-slate-900">
+                      {{ diagnosis.make || diagnosis.vehicle_info?.make }} {{ diagnosis.model || diagnosis.vehicle_info?.model }}
+                      <span v-if="diagnosis.year || diagnosis.vehicle_info?.year" class="font-normal text-slate-500">
+                        ({{ diagnosis.year || diagnosis.vehicle_info?.year }})
+                      </span>
+                    </h4>
+                    <span class="rounded-full px-2 py-0.5 text-[11px] font-medium" :class="getDiagnosisStatusColor(diagnosis.status)">
                       {{ diagnosis.status }}
-                    </div>
+                    </span>
+                    <span
+                      class="rounded-full px-2 py-0.5 text-[11px] font-medium"
+                      :class="(diagnosis.can_download_pdf || diagnosis.unlocked) ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'"
+                    >
+                      {{ (diagnosis.can_download_pdf || diagnosis.unlocked) ? 'PDF ready' : 'Preview' }}
+                    </span>
                   </div>
+                  <p class="mt-1 truncate text-sm text-slate-600">
+                    {{ diagnosis.result?.problem_title || diagnosis.description || 'Diagnosis' }}
+                  </p>
+                  <p class="mt-1 text-xs text-slate-400">{{ formatDate(diagnosis.created_at) }}</p>
+                </div>
+                <div class="flex shrink-0 flex-wrap gap-2">
+                  <router-link
+                    to="/diagnosis-history"
+                    class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50"
+                  >
+                    Open
+                  </router-link>
+                  <button
+                    v-if="diagnosis.can_download_pdf || diagnosis.unlocked"
+                    type="button"
+                    :disabled="downloadingId === (diagnosis.session_id || diagnosis.id)"
+                    class="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+                    @click="downloadDiagnosisPdf(diagnosis)"
+                  >
+                    {{ downloadingId === (diagnosis.session_id || diagnosis.id) ? 'Preparing…' : 'Download PDF' }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -565,7 +592,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { authAPI, carsAPI, diagnosisAPI, dashboardAPI } from '../services/api'
+import api, { authAPI, carsAPI, diagnosisAPI, dashboardAPI } from '../services/api'
 import { useAuth } from '../composables/useAuth'
 import LiveChatWidget from '../components/LiveChatWidget.vue'
 import { features } from '../config/features'
@@ -673,6 +700,70 @@ export default {
     })
 
     const recentDiagnoses = ref([])
+    const historyLoading = ref(false)
+    const downloadingId = ref(null)
+
+    const loadDiagnosisHistory = async () => {
+      historyLoading.value = true
+      try {
+        const response = await diagnosisAPI.getHistory({ per_page: 8, page: 1 })
+        const page = response.data?.data
+        const rows = Array.isArray(page?.data) ? page.data : (Array.isArray(page) ? page : [])
+        if (rows.length) {
+          recentDiagnoses.value = rows
+        }
+      } catch (error) {
+        console.error('Error loading diagnosis history:', error)
+      } finally {
+        historyLoading.value = false
+      }
+    }
+
+    const downloadDiagnosisPdf = async (diagnosis) => {
+      if (!(diagnosis.can_download_pdf || diagnosis.unlocked) || !diagnosis.result) {
+        return
+      }
+      const key = diagnosis.session_id || diagnosis.id
+      downloadingId.value = key
+      try {
+        const stamp = new Date()
+        const response = await api.post('/diagnosis/export-pdf', {
+          title: 'CarWise.ai — Diagnosis Evidence Report',
+          session_id: diagnosis.session_id,
+          vehicle: {
+            make: diagnosis.make || diagnosis.vehicle_info?.make || 'Vehicle',
+            model: diagnosis.model || diagnosis.vehicle_info?.model || 'Unknown',
+            year: Number(diagnosis.year || diagnosis.vehicle_info?.year) || new Date().getFullYear(),
+            mileage: diagnosis.mileage ? Number(diagnosis.mileage) : null,
+            engine_type: diagnosis.engine_type,
+            engine_size: diagnosis.engine_size,
+          },
+          symptoms: diagnosis.symptoms || [],
+          description: diagnosis.description || '',
+          result: diagnosis.result,
+          generated_at: stamp.toISOString(),
+        }, { responseType: 'blob' })
+
+        const blob = new Blob([response.data], { type: 'application/pdf' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `CarWise_Diagnosis_${diagnosis.make || 'Car'}_${diagnosis.model || 'Report'}_${stamp.toISOString().slice(0, 10)}.pdf`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } catch (error) {
+        console.error('PDF download failed', error)
+        if (window.$notify) {
+          window.$notify.error('PDF export failed', 'Could not download this diagnosis report.')
+        } else {
+          alert('Failed to download PDF. Please try again.')
+        }
+      } finally {
+        downloadingId.value = null
+      }
+    }
     const notifications = ref([
       {
         id: 1,
@@ -741,8 +832,10 @@ export default {
           stats.value.monthlyDiagnoses = data.analytics.monthly_diagnoses
           stats.value.mostCommonIssues = data.analytics.common_issues
           
-          // Recent diagnoses
-          recentDiagnoses.value = data.recent_diagnoses
+          // Fallback list; history API below is the source of truth for PDF flags
+          if (!recentDiagnoses.value.length && Array.isArray(data.recent_diagnoses)) {
+            recentDiagnoses.value = data.recent_diagnoses
+          }
           
           // User-specific stats
           if (user.value?.role === 'mechanic') {
@@ -751,6 +844,8 @@ export default {
           }
         }
 
+        await loadDiagnosisHistory()
+
         // Load notifications
         const notificationsResponse = await dashboardAPI.getNotifications()
         if (notificationsResponse.data.success) {
@@ -758,6 +853,7 @@ export default {
         }
       } catch (error) {
         console.error('Error loading statistics:', error)
+        await loadDiagnosisHistory()
         // Set default values if API calls fail
         stats.value = {
           totalDiagnoses: 0,
@@ -843,8 +939,7 @@ export default {
     }
 
     const handleHistory = () => {
-      // Navigate to diagnosis history page
-      router.push('/diagnosis/history')
+      router.push('/diagnosis-history')
     }
 
     const handleLogout = async () => {
@@ -979,6 +1074,9 @@ export default {
       stats,
       recentActivity,
       recentDiagnoses,
+      historyLoading,
+      downloadingId,
+      downloadDiagnosisPdf,
       notifications,
       isLoading,
       showNotificationsModal,

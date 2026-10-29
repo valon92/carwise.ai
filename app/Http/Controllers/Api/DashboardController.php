@@ -98,26 +98,55 @@ class DashboardController extends Controller
             ->sortByDesc('count')
             ->take(10);
 
-            // Recent diagnoses
+            // Recent diagnoses (aligned with diagnosis history / PDF unlock flags)
             $recentDiagnoses = DiagnosisSession::where('user_id', $userId)
                 ->with(['result'])
                 ->orderBy('created_at', 'desc')
-                ->limit(5)
+                ->limit(8)
                 ->get()
                 ->map(function ($session) {
+                    $meta = is_array($session->ai_response) ? $session->ai_response : [];
+                    $result = $session->result;
+                    $hasFull = $result && (
+                        filled($result->problem_description)
+                        || ! empty($result->recommended_actions)
+                        || ! empty($result->likely_causes)
+                    );
+                    $unlocked = (bool) ($meta['unlocked'] ?? false) || $hasFull;
+
                     return [
                         'id' => $session->id,
                         'session_id' => $session->session_id,
                         'make' => $session->make,
                         'model' => $session->model,
                         'year' => $session->year,
+                        'mileage' => $session->mileage,
+                        'engine_type' => $session->engine_type,
+                        'engine_size' => $session->engine_size,
+                        'description' => $session->description,
+                        'symptoms' => $session->symptoms ?? [],
                         'status' => $session->status,
-                        'created_at' => $session->created_at,
-                        'result' => $session->result ? [
-                            'problem_title' => $session->result->problem_title,
-                            'severity' => $session->result->severity,
-                            'confidence_score' => $session->result->confidence_score
-                        ] : null
+                        'unlocked' => $unlocked,
+                        'can_download_pdf' => $unlocked && $result !== null,
+                        'created_at' => optional($session->created_at)?->toIso8601String(),
+                        'result' => $result ? [
+                            'problem_title' => $result->problem_title,
+                            'problem_description' => $result->problem_description,
+                            'severity' => $result->severity,
+                            'confidence_score' => $result->confidence_score,
+                            'likely_causes' => $result->likely_causes ?? [],
+                            'recommended_actions' => $result->recommended_actions ?? [],
+                            'estimated_costs' => $result->estimated_costs ?? [],
+                            'ai_insights' => $result->ai_insights ?? [],
+                            'illustrations' => $meta['illustrations'] ?? [],
+                            'evidence' => [
+                                'session_id' => $session->session_id,
+                                'diagnosed_at' => optional($session->created_at)?->toIso8601String(),
+                                'unlocked_at' => $meta['unlocked_at'] ?? null,
+                                'ai_provider' => $meta['provider'] ?? ($result->ai_model_version ?? 'openai'),
+                                'report_id' => substr(hash('sha256', $session->session_id.'|'.($meta['unlocked_at'] ?? '')), 0, 12),
+                            ],
+                        ] : null,
                     ];
                 });
 

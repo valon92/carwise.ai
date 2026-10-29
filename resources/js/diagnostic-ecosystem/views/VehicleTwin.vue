@@ -24,6 +24,12 @@
             AI Diagnosis
           </router-link>
           <router-link
+            to="/diagnosis-history"
+            class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-800 font-medium rounded-xl hover:bg-slate-50"
+          >
+            Diagnosis history
+          </router-link>
+          <router-link
             to="/my-cars"
             class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-800 font-medium rounded-xl hover:bg-slate-50"
           >
@@ -41,6 +47,50 @@
           </button>
         </div>
       </div>
+
+      <!-- Recent AI diagnosis history -->
+      <section class="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Platform history</p>
+            <h2 class="text-lg font-semibold text-slate-900">Recent AI diagnoses</h2>
+          </div>
+          <router-link to="/diagnosis-history" class="text-sm font-semibold text-slate-900 underline">
+            Open full history & PDF downloads
+          </router-link>
+        </div>
+        <div v-if="historyLoading" class="py-6 text-sm text-slate-500">Loading diagnoses…</div>
+        <div v-else-if="recentDiagnoses.length === 0" class="rounded-xl bg-slate-50 px-4 py-6 text-sm text-slate-600">
+          No diagnoses yet.
+          <router-link to="/diagnose" class="ml-1 font-semibold text-slate-900 underline">Run AI Diagnosis</router-link>
+          to create downloadable evidence reports.
+        </div>
+        <div v-else class="space-y-3">
+          <div
+            v-for="item in recentDiagnoses"
+            :key="item.session_id || item.id"
+            class="flex flex-col gap-3 rounded-xl border border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div class="min-w-0">
+              <p class="font-medium text-slate-900">
+                {{ item.make }} {{ item.model }}
+                <span v-if="item.year" class="text-slate-500">({{ item.year }})</span>
+              </p>
+              <p class="truncate text-sm text-slate-600">{{ item.result?.problem_title || item.description || 'Diagnosis' }}</p>
+              <p class="mt-1 text-xs text-slate-400">
+                {{ formatDiagnosisDate(item.created_at) }}
+                · {{ item.unlocked || item.can_download_pdf ? 'Unlocked · PDF ready' : 'Preview only' }}
+              </p>
+            </div>
+            <router-link
+              to="/diagnosis-history"
+              class="shrink-0 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              View / download
+            </router-link>
+          </div>
+        </div>
+      </section>
 
       <!-- Loading -->
       <div v-if="isLoading && vehicles.length === 0" class="flex justify-center py-20">
@@ -568,10 +618,42 @@
 import { ref, onMounted, reactive } from 'vue'
 import { useVehicleTwin } from '../composables/useVehicleTwin'
 import { features } from '../../config/features'
+import { diagnosisAPI } from '../../services/api'
 
 export default {
   name: 'VehicleTwin',
   setup() {
+    const recentDiagnoses = ref([])
+    const historyLoading = ref(false)
+
+    const formatDiagnosisDate = (value) => {
+      if (!value) return '—'
+      try {
+        return new Date(value).toLocaleString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      } catch (_) {
+        return String(value)
+      }
+    }
+
+    const loadRecentDiagnoses = async () => {
+      historyLoading.value = true
+      try {
+        const response = await diagnosisAPI.getHistory({ per_page: 5, page: 1 })
+        const page = response.data?.data
+        recentDiagnoses.value = Array.isArray(page?.data) ? page.data : (Array.isArray(page) ? page : [])
+      } catch (_) {
+        recentDiagnoses.value = []
+      } finally {
+        historyLoading.value = false
+      }
+    }
+
     const {
       vehicles,
       isLoading,
@@ -862,10 +944,14 @@ export default {
 
     onMounted(() => {
       loadVehicles()
+      loadRecentDiagnoses()
     })
 
     return {
       carPartsEnabled: features.carParts,
+      recentDiagnoses,
+      historyLoading,
+      formatDiagnosisDate,
       vehicles,
       isLoading,
       showRegisterModal,

@@ -46,6 +46,17 @@
             </svg>
             Diagnose
           </router-link>
+          <router-link
+            v-if="isAuthenticated"
+            to="/diagnosis-history"
+            class="nav-link"
+            :class="{ 'nav-link-active': $route.path === '/diagnosis-history' }"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            History
+          </router-link>
           <router-link 
             to="/my-cars" 
             class="nav-link"
@@ -149,6 +160,17 @@
                   Dashboard
                 </router-link>
                 
+                <router-link
+                  to="/diagnosis-history"
+                  class="flex items-center px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors duration-200"
+                  @click="userDropdownOpen = false"
+                >
+                  <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Diagnosis history
+                </router-link>
+
                 <router-link 
                   to="/pricing" 
                   class="flex items-center px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors duration-200"
@@ -275,6 +297,19 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               Diagnose
+            </router-link>
+
+            <router-link
+              v-if="isAuthenticated"
+              to="/diagnosis-history"
+              class="flex items-center px-4 py-3 rounded-lg text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-200"
+              :class="{ 'bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400': $route.path === '/diagnosis-history' }"
+              @click="mobileMenuOpen = false"
+            >
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              History
             </router-link>
             
             <router-link 

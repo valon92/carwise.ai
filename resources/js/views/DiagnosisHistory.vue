@@ -1,191 +1,213 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-800">
-    <!-- Header -->
-    <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md border-b border-secondary-200 dark:border-secondary-700">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4">
-            <button @click="goBack" class="p-2 text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-white transition-colors duration-200">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-              </svg>
-            </button>
-            <div>
-              <h1 class="text-2xl font-bold text-secondary-900 dark:text-white">Diagnosis History</h1>
-              <p class="text-secondary-600 dark:text-secondary-400">View all your past car diagnoses</p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <div class="text-sm text-secondary-600 dark:text-secondary-400">
-              Total: {{ diagnoses.length }} diagnoses
-            </div>
-          </div>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div class="border-b border-slate-200/80 bg-white/90 backdrop-blur-sm">
+      <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Your account</p>
+          <h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-900">Diagnosis history</h1>
+          <p class="mt-2 max-w-2xl text-slate-600">
+            Every check you ran — open the full result, download the dated PDF evidence report, and jump back into Diagnose.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <router-link
+            to="/diagnose"
+            class="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+          >
+            New diagnosis
+          </router-link>
+          <router-link
+            to="/my-cars"
+            class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+          >
+            My Garage
+          </router-link>
         </div>
       </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Filters -->
-      <div class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md rounded-2xl p-6 border border-white/20 dark:border-secondary-700/20 mb-8">
-        <div class="flex flex-wrap items-center gap-4">
-          <div class="flex-1 min-w-64">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search by car make, model, or problem..."
-              class="input w-full"
-            />
-          </div>
-          <select v-model="statusFilter" class="input min-w-32">
-            <option value="">All Status</option>
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div class="mb-6 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-3">
+        <div>
+          <p class="text-xs uppercase tracking-[0.14em] text-slate-400">Total checks</p>
+          <p class="mt-1 text-2xl font-bold text-slate-900">{{ totalCount }}</p>
+        </div>
+        <div>
+          <p class="text-xs uppercase tracking-[0.14em] text-slate-400">Unlocked / downloadable</p>
+          <p class="mt-1 text-2xl font-bold text-slate-900">{{ unlockedCount }}</p>
+        </div>
+        <div>
+          <p class="text-xs uppercase tracking-[0.14em] text-slate-400">Preview only</p>
+          <p class="mt-1 text-2xl font-bold text-slate-900">{{ previewCount }}</p>
+        </div>
+      </div>
+
+      <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <input
+            v-model="searchQuery"
+            type="search"
+            placeholder="Search make, model, problem…"
+            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 outline-none ring-slate-900 focus:ring-2"
+          >
+          <select v-model="statusFilter" class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-800">
+            <option value="">All status</option>
             <option value="completed">Completed</option>
             <option value="processing">Processing</option>
             <option value="failed">Failed</option>
           </select>
-          <select v-model="severityFilter" class="input min-w-32">
-            <option value="">All Severity</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="critical">Critical</option>
+          <select v-model="accessFilter" class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-800">
+            <option value="">All access</option>
+            <option value="unlocked">Unlocked + PDF</option>
+            <option value="preview">Preview only</option>
           </select>
-          <button @click="clearFilters" class="btn-outline text-sm">
-            Clear Filters
+          <button type="button" @click="clearFilters" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Clear
           </button>
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="isLoading" class="text-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
-        <p class="text-secondary-600 dark:text-secondary-400 mt-4">Loading diagnosis history...</p>
+      <div v-if="isLoading" class="py-20 text-center">
+        <div class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-slate-900"></div>
+        <p class="text-sm text-slate-500">Loading your diagnosis history…</p>
       </div>
 
-      <!-- Empty State -->
-      <div v-else-if="filteredDiagnoses.length === 0" class="text-center py-20">
-        <svg class="w-16 h-16 text-secondary-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        <h3 class="text-lg font-semibold text-secondary-900 dark:text-white mb-2">No diagnoses found</h3>
-        <p class="text-secondary-600 dark:text-secondary-400 mb-6">
-          {{ diagnoses.length === 0 ? 'You haven\'t performed any diagnoses yet.' : 'No diagnoses match your current filters.' }}
+      <div v-else-if="loadError" class="rounded-2xl border border-red-200 bg-red-50 px-6 py-10 text-center">
+        <p class="text-sm font-medium text-red-800">{{ loadError }}</p>
+        <button type="button" class="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white" @click="loadDiagnoses()">
+          Try again
+        </button>
+      </div>
+
+      <div v-else-if="filteredDiagnoses.length === 0" class="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center">
+        <h3 class="text-lg font-semibold text-slate-900">No diagnoses yet</h3>
+        <p class="mx-auto mt-2 max-w-md text-sm text-slate-500">
+          {{ diagnoses.length === 0
+            ? 'Run an AI diagnosis to build your evidence history here.'
+            : 'Nothing matches these filters.' }}
         </p>
-        <router-link to="/diagnose" class="btn-primary">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-          </svg>
-          Start New Diagnosis
+        <router-link to="/diagnose" class="mt-6 inline-flex rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
+          Start AI Diagnosis
         </router-link>
       </div>
 
-      <!-- Diagnoses List -->
-      <div v-else class="space-y-6">
-        <div v-for="diagnosis in filteredDiagnoses" :key="diagnosis.id" 
-             class="bg-white/80 dark:bg-secondary-800/80 backdrop-blur-md rounded-2xl p-6 border border-white/20 dark:border-secondary-700/20 hover:shadow-lg transition-all duration-200">
-          
-          <!-- Diagnosis Header -->
-          <div class="flex items-start justify-between mb-4">
-            <div class="flex-1">
-              <div class="flex items-center space-x-3 mb-2">
-                <h3 class="text-lg font-semibold text-secondary-900 dark:text-white">
-                  {{ diagnosis.make }} {{ diagnosis.model }} ({{ diagnosis.year }})
-                </h3>
-                <span :class="getStatusBadgeClass(diagnosis.status)" class="px-2 py-1 rounded-full text-xs font-medium">
-                  {{ getStatusText(diagnosis.status) }}
+      <div v-else class="space-y-4">
+        <article
+          v-for="diagnosis in filteredDiagnoses"
+          :key="diagnosis.session_id || diagnosis.id"
+          class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-lg font-semibold text-slate-900">
+                  {{ diagnosis.make }} {{ diagnosis.model }}
+                  <span v-if="diagnosis.year" class="font-normal text-slate-500">({{ diagnosis.year }})</span>
+                </h2>
+                <span class="rounded-full px-2.5 py-1 text-xs font-medium" :class="statusClass(diagnosis.status)">
+                  {{ statusLabel(diagnosis.status) }}
                 </span>
-                <span v-if="diagnosis.result?.severity" :class="getSeverityBadgeClass(diagnosis.result.severity)" class="px-2 py-1 rounded-full text-xs font-medium">
-                  {{ getSeverityText(diagnosis.result.severity) }}
+                <span
+                  class="rounded-full px-2.5 py-1 text-xs font-medium"
+                  :class="diagnosis.unlocked || diagnosis.can_download_pdf ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'"
+                >
+                  {{ diagnosis.unlocked || diagnosis.can_download_pdf ? 'Unlocked' : 'Preview' }}
+                </span>
+                <span
+                  v-if="diagnosis.result?.severity"
+                  class="rounded-full px-2.5 py-1 text-xs font-medium"
+                  :class="severityClass(diagnosis.result.severity)"
+                >
+                  {{ diagnosis.result.severity }}
                 </span>
               </div>
-              <p class="text-sm text-secondary-600 dark:text-secondary-400">
-                {{ formatDate(diagnosis.created_at) }} • {{ diagnosis.result?.ai_provider || 'Unknown AI' }}
+
+              <p class="mt-2 text-xs text-slate-500">
+                {{ formatDate(diagnosis.created_at) }}
+                <span v-if="diagnosis.result?.evidence?.report_id"> · ID {{ diagnosis.result.evidence.report_id }}</span>
+                <span v-if="diagnosis.session_id"> · {{ diagnosis.session_id }}</span>
               </p>
+
+              <h3 class="mt-3 text-base font-medium text-slate-900">
+                {{ diagnosis.result?.problem_title || 'Diagnosis in progress' }}
+              </h3>
+              <p v-if="diagnosis.result?.problem_description || diagnosis.description" class="mt-1 line-clamp-2 text-sm text-slate-600">
+                {{ diagnosis.result?.problem_description || diagnosis.description }}
+              </p>
+
+              <div v-if="(diagnosis.result?.illustrations || []).length" class="mt-4 overflow-hidden rounded-xl border border-slate-200">
+                <img
+                  :src="diagnosis.result.illustrations[0].url"
+                  :alt="diagnosis.result.illustrations[0].caption || diagnosis.result.problem_title"
+                  class="h-40 w-full object-cover"
+                  loading="lazy"
+                >
+              </div>
             </div>
-            <div class="flex items-center space-x-2">
-              <button @click="viewDiagnosis(diagnosis)" class="btn-outline text-sm">
-                View Details
+
+            <div class="flex shrink-0 flex-wrap gap-2 lg:flex-col">
+              <button
+                type="button"
+                @click="viewDiagnosis(diagnosis)"
+                class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+              >
+                View details
               </button>
-              <button @click="downloadReport(diagnosis)" class="btn-secondary text-sm">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                Download
+              <button
+                v-if="diagnosis.can_download_pdf || diagnosis.unlocked"
+                type="button"
+                :disabled="downloadingId === (diagnosis.session_id || diagnosis.id)"
+                @click="downloadReport(diagnosis)"
+                class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+              >
+                {{ downloadingId === (diagnosis.session_id || diagnosis.id) ? 'Preparing PDF…' : 'Download PDF' }}
               </button>
+              <router-link
+                v-else
+                :to="{ path: '/diagnose', query: { session: diagnosis.session_id } }"
+                class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-semibold text-amber-900 hover:bg-amber-100"
+              >
+                Unlock to download
+              </router-link>
             </div>
           </div>
-
-          <!-- Problem Description -->
-          <div class="mb-4">
-            <h4 class="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">Problem Description</h4>
-            <p class="text-sm text-secondary-600 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-700/50 rounded-lg p-3">
-              {{ diagnosis.description }}
-            </p>
-          </div>
-
-          <!-- Diagnosis Result Summary -->
-          <div v-if="diagnosis.result" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4">
-              <h5 class="text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">Problem Title</h5>
-              <p class="text-sm text-primary-900 dark:text-primary-100">{{ diagnosis.result.problem_title }}</p>
-            </div>
-            <div class="bg-info-50 dark:bg-info-900/20 rounded-lg p-4">
-              <h5 class="text-sm font-medium text-info-700 dark:text-info-300 mb-1">Confidence Score</h5>
-              <p class="text-sm text-info-900 dark:text-info-100">{{ diagnosis.result.confidence_score }}%</p>
-            </div>
-            <div class="bg-success-50 dark:bg-success-900/20 rounded-lg p-4">
-              <h5 class="text-sm font-medium text-success-700 dark:text-success-300 mb-1">Processing Time</h5>
-              <p class="text-sm text-success-900 dark:text-success-100">{{ diagnosis.result.processing_time }}s</p>
-            </div>
-          </div>
-
-          <!-- Symptoms -->
-          <div v-if="diagnosis.symptoms && diagnosis.symptoms.length > 0" class="mt-4">
-            <h4 class="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">Reported Symptoms</h4>
-            <div class="flex flex-wrap gap-2">
-              <span v-for="symptom in diagnosis.symptoms" :key="symptom" 
-                    class="px-3 py-1 bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300 rounded-full text-xs">
-                {{ symptom }}
-              </span>
-            </div>
-          </div>
-        </div>
+        </article>
       </div>
 
-      <!-- Pagination -->
-      <div v-if="filteredDiagnoses.length > 0" class="mt-8 flex items-center justify-between">
-        <div class="text-sm text-secondary-600 dark:text-secondary-400">
-          Showing {{ filteredDiagnoses.length }} of {{ diagnoses.length }} diagnoses
-        </div>
-        <div class="flex items-center space-x-2">
-          <button 
-            @click="loadMore" 
-            v-if="hasMore"
-            class="btn-outline text-sm"
-          >
-            Load More
-          </button>
-        </div>
+      <div v-if="hasMore" class="mt-8 text-center">
+        <button
+          type="button"
+          :disabled="loadingMore"
+          @click="loadMore"
+          class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+        >
+          {{ loadingMore ? 'Loading…' : 'Load more' }}
+        </button>
       </div>
     </div>
 
-    <!-- Diagnosis Detail Modal -->
-    <div v-if="selectedDiagnosis" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white dark:bg-secondary-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-        <!-- Modal Header -->
-        <div class="flex items-center justify-between p-6 border-b border-secondary-200 dark:border-secondary-700">
-          <h3 class="text-lg font-semibold text-secondary-900 dark:text-white">
-            Diagnosis Details - {{ selectedDiagnosis.make }} {{ selectedDiagnosis.model }}
-          </h3>
-          <button @click="closeModal" class="p-2 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
+    <div v-if="selectedDiagnosis" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" @click.self="closeModal">
+      <div class="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <div>
+            <h3 class="text-lg font-semibold text-slate-900">
+              {{ selectedDiagnosis.make }} {{ selectedDiagnosis.model }}
+            </h3>
+            <p class="text-xs text-slate-500">{{ formatDate(selectedDiagnosis.created_at) }}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              v-if="selectedDiagnosis.can_download_pdf || selectedDiagnosis.unlocked"
+              type="button"
+              @click="downloadReport(selectedDiagnosis)"
+              class="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
+            >
+              Download PDF
+            </button>
+            <button type="button" @click="closeModal" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100">✕</button>
+          </div>
         </div>
-
-        <!-- Modal Content -->
-        <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <div class="max-h-[calc(90vh-80px)] overflow-y-auto p-6">
           <DiagnosisDetail :diagnosis="selectedDiagnosis" />
         </div>
       </div>
@@ -196,82 +218,89 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { diagnosisAPI } from '../services/api'
+import api, { diagnosisAPI } from '../services/api'
+import { useAuth } from '../composables/useAuth'
 import DiagnosisDetail from '../components/DiagnosisDetail.vue'
 
 export default {
   name: 'DiagnosisHistory',
-  components: {
-    DiagnosisDetail
-  },
+  components: { DiagnosisDetail },
   setup() {
     const router = useRouter()
+    const { isAuthenticated, checkAuth } = useAuth()
     const diagnoses = ref([])
     const isLoading = ref(true)
+    const loadingMore = ref(false)
     const selectedDiagnosis = ref(null)
     const searchQuery = ref('')
     const statusFilter = ref('')
-    const severityFilter = ref('')
-    const hasMore = ref(false)
+    const accessFilter = ref('')
+    const currentPage = ref(1)
+    const lastPage = ref(1)
+    const downloadingId = ref(null)
+    const loadError = ref('')
+
+    const hasMore = computed(() => currentPage.value < lastPage.value)
+    const totalCount = computed(() => diagnoses.value.length)
+    const unlockedCount = computed(() => diagnoses.value.filter(d => d.unlocked || d.can_download_pdf).length)
+    const previewCount = computed(() => diagnoses.value.filter(d => !(d.unlocked || d.can_download_pdf)).length)
 
     const filteredDiagnoses = computed(() => {
       let filtered = diagnoses.value
-
-      // Search filter
       if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase()
-        filtered = filtered.filter(d => 
-          d.make.toLowerCase().includes(query) ||
-          d.model.toLowerCase().includes(query) ||
-          d.description.toLowerCase().includes(query) ||
-          d.result?.problem_title?.toLowerCase().includes(query)
+        const q = searchQuery.value.toLowerCase()
+        filtered = filtered.filter(d =>
+          `${d.make} ${d.model} ${d.description || ''} ${d.result?.problem_title || ''}`.toLowerCase().includes(q)
         )
       }
-
-      // Status filter
       if (statusFilter.value) {
         filtered = filtered.filter(d => d.status === statusFilter.value)
       }
-
-      // Severity filter
-      if (severityFilter.value) {
-        filtered = filtered.filter(d => d.result?.severity === severityFilter.value)
+      if (accessFilter.value === 'unlocked') {
+        filtered = filtered.filter(d => d.unlocked || d.can_download_pdf)
       }
-
+      if (accessFilter.value === 'preview') {
+        filtered = filtered.filter(d => !(d.unlocked || d.can_download_pdf))
+      }
       return filtered
     })
 
-    const loadDiagnoses = async () => {
+    const normalizeList = (payload) => {
+      if (Array.isArray(payload)) return payload
+      if (Array.isArray(payload?.data)) return payload.data
+      return []
+    }
+
+    const loadDiagnoses = async (page = 1, append = false) => {
       try {
-        isLoading.value = true
-        console.log('Loading diagnosis history...')
-        
-        const response = await diagnosisAPI.getHistory()
-        console.log('Diagnosis history response:', response)
-        
-        if (response.data.success) {
-          // The API returns paginated data with 'data' property
-          diagnoses.value = response.data.data?.data || []
-          console.log('Loaded diagnoses:', diagnoses.value.length)
-        } else {
-          console.error('API returned error:', response.data.message)
+        if (append) loadingMore.value = true
+        else isLoading.value = true
+        loadError.value = ''
+
+        const response = await diagnosisAPI.getHistory({ per_page: 12, page })
+        const body = response.data
+        if (!body?.success) {
+          loadError.value = body?.message || 'Could not load diagnosis history.'
+          return
         }
+
+        const pageData = body.data
+        const rows = normalizeList(pageData)
+        diagnoses.value = append ? [...diagnoses.value, ...rows] : rows
+        currentPage.value = pageData?.current_page || page
+        lastPage.value = pageData?.last_page || page
       } catch (error) {
-        console.error('Error loading diagnosis history:', error)
-        console.error('Error details:', error.response?.data)
-        
-        // Check if it's an authentication error
-        if (error.response?.status === 401) {
-          console.log('Authentication error, redirecting to login')
-          router.push('/login')
-        }
+        loadError.value = error.response?.data?.message || 'Could not load diagnosis history.'
+        if (error.response?.status === 401) router.push('/login')
       } finally {
         isLoading.value = false
+        loadingMore.value = false
       }
     }
 
-    const goBack = () => {
-      router.push('/dashboard')
+    const loadMore = () => {
+      if (!hasMore.value || loadingMore.value) return
+      loadDiagnoses(currentPage.value + 1, true)
     }
 
     const viewDiagnosis = (diagnosis) => {
@@ -283,150 +312,137 @@ export default {
     }
 
     const downloadReport = async (diagnosis) => {
+      if (!(diagnosis.can_download_pdf || diagnosis.unlocked) || !diagnosis.result) {
+        return
+      }
+
+      const key = diagnosis.session_id || diagnosis.id
+      downloadingId.value = key
       try {
-        // Create PDF content
+        const stamp = new Date()
         const pdfContent = {
-          title: 'CarWise.ai - AI Diagnosis Report',
+          title: 'CarWise.ai — Diagnosis Evidence Report',
+          session_id: diagnosis.session_id,
           vehicle: {
             make: diagnosis.make,
             model: diagnosis.model,
-            year: diagnosis.year,
-            mileage: diagnosis.mileage,
+            year: Number(diagnosis.year) || new Date().getFullYear(),
+            mileage: diagnosis.mileage ? Number(diagnosis.mileage) : null,
             engine_type: diagnosis.engine_type,
-            engine_size: diagnosis.engine_size
+            engine_size: diagnosis.engine_size,
           },
           symptoms: diagnosis.symptoms || [],
-          description: diagnosis.description,
+          description: diagnosis.description || '',
           result: diagnosis.result,
-          generated_at: diagnosis.created_at
+          generated_at: stamp.toISOString(),
         }
 
-        // Call backend to generate PDF
-        const response = await fetch('/api/diagnosis/export-pdf', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(pdfContent)
-        })
-
-        if (response.ok) {
-          // Create download link
-          const blob = await response.blob()
-          const url = window.URL.createObjectURL(blob)
-          const link = document.createElement('a')
-          link.href = url
-          link.download = `CarWise_Diagnosis_${diagnosis.make}_${diagnosis.model}_${new Date(diagnosis.created_at).toISOString().split('T')[0]}.pdf`
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-          window.URL.revokeObjectURL(url)
-        } else {
-          const error = await response.json()
-          alert('Failed to download report: ' + (error.message || 'Unknown error'))
-        }
+        const response = await api.post('/diagnosis/export-pdf', pdfContent, { responseType: 'blob' })
+        const blob = new Blob([response.data], { type: 'application/pdf' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        const day = stamp.toISOString().slice(0, 10)
+        link.download = `CarWise_Diagnosis_${diagnosis.make}_${diagnosis.model}_${day}.pdf`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
       } catch (error) {
-        console.error('Error downloading report:', error)
-        alert('Failed to download report. Please try again.')
+        console.error('PDF download failed', error)
+        if (window.$notify) {
+          window.$notify.error('PDF export failed', 'Could not download this diagnosis report.')
+        } else {
+          alert('Failed to download report. Please try again.')
+        }
+      } finally {
+        downloadingId.value = null
       }
     }
 
     const clearFilters = () => {
       searchQuery.value = ''
       statusFilter.value = ''
-      severityFilter.value = ''
+      accessFilter.value = ''
     }
 
-    const loadMore = () => {
-      // TODO: Implement pagination
-      console.log('Load more diagnoses')
-    }
-
-    const formatDate = (dateString) => {
-      if (!dateString) return 'Unknown'
-      const date = new Date(dateString)
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    }
-
-    const getStatusBadgeClass = (status) => {
-      switch (status?.toLowerCase()) {
-        case 'completed': return 'bg-success-100 dark:bg-success-900 text-success-600 dark:text-success-400'
-        case 'processing': return 'bg-warning-100 dark:bg-warning-900 text-warning-600 dark:text-warning-400'
-        case 'failed': return 'bg-danger-100 dark:bg-danger-900 text-danger-600 dark:text-danger-400'
-        default: return 'bg-secondary-100 dark:bg-secondary-700 text-secondary-600 dark:text-secondary-400'
+    const formatDate = (value) => {
+      if (!value) return '—'
+      try {
+        return new Date(value).toLocaleString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      } catch (_) {
+        return String(value)
       }
     }
 
-    const getStatusText = (status) => {
-      switch (status?.toLowerCase()) {
-        case 'completed': return 'Completed'
-        case 'processing': return 'Processing'
-        case 'failed': return 'Failed'
-        default: return 'Unknown'
+    const statusClass = (status) => {
+      const map = {
+        completed: 'bg-emerald-50 text-emerald-800',
+        processing: 'bg-amber-50 text-amber-800',
+        failed: 'bg-red-50 text-red-800',
       }
+      return map[status?.toLowerCase()] || 'bg-slate-100 text-slate-700'
     }
 
-    const getSeverityBadgeClass = (severity) => {
-      switch (severity?.toLowerCase()) {
-        case 'low': return 'bg-success-100 dark:bg-success-900 text-success-600 dark:text-success-400'
-        case 'medium': return 'bg-warning-100 dark:bg-warning-900 text-warning-600 dark:text-warning-400'
-        case 'high': return 'bg-danger-100 dark:bg-danger-900 text-danger-600 dark:text-danger-400'
-        case 'critical': return 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400'
-        default: return 'bg-secondary-100 dark:bg-secondary-700 text-secondary-600 dark:text-secondary-400'
-      }
+    const statusLabel = (status) => {
+      const map = { completed: 'Completed', processing: 'Processing', failed: 'Failed' }
+      return map[status?.toLowerCase()] || 'Unknown'
     }
 
-    const getSeverityText = (severity) => {
-      switch (severity?.toLowerCase()) {
-        case 'low': return 'Low'
-        case 'medium': return 'Medium'
-        case 'high': return 'High'
-        case 'critical': return 'Critical'
-        default: return 'Unknown'
+    const severityClass = (severity) => {
+      const map = {
+        low: 'bg-emerald-50 text-emerald-800',
+        medium: 'bg-amber-50 text-amber-800',
+        high: 'bg-orange-50 text-orange-800',
+        critical: 'bg-red-50 text-red-800',
       }
+      return map[severity?.toLowerCase()] || 'bg-slate-100 text-slate-700'
     }
 
-    onMounted(() => {
-      // Check if user is logged in
-      const token = localStorage.getItem('token')
-      if (!token) {
-        router.push('/login')
+    onMounted(async () => {
+      document.title = 'Diagnosis History - CarWise.ai'
+      if (!localStorage.getItem('token') && !isAuthenticated.value) {
+        router.push({ path: '/login', query: { redirect: '/diagnosis-history' } })
         return
       }
-      
-      loadDiagnoses()
+      // Load history immediately; auth verify can run in parallel without blocking the list.
+      const loadPromise = loadDiagnoses()
+      checkAuth().catch(() => {})
+      await loadPromise
     })
 
     return {
       diagnoses,
       isLoading,
+      loadingMore,
+      loadError,
       selectedDiagnosis,
       searchQuery,
       statusFilter,
-      severityFilter,
+      accessFilter,
       hasMore,
+      downloadingId,
+      totalCount,
+      unlockedCount,
+      previewCount,
       filteredDiagnoses,
       loadDiagnoses,
-      goBack,
+      loadMore,
       viewDiagnosis,
       closeModal,
       downloadReport,
       clearFilters,
-      loadMore,
       formatDate,
-      getStatusBadgeClass,
-      getStatusText,
-      getSeverityBadgeClass,
-      getSeverityText,
-      t
+      statusClass,
+      statusLabel,
+      severityClass,
     }
-  }
+  },
 }
 </script>

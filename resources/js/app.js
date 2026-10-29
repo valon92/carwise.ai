@@ -164,15 +164,19 @@ const routes = [
       requiresAuth: true
     }
   },
-  { 
-    path: '/diagnosis/history', 
-    name: 'DiagnosisHistory', 
+  {
+    path: '/diagnosis-history',
+    name: 'DiagnosisHistory',
     component: DiagnosisHistory,
-    meta: { 
+    meta: {
       title: 'Diagnosis History - CarWise AI',
-      description: 'View your past car diagnoses',
+      description: 'View your past car diagnoses and download PDF evidence reports',
       requiresAuth: true
     }
+  },
+  {
+    path: '/diagnosis/history',
+    redirect: '/diagnosis-history'
   },
   { 
     path: '/privacy-policy', 
@@ -300,7 +304,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth) {
     const token = localStorage.getItem('token')
     if (!token) {
-      next('/login')
+      next({ path: '/login', query: { redirect: to.fullPath } })
       return
     }
   }

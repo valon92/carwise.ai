@@ -376,9 +376,13 @@ class DiagnosisController extends Controller
             $sessions = $query->orderBy('created_at', 'desc')
                 ->paginate($perPage);
 
+            $sessions->setCollection(
+                $sessions->getCollection()->map(fn (DiagnosisSession $session) => $this->historyItem($session))
+            );
+
             return response()->json([
                 'success' => true,
-                'data' => $sessions
+                'data' => $sessions,
             ]);
 
         } catch (\Exception $e) {
@@ -388,6 +392,42 @@ class DiagnosisController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    private function historyItem(DiagnosisSession $session): array
+    {
+        $meta = is_array($session->ai_response) ? $session->ai_response : [];
+        $result = $session->result;
+        $hasFullResult = $result
+            && (
+                filled($result->problem_description)
+                || ! empty($result->recommended_actions)
+                || ! empty($result->likely_causes)
+            );
+        $unlocked = (bool) ($meta['unlocked'] ?? false) || $hasFullResult;
+        $payload = $unlocked && $result
+            ? $this->fullResult($result, $session)
+            : ($result ? $this->previewResult($result) : null);
+
+        return [
+            'id' => $session->id,
+            'session_id' => $session->session_id,
+            'car_id' => $session->car_id,
+            'make' => $session->make,
+            'model' => $session->model,
+            'year' => $session->year,
+            'mileage' => $session->mileage,
+            'engine_type' => $session->engine_type,
+            'engine_size' => $session->engine_size,
+            'description' => $session->description,
+            'symptoms' => $session->symptoms ?? [],
+            'status' => $session->status,
+            'unlocked' => $unlocked,
+            'created_at' => optional($session->created_at)?->toIso8601String(),
+            'processed_at' => optional($session->processed_at)?->toIso8601String(),
+            'result' => $payload,
+            'can_download_pdf' => $unlocked && $result !== null,
+        ];
     }
 
     /**
@@ -417,10 +457,14 @@ class DiagnosisController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
 
+            $sessions->setCollection(
+                $sessions->getCollection()->map(fn (DiagnosisSession $session) => $this->historyItem($session))
+            );
+
             return response()->json([
                 'success' => true,
                 'car' => $car,
-                'diagnosis_history' => $sessions
+                'diagnosis_history' => $sessions,
             ]);
 
         } catch (\Exception $e) {
