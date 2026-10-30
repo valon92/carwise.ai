@@ -120,8 +120,12 @@ class DiagnosisController extends Controller
             'mileage' => 'nullable|integer|min:0',
             'engine_type' => 'nullable|string|max:255',
             'engine_size' => 'nullable|string|max:255',
-            'description' => 'required|string|max:2000',
+            'description' => 'required|string|max:4000',
             'symptoms' => 'nullable|array',
+            'obd_code' => 'nullable|string|max:64',
+            'warning_light_behavior' => 'nullable|string|max:120',
+            'power_loss' => 'nullable|string|max:120',
+            'fuel_consumption_change' => 'nullable|string|max:120',
             'car_id' => 'nullable|integer|exists:cars,id',
             'photos' => 'nullable|array|max:5',
             'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max
@@ -142,7 +146,29 @@ class DiagnosisController extends Controller
         try {
             // Log the received car_id for debugging
             \Log::info('Diagnosis submission received car_id: ' . ($request->car_id ?? 'null'));
-            
+
+            $symptoms = is_array($request->symptoms)
+                ? $request->symptoms
+                : ($request->symptoms ? [$request->symptoms] : []);
+            $symptoms = array_values(array_filter($symptoms, fn ($s) => is_string($s) && $s !== ''));
+
+            $clarifying = array_filter([
+                'warning_light_behavior' => $request->input('warning_light_behavior'),
+                'power_loss' => $request->input('power_loss'),
+                'fuel_consumption_change' => $request->input('fuel_consumption_change'),
+                'obd_code' => $request->input('obd_code'),
+            ], fn ($v) => filled($v));
+
+            foreach ($clarifying as $key => $value) {
+                $label = str_replace('_', ' ', $key);
+                $symptoms[] = ucfirst($label) . ': ' . $value;
+            }
+
+            $description = trim((string) $request->description);
+            if (!empty($clarifying['obd_code'])) {
+                $description .= "\n\nOBD/VCDS code: " . $clarifying['obd_code'];
+            }
+
             // Create diagnosis session
             $session = DiagnosisSession::create([
                 'user_id' => auth()->id(),
@@ -154,10 +180,17 @@ class DiagnosisController extends Controller
                 'mileage' => $request->mileage,
                 'engine_type' => $request->engine_type,
                 'engine_size' => $request->engine_size,
-                'description' => $request->description,
-                'symptoms' => is_array($request->symptoms) ? $request->symptoms : ($request->symptoms ? [$request->symptoms] : []),
+                'description' => $description,
+                'symptoms' => $symptoms,
                 'status' => 'processing'
             ]);
+
+            // Stash clarifying context for AI (also survives on session meta after process)
+            $session->ai_response = array_merge(
+                is_array($session->ai_response) ? $session->ai_response : [],
+                ['clarifying_answers' => $clarifying]
+            );
+            $session->save();
 
             // Handle file uploads
             $mediaTypes = ['photos' => 'image', 'videos' => 'video', 'audio' => 'audio'];
@@ -345,6 +378,145 @@ class DiagnosisController extends Controller
         }
     }
 
+    /**
+     * Create PaymentIntent for verifying diagnosis with a live OBD/VCDS code.
+     */
+    public function createCodeRefinePayment(string $sessionId): JsonResponse
+    {
+        $session = DiagnosisSession::where('session_id', $sessionId)
+            ->with(['result'])
+            ->first();
+
+        if (! $session || ! $session->result || (int) $session->user_id !== (int) auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Diagnosis result not available',
+            ], 404);
+        }
+
+        if (! (bool) ($session->ai_response['unlocked'] ?? false)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unlock the full diagnosis before verifying with a fault code.',
+            ], 402);
+        }
+
+        try {
+            $payment = $this->stripePayments->createCodeRefinePaymentIntent($session, auth()->user());
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'mock' => $payment['mock'],
+                    'payment_intent_id' => $payment['payment_intent_id'],
+                    'client_secret' => $payment['client_secret'],
+                    'publishable_key' => $payment['publishable_key'] ?? null,
+                    'amount' => $payment['amount'],
+                    'currency' => $payment['currency'],
+                    'product' => 'diagnosis_code_refine',
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage() ?: 'Could not start code verification payment',
+            ], 422);
+        }
+    }
+
+    /**
+     * Re-run a paid differential diagnosis using a live OBD/VCDS code.
+     */
+    public function refineWithCode(Request $request, string $sessionId): JsonResponse
+    {
+        @set_time_limit(180);
+
+        $validator = Validator::make($request->all(), [
+            'obd_code' => 'required|string|max:64',
+            'payment_intent_id' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $session = DiagnosisSession::where('session_id', $sessionId)
+            ->with(['result', 'media'])
+            ->first();
+
+        if (! $session || ! $session->result || (int) $session->user_id !== (int) auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Diagnosis result not available',
+            ], 404);
+        }
+
+        if (! (bool) ($session->ai_response['unlocked'] ?? false)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unlock the full diagnosis before verifying with a fault code.',
+            ], 402);
+        }
+
+        try {
+            $payment = $this->stripePayments->assertPaid(
+                $session,
+                auth()->user(),
+                (string) $request->input('payment_intent_id'),
+                'diagnosis_code_refine'
+            );
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage() ?: 'Payment verification failed',
+            ], 402);
+        }
+
+        $obdCode = strtoupper(trim((string) $request->input('obd_code')));
+        $meta = is_array($session->ai_response) ? $session->ai_response : [];
+        $clarifying = is_array($meta['clarifying_answers'] ?? null) ? $meta['clarifying_answers'] : [];
+        $clarifying['obd_code'] = $obdCode;
+        $meta['clarifying_answers'] = $clarifying;
+        $meta['refined_obd_code'] = $obdCode;
+        $meta['illustrations'] = []; // force fresh visuals for refined causes
+        $session->update(['ai_response' => $meta]);
+
+        // Re-run ensemble with the live code
+        $this->processWithAI($session->fresh(['media']));
+        $session->refresh();
+        $session->load('result');
+
+        $meta = is_array($session->ai_response) ? $session->ai_response : [];
+        $meta['unlocked'] = true;
+        $meta['code_refined'] = true;
+        $meta['code_refined_at'] = now()->toIso8601String();
+        $meta['code_refine_payment_id'] = $payment->payment_id ?? $request->input('payment_intent_id');
+        $meta['clarifying_answers'] = $clarifying;
+        $meta['refined_obd_code'] = $obdCode;
+        if (empty($meta['unlocked_at'])) {
+            $meta['unlocked_at'] = now()->toIso8601String();
+        }
+        $session->update(['ai_response' => $meta]);
+
+        $images = $this->illustrations->forSession($session->fresh(['result']), 3);
+        $session->refresh();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'result' => $this->fullResult($session->result, $session, $images),
+                'amount' => $meta['code_refine_amount'] ?? null,
+                'currency' => strtoupper((string) config('customer-services.currency', 'eur')),
+                'locked' => false,
+                'code_refined' => true,
+            ],
+        ]);
+    }
+
     public function continueDiagnosis(Request $request, string $sessionId): JsonResponse
     {
         @set_time_limit(120);
@@ -397,7 +569,7 @@ class DiagnosisController extends Controller
             $session->refresh();
         }
 
-        $images = $this->illustrations->forSession($session);
+        $images = $this->illustrations->forSession($session, 3);
         $session->refresh();
 
         return response()->json([
@@ -432,17 +604,26 @@ class DiagnosisController extends Controller
             'problem_description' => $data['problem_description'] ?? null,
             'severity' => $data['severity'] ?? null,
             'confidence_score' => $data['confidence_score'] ?? null,
+            'data_quality' => $meta['data_quality'] ?? null,
+            'hypothesis_disclaimer' => $meta['hypothesis_disclaimer'] ?? null,
             'likely_causes' => $data['likely_causes'] ?? [],
             'recommended_actions' => $data['recommended_actions'] ?? [],
             'estimated_costs' => $data['estimated_costs'] ?? [],
             'ai_insights' => $data['ai_insights'] ?? [],
+            'diagnostic_codes_to_check' => $meta['diagnostic_codes_to_check'] ?? [],
+            'next_workshop_questions' => $meta['next_workshop_questions'] ?? [],
+            'glossary' => $meta['glossary'] ?? [],
+            'diagnostic_engines' => $meta['diagnostic_engines'] ?? [],
+            'code_refined' => (bool) ($meta['code_refined'] ?? false),
+            'provided_obd_code' => $meta['clarifying_answers']['obd_code'] ?? ($meta['refined_obd_code'] ?? null),
             'illustrations' => is_array($illustrations) ? array_values($illustrations) : [],
             'evidence' => [
                 'session_id' => $session?->session_id,
                 'diagnosed_at' => optional($session?->created_at)?->toIso8601String()
                     ?? ($data['analysis_completed_at'] ?? null),
                 'unlocked_at' => $meta['unlocked_at'] ?? null,
-                'ai_provider' => $meta['provider'] ?? ($data['ai_model_version'] ?? 'openai'),
+                'ai_provider' => $meta['provider'] ?? 'CarWise Multi-AI',
+                'diagnostic_engines' => $meta['diagnostic_engines'] ?? [],
                 'report_id' => substr(hash('sha256', ($session?->session_id ?? '').'|'.($meta['unlocked_at'] ?? '')), 0, 12),
             ],
             'locked' => false,
@@ -714,7 +895,25 @@ class DiagnosisController extends Controller
     private function processWithAI(DiagnosisSession $session): void
     {
         try {
-            // Prepare data for AI analysis
+            $meta = is_array($session->ai_response) ? $session->ai_response : [];
+            $clarifying = is_array($meta['clarifying_answers'] ?? null) ? $meta['clarifying_answers'] : [];
+
+            $currencyCode = 'EUR';
+            try {
+                $currencyId = auth()->user()?->preferred_currency_id;
+                if ($currencyId) {
+                    $currency = \App\Models\Currency::find($currencyId);
+                    if ($currency?->code) {
+                        $currencyCode = strtoupper((string) $currency->code);
+                    }
+                }
+            } catch (\Throwable $e) {
+                $currencyCode = 'EUR';
+            }
+            if ($currencyCode === 'USD') {
+                $currencyCode = 'EUR';
+            }
+
             $analysisData = [
                 'car_brand' => $session->make,
                 'car_model' => $session->model,
@@ -726,63 +925,75 @@ class DiagnosisController extends Controller
                 'problem_description' => $session->description,
                 'media_files' => $session->media ? $session->media->pluck('file_path')->toArray() : [],
                 'user_currency_id' => auth()->user()?->preferred_currency_id ?? 1,
-                'user_language' => $this->detectLanguageFromText($session->description, $session->symptoms)
+                'currency_code' => $currencyCode,
+                'user_language' => $this->detectLanguageFromText($session->description, $session->symptoms),
+                'obd_code' => $clarifying['obd_code'] ?? '',
+                'clarifying_answers' => $clarifying,
             ];
 
-            // Call AI service
             $aiResult = $this->aiService->analyzeDiagnosis($analysisData);
             $usage = $aiResult['usage'] ?? null;
             unset($aiResult['usage']);
 
-            // Enhance results with part images, videos, and purchase links
             $aiResult = $this->enhancementService->enhanceDiagnosisResults(
-                $aiResult, 
-                $session->make, 
-                $session->model, 
+                $aiResult,
+                $session->make,
+                $session->model,
                 $session->year
             );
 
-            // Create diagnosis result
-            DiagnosisResult::create([
-                'diagnosis_session_id' => $session->id,
-                'problem_title' => $aiResult['problem_title'],
-                'problem_description' => $aiResult['problem_description']
-                    ?? $aiResult['problem_summary']
-                    ?? ($aiResult['primary_diagnosis']['description'] ?? null),
-                'severity' => $aiResult['severity'],
-                'confidence_score' => $aiResult['confidence_score'],
-                'likely_causes' => $aiResult['secondary_causes'] ?? $aiResult['likely_causes'] ?? [],
-                'recommended_actions' => $aiResult['immediate_actions'] ?? $aiResult['recommended_actions'] ?? [],
-                'estimated_costs' => $aiResult['repair_estimates'] ?? $aiResult['estimated_costs'] ?? null,
-                'ai_insights' => $aiResult['ai_insights'] ?? null,
-                'related_issues' => $aiResult['related_issues'] ?? null,
-                'requires_immediate_attention' => $aiResult['requires_immediate_attention'] ?? false,
-                'ai_model_version' => $aiResult['model_version'] ?? '1.0',
-                'analysis_completed_at' => now()
-            ]);
+            DiagnosisResult::updateOrCreate(
+                ['diagnosis_session_id' => $session->id],
+                [
+                    'problem_title' => $aiResult['problem_title'],
+                    'problem_description' => $aiResult['problem_description']
+                        ?? $aiResult['problem_summary']
+                        ?? ($aiResult['primary_diagnosis']['description'] ?? null),
+                    'severity' => $aiResult['severity'],
+                    'confidence_score' => $aiResult['confidence_score'],
+                    'likely_causes' => $aiResult['secondary_causes'] ?? $aiResult['likely_causes'] ?? [],
+                    'recommended_actions' => $aiResult['immediate_actions'] ?? $aiResult['recommended_actions'] ?? [],
+                    'estimated_costs' => $aiResult['repair_estimates'] ?? $aiResult['estimated_costs'] ?? null,
+                    'ai_insights' => $aiResult['ai_insights'] ?? null,
+                    'related_issues' => $aiResult['related_issues'] ?? null,
+                    'requires_immediate_attention' => $aiResult['requires_immediate_attention'] ?? false,
+                    'ai_model_version' => $aiResult['ai_model_version']
+                        ?? ($usage['model'] ?? $aiResult['model_version'] ?? 'CarWise Multi-AI'),
+                    'analysis_completed_at' => now(),
+                ]
+            );
 
-            // Update session status
+            $wasUnlocked = (bool) ($meta['unlocked'] ?? false);
+
             $session->update([
                 'status' => 'completed',
                 'confidence_score' => $aiResult['confidence_score'],
                 'severity' => $aiResult['severity'],
                 'processed_at' => now(),
-                'ai_response' => [
+                'ai_response' => array_merge($meta, [
                     'usage' => $usage,
-                    'unlocked' => false,
-                ],
+                    'unlocked' => $wasUnlocked,
+                    'clarifying_answers' => $clarifying,
+                    'data_quality' => $aiResult['data_quality'] ?? null,
+                    'hypothesis_disclaimer' => $aiResult['hypothesis_disclaimer'] ?? null,
+                    'diagnostic_codes_to_check' => $aiResult['diagnostic_codes_to_check'] ?? [],
+                    'next_workshop_questions' => $aiResult['next_workshop_questions'] ?? [],
+                    'glossary' => $aiResult['glossary'] ?? \App\Services\DiagnosisTerminology::glossary(
+                        $analysisData['user_language'] ?? 'en'
+                    ),
+                    'diagnostic_engines' => $aiResult['diagnostic_engines'] ?? [],
+                    'provider' => $aiResult['ai_provider'] ?? 'CarWise Multi-AI',
+                ]),
             ]);
-
         } catch (\Exception $e) {
-            // Update session status to failed
             $session->update([
                 'status' => 'failed',
-                'ai_response' => ['error' => $e->getMessage()]
+                'ai_response' => ['error' => $e->getMessage()],
             ]);
 
             \Log::error('AI Diagnosis failed for session: ' . $session->session_id, [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
         }
     }

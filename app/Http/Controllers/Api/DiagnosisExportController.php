@@ -55,6 +55,31 @@ class DiagnosisExportController extends Controller
                 if (empty($data['result']['illustrations']) && ! empty($meta['illustrations'])) {
                     $data['result']['illustrations'] = $meta['illustrations'];
                 }
+
+                foreach ([
+                    'hypothesis_disclaimer',
+                    'data_quality',
+                    'diagnostic_codes_to_check',
+                    'next_workshop_questions',
+                    'glossary',
+                    'diagnostic_engines',
+                    'code_refined',
+                    'provided_obd_code',
+                ] as $field) {
+                    if ((empty($data['result'][$field]) || $data['result'][$field] === []) && ! empty($meta[$field])) {
+                        $data['result'][$field] = $meta[$field];
+                    }
+                }
+
+                if (empty($data['result']['provided_obd_code']) && ! empty($meta['refined_obd_code'])) {
+                    $data['result']['provided_obd_code'] = $meta['refined_obd_code'];
+                }
+                if (empty($data['result']['provided_obd_code']) && ! empty($meta['clarifying_answers']['obd_code'])) {
+                    $data['result']['provided_obd_code'] = $meta['clarifying_answers']['obd_code'];
+                }
+                if (empty($evidence['diagnostic_engines']) && ! empty($meta['diagnostic_engines'])) {
+                    $evidence['diagnostic_engines'] = $meta['diagnostic_engines'];
+                }
             }
 
             $generatedAt = $data['generated_at']

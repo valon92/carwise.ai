@@ -11,6 +11,8 @@ return [
         'report' => 14.99,
         'predictive' => 19.99,
         'expert' => 2.99,
+        // Extra paid step: re-run differential diagnosis after owner provides a live DTC.
+        'code_refine' => (float) env('CUSTOMER_SERVICE_CODE_REFINE', 1.49),
     ],
     // Internal spend per API. Never send these values to the client.
     'api_coins' => [

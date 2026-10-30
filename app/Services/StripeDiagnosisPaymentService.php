@@ -44,18 +44,43 @@ class StripeDiagnosisPaymentService
      */
     public function createPaymentIntent(DiagnosisSession $session, User $user): array
     {
+        $quote = $this->pricing->quoteForSession($session);
+
+        return $this->createQuotedIntent($session, $user, $quote, 'diagnosis_unlock', 'customer_amount');
+    }
+
+    /**
+     * PaymentIntent for refining an unlocked diagnosis with a live OBD/VCDS code.
+     */
+    public function createCodeRefinePaymentIntent(DiagnosisSession $session, User $user): array
+    {
+        $quote = $this->pricing->quoteCodeRefine();
+
+        return $this->createQuotedIntent($session, $user, $quote, 'diagnosis_code_refine', 'code_refine_amount');
+    }
+
+    private function createQuotedIntent(
+        DiagnosisSession $session,
+        User $user,
+        array $quote,
+        string $type,
+        string $amountMetaKey
+    ): array {
         if (! $this->isConfigured()) {
             throw new \RuntimeException('Stripe is not configured.');
         }
 
-        $quote = $this->pricing->quoteForSession($session);
         $amount = $quote['amount'];
         $currency = strtolower($quote['currency']);
         $internal = $quote['_internal'];
 
         $meta = is_array($session->ai_response) ? $session->ai_response : [];
-        $meta['customer_amount'] = $amount;
-        $meta['pricing'] = $internal; // server-only
+        $meta[$amountMetaKey] = $amount;
+        $meta[$amountMetaKey.'_pricing'] = $internal;
+        if ($type === 'diagnosis_unlock') {
+            $meta['customer_amount'] = $amount;
+            $meta['pricing'] = $internal;
+        }
         $session->update(['ai_response' => $meta]);
 
         if ($this->isMock()) {
@@ -65,6 +90,7 @@ class StripeDiagnosisPaymentService
                 'api_cost' => $internal['api_cost'],
                 'margin' => $internal['margin'],
                 'source' => $internal['source'],
+                'type' => $type,
             ]);
 
             return [
@@ -75,12 +101,14 @@ class StripeDiagnosisPaymentService
                 'amount' => $amount,
                 'currency' => strtoupper($currency),
                 'payment_id' => $payment->payment_id,
+                'product' => $type,
             ];
         }
 
         $this->bootStripe();
 
-        $existingPi = $meta['stripe_payment_intent_id'] ?? null;
+        $piMetaKey = $type === 'diagnosis_code_refine' ? 'stripe_code_refine_payment_intent_id' : 'stripe_payment_intent_id';
+        $existingPi = $meta[$piMetaKey] ?? null;
         if (is_string($existingPi) && str_starts_with($existingPi, 'pi_')) {
             try {
                 $intent = PaymentIntent::retrieve($existingPi);
@@ -91,6 +119,7 @@ class StripeDiagnosisPaymentService
                         'api_cost' => $internal['api_cost'],
                         'margin' => $internal['margin'],
                         'source' => $internal['source'],
+                        'type' => $type,
                     ]);
 
                     return [
@@ -100,10 +129,11 @@ class StripeDiagnosisPaymentService
                         'publishable_key' => $this->publishableKey(),
                         'amount' => $amount,
                         'currency' => strtoupper($currency),
+                        'product' => $type,
                     ];
                 }
             } catch (ApiErrorException $e) {
-                Log::warning('Stripe reuse PI failed', ['error' => $e->getMessage()]);
+                Log::warning('Stripe reuse PI failed', ['error' => $e->getMessage(), 'type' => $type]);
             }
         }
 
@@ -113,24 +143,26 @@ class StripeDiagnosisPaymentService
             'automatic_payment_methods' => ['enabled' => true],
             'receipt_email' => $user->email,
             'metadata' => [
-                'type' => 'diagnosis_unlock',
+                'type' => $type,
                 'session_id' => $session->session_id,
                 'user_id' => (string) $user->id,
-                // Internal accounting — visible only in Stripe dashboard / webhooks
                 'api_cost' => $internal['api_cost'],
                 'margin' => (string) $internal['margin'],
                 'pricing_source' => $internal['source'],
             ],
-            'description' => 'CarWise.ai diagnosis unlock · '.$session->session_id,
+            'description' => $type === 'diagnosis_code_refine'
+                ? 'CarWise.ai OBD code verification · '.$session->session_id
+                : 'CarWise.ai diagnosis unlock · '.$session->session_id,
         ]);
 
-        $meta['stripe_payment_intent_id'] = $intent->id;
+        $meta[$piMetaKey] = $intent->id;
         $session->update(['ai_response' => $meta]);
 
         $this->upsertPayment($session, $user, $intent->id, $amount, $currency, 'pending', [
             'api_cost' => $internal['api_cost'],
             'margin' => $internal['margin'],
             'source' => $internal['source'],
+            'type' => $type,
         ]);
 
         return [
@@ -140,16 +172,20 @@ class StripeDiagnosisPaymentService
             'publishable_key' => $this->publishableKey(),
             'amount' => $amount,
             'currency' => strtoupper($currency),
+            'product' => $type,
         ];
     }
 
     /**
      * Verify the PaymentIntent succeeded for this session before unlock.
      */
-    public function assertPaid(DiagnosisSession $session, User $user, string $paymentIntentId): Payment
+    public function assertPaid(DiagnosisSession $session, User $user, string $paymentIntentId, string $product = 'diagnosis_unlock'): Payment
     {
-        $expected = (string) (($session->ai_response['customer_amount'] ?? null)
-            ?: $this->pricing->quoteForSession($session)['amount']);
+        $expected = $product === 'diagnosis_code_refine'
+            ? (string) (($session->ai_response['code_refine_amount'] ?? null)
+                ?: $this->pricing->quoteCodeRefine()['amount'])
+            : (string) (($session->ai_response['customer_amount'] ?? null)
+                ?: $this->pricing->quoteForSession($session)['amount']);
 
         if ($this->isMock() && str_starts_with($paymentIntentId, 'pi_mock_')) {
             $payment = $this->upsertPayment(
@@ -180,6 +216,11 @@ class StripeDiagnosisPaymentService
 
         if ((int) ($intent->metadata['user_id'] ?? 0) !== (int) $user->id) {
             throw new \RuntimeException('Payment does not match this account.');
+        }
+
+        $intentType = (string) ($intent->metadata['type'] ?? 'diagnosis_unlock');
+        if ($intentType !== $product) {
+            throw new \RuntimeException('Payment product does not match this action.');
         }
 
         if ($intent->status !== 'succeeded') {

@@ -370,6 +370,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/diagnosis/result/{sessionId}', [DiagnosisController::class, 'getResult']);
     Route::post('/diagnosis/result/{sessionId}/pay', [DiagnosisController::class, 'createUnlockPayment']);
     Route::post('/diagnosis/result/{sessionId}/continue', [DiagnosisController::class, 'continueDiagnosis']);
+    Route::post('/diagnosis/result/{sessionId}/pay-code-refine', [DiagnosisController::class, 'createCodeRefinePayment']);
+    Route::post('/diagnosis/result/{sessionId}/refine-code', [DiagnosisController::class, 'refineWithCode']);
     Route::get('/diagnosis/history', [DiagnosisController::class, 'getHistory']);
     Route::get('/diagnosis/car/{carId}/history', [DiagnosisController::class, 'getCarDiagnosisHistory']);
     Route::post('/transcribe-audio', [DiagnosisController::class, 'transcribeAudio']);

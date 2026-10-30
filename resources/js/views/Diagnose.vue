@@ -543,6 +543,62 @@
               </div>
             </div>
 
+            <!-- Professional clarifying questions (paid-grade differential) -->
+            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-6 lg:p-8">
+              <div class="mb-6">
+                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Sharper diagnosis</p>
+                <h3 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">Quick professional checks</h3>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                  These answers make the paid result much more accurate than a generic chat reply. OBD code is optional but strongly recommended.
+                </p>
+              </div>
+
+              <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Warning light behavior</label>
+                  <select v-model="diagnosisForm.warning_light_behavior" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                    <option value="">Not sure / not applicable</option>
+                    <option value="Steady yellow / amber">Steady yellow / amber</option>
+                    <option value="Flashing / pulsing">Flashing / pulsing</option>
+                    <option value="Comes and goes">Comes and goes</option>
+                    <option value="Red warning">Red warning</option>
+                    <option value="No warning light">No warning light</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Power / drive feel</label>
+                  <select v-model="diagnosisForm.power_loss" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                    <option value="">Not sure</option>
+                    <option value="Drives normally">Drives normally</option>
+                    <option value="Noticeable power loss">Noticeable power loss</option>
+                    <option value="Limp / safe mode">Limp / safe mode</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Fuel consumption</label>
+                  <select v-model="diagnosisForm.fuel_consumption_change" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                    <option value="">Not sure</option>
+                    <option value="Same as before">Same as before</option>
+                    <option value="Higher fuel use">Higher fuel use</option>
+                    <option value="Lower fuel use">Lower fuel use</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    OBD / VCDS code <span class="font-normal text-slate-400">(optional)</span>
+                  </label>
+                  <input
+                    v-model="diagnosisForm.obd_code"
+                    type="text"
+                    maxlength="64"
+                    placeholder="e.g. P0401, P2002, P0299"
+                    class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm uppercase text-slate-900 placeholder:normal-case dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                  >
+                  <p class="mt-1.5 text-xs text-slate-500">If you already scanned the car, add the code — confidence rises sharply.</p>
+                </div>
+              </div>
+            </div>
+
             <!-- Form Validation Feedback -->
             <div v-if="formErrors.length > 0" class="p-4 bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-lg">
               <div class="flex items-start space-x-3">
@@ -901,8 +957,68 @@
               </figure>
             </section>
 
+            <p
+              v-if="diagnosisResult.hypothesis_disclaimer"
+              class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300"
+            >
+              {{ diagnosisResult.hypothesis_disclaimer }}
+              <span v-if="diagnosisResult.data_quality" class="mt-1 block text-xs text-slate-400">
+                Data quality: {{ diagnosisResult.data_quality }}
+              </span>
+              <span
+                v-if="(diagnosisResult.diagnostic_engines || diagnosisResult.evidence?.diagnostic_engines || []).length"
+                class="mt-1 block text-xs text-slate-400"
+              >
+                Engines:
+                {{ (diagnosisResult.diagnostic_engines || diagnosisResult.evidence?.diagnostic_engines || []).join(' + ') }}
+              </span>
+            </p>
+
+            <!-- Paid OBD / VCDS code verification -->
+            <section
+              v-if="continuationPaid && !diagnosisResult.code_refined"
+              class="rounded-2xl border border-slate-900/10 bg-slate-900 px-5 py-5 text-white"
+            >
+              <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Upgrade accuracy</p>
+              <h4 class="mt-2 text-lg font-semibold">Verify with a live fault code</h4>
+              <p class="mt-1 text-sm text-slate-300">
+                If you scanned the car (OBD-II / VCDS), enter the code (e.g. P0401). We re-run the Multi-AI differential
+                diagnosis against that code — paid add-on, denser confidence, clearer next steps.
+              </p>
+              <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div class="flex-1">
+                  <label class="mb-1 block text-xs text-slate-400">OBD / VCDS code</label>
+                  <input
+                    v-model="refineObdCode"
+                    type="text"
+                    maxlength="64"
+                    placeholder="P0401"
+                    class="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 text-sm uppercase text-white placeholder:normal-case placeholder:text-slate-500"
+                  >
+                </div>
+                <button
+                  type="button"
+                  class="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 disabled:opacity-50"
+                  :disabled="refiningCode || !refineObdCode.trim()"
+                  @click="confirmCodeRefine"
+                >
+                  {{ refiningCode ? 'Verifying…' : (refineAmount ? `Verify · €${refineAmount}` : 'Verify with code') }}
+                </button>
+              </div>
+              <p v-if="refineError" class="mt-3 text-sm text-red-300">{{ refineError }}</p>
+            </section>
+
+            <section
+              v-else-if="continuationPaid && diagnosisResult.code_refined"
+              class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+            >
+              Verified with code
+              <strong>{{ diagnosisResult.provided_obd_code || refineObdCode }}</strong>.
+              The ranked causes below were re-run against that live DTC.
+            </section>
+
             <section v-if="(diagnosisResult.recommended_actions || diagnosisResult.recommendedActions || []).length">
-              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">What to do</h4>
+              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">What to do (in order)</h4>
               <ol class="space-y-3">
                 <li v-for="(action, index) in (diagnosisResult.recommended_actions || diagnosisResult.recommendedActions || [])" :key="index" class="flex gap-3">
                   <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white dark:bg-white dark:text-slate-900">{{ index + 1 }}</span>
@@ -916,7 +1032,7 @@
             </section>
 
             <section v-if="(diagnosisResult.likely_causes || diagnosisResult.likelyCauses || []).length">
-              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">Why this is likely</h4>
+              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">Ranked likely causes</h4>
               <div class="divide-y divide-slate-100 dark:divide-slate-800">
                 <div v-for="(cause, index) in (diagnosisResult.likely_causes || diagnosisResult.likelyCauses || [])" :key="index" class="py-3 first:pt-0 last:pb-0">
                   <div class="flex items-baseline justify-between gap-4">
@@ -924,12 +1040,30 @@
                     <span v-if="cause.probability" class="shrink-0 text-xs text-slate-500">{{ cause.probability }}%</span>
                   </div>
                   <p v-if="cause.description || cause.explanation" class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{{ cause.description || cause.explanation }}</p>
+                  <p v-if="cause.typical_dtc_examples?.length" class="mt-1 text-xs text-slate-500">
+                    Typical codes: {{ Array.isArray(cause.typical_dtc_examples) ? cause.typical_dtc_examples.join(', ') : cause.typical_dtc_examples }}
+                  </p>
                 </div>
               </div>
             </section>
 
+            <section v-if="(diagnosisResult.diagnostic_codes_to_check || []).length">
+              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">Codes to check on OBD / VCDS</h4>
+              <ul class="space-y-2">
+                <li
+                  v-for="(code, index) in diagnosisResult.diagnostic_codes_to_check"
+                  :key="index"
+                  class="rounded-xl border border-slate-200 px-4 py-3 text-sm dark:border-slate-700"
+                >
+                  <span class="font-semibold text-slate-900 dark:text-white">{{ code.code || code }}</span>
+                  <span v-if="code.meaning" class="text-slate-600 dark:text-slate-300"> — {{ code.meaning }}</span>
+                  <span v-if="code.related_cause" class="mt-1 block text-xs text-slate-500">{{ code.related_cause }}</span>
+                </li>
+              </ul>
+            </section>
+
             <section v-if="diagnosisResult.estimated_costs && diagnosisResult.estimated_costs.length">
-              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">What it may cost</h4>
+              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">Guide costs (EUR)</h4>
               <div class="divide-y divide-slate-100 dark:divide-slate-800">
                 <div v-for="cost in diagnosisResult.estimated_costs" :key="cost.service" class="flex items-baseline justify-between gap-4 py-3 first:pt-0">
                   <div>
@@ -939,7 +1073,20 @@
                   <p class="shrink-0 text-sm font-semibold text-slate-900 dark:text-white">€{{ cost.min }} – €{{ cost.max }}</p>
                 </div>
               </div>
-              <p class="mt-3 text-xs text-slate-400">A guide only. The workshop price can differ.</p>
+              <p class="mt-3 text-xs text-slate-400">Guide only — workshop quotes can differ by region and labour rate.</p>
+            </section>
+
+            <section v-if="(diagnosisResult.next_workshop_questions || []).length">
+              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">Bring to the workshop</h4>
+              <ul class="list-disc space-y-2 pl-5">
+                <li
+                  v-for="(question, index) in diagnosisResult.next_workshop_questions"
+                  :key="index"
+                  class="text-sm leading-relaxed text-slate-600 dark:text-slate-300"
+                >
+                  {{ question }}
+                </li>
+              </ul>
             </section>
 
             <section v-if="diagnosisResult.ai_insights && diagnosisResult.ai_insights.length">
@@ -949,6 +1096,20 @@
                   {{ insight }}
                 </li>
               </ul>
+            </section>
+
+            <section v-if="diagnosisResult.glossary && Object.keys(diagnosisResult.glossary).length">
+              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">Glossary</h4>
+              <dl class="space-y-2">
+                <div
+                  v-for="(meaning, abbr) in diagnosisResult.glossary"
+                  :key="abbr"
+                  class="grid grid-cols-[4.5rem_1fr] gap-3 text-sm"
+                >
+                  <dt class="font-semibold text-slate-900 dark:text-white">{{ abbr }}</dt>
+                  <dd class="text-slate-600 dark:text-slate-300">{{ meaning }}</dd>
+                </div>
+              </dl>
             </section>
             </template>
           </div>
@@ -1002,6 +1163,11 @@ export default {
       return text
     })
     const continuationPaid = ref(false)
+    const refineObdCode = ref('')
+    const refineAmount = ref(null)
+    const refiningCode = ref(false)
+    const refineError = ref('')
+    const refinePayment = ref({ payment_intent_id: null, client_secret: null, mock: true })
     const continuationAmount = ref(null)
     const continuationCurrency = ref('EUR')
     const payError = ref('')
@@ -1058,7 +1224,11 @@ export default {
       engineSize: '',
       description: '',
       symptoms: [],
-      selectedCarId: null
+      selectedCarId: null,
+      warning_light_behavior: '',
+      power_loss: '',
+      fuel_consumption_change: '',
+      obd_code: '',
     })
 
     // Form persistence functions
@@ -1091,6 +1261,10 @@ export default {
         description: diagnosisForm.description,
         symptoms: diagnosisForm.symptoms,
         selectedCarId: diagnosisForm.selectedCarId,
+        warning_light_behavior: diagnosisForm.warning_light_behavior,
+        power_loss: diagnosisForm.power_loss,
+        fuel_consumption_change: diagnosisForm.fuel_consumption_change,
+        obd_code: diagnosisForm.obd_code,
         timestamp: Date.now()
       }
       localStorage.setItem('diagnosis_form_data', JSON.stringify(formData))
@@ -1112,6 +1286,10 @@ export default {
             diagnosisForm.description = formData.description || ''
             diagnosisForm.symptoms = formData.symptoms || []
             diagnosisForm.selectedCarId = formData.selectedCarId || null
+            diagnosisForm.warning_light_behavior = formData.warning_light_behavior || ''
+            diagnosisForm.power_loss = formData.power_loss || ''
+            diagnosisForm.fuel_consumption_change = formData.fuel_consumption_change || ''
+            diagnosisForm.obd_code = formData.obd_code || ''
             console.log('📂 Form data loaded from localStorage')
             return true
           } else {
@@ -1787,7 +1965,19 @@ export default {
         formData.append('engine_type', diagnosisForm.engineType)
         formData.append('engine_size', diagnosisForm.engineSize)
         formData.append('description', diagnosisForm.description)
-        
+        if (diagnosisForm.warning_light_behavior) {
+          formData.append('warning_light_behavior', diagnosisForm.warning_light_behavior)
+        }
+        if (diagnosisForm.power_loss) {
+          formData.append('power_loss', diagnosisForm.power_loss)
+        }
+        if (diagnosisForm.fuel_consumption_change) {
+          formData.append('fuel_consumption_change', diagnosisForm.fuel_consumption_change)
+        }
+        if (diagnosisForm.obd_code) {
+          formData.append('obd_code', String(diagnosisForm.obd_code).trim().toUpperCase())
+        }
+
         // Add car_id if a car is selected
         if (diagnosisForm.selectedCarId) {
           formData.append('car_id', diagnosisForm.selectedCarId)
@@ -1985,6 +2175,84 @@ export default {
         payError.value = error.response?.data?.message || 'Could not start Stripe payment.'
       }
     }
+
+    const prepareCodeRefinePayment = async () => {
+      if (!diagnosisSessionId.value) return null
+      refineError.value = ''
+      const { data } = await api.post(`/diagnosis/result/${diagnosisSessionId.value}/pay-code-refine`)
+      const payload = data?.data || {}
+      refineAmount.value = payload.amount ?? refineAmount.value
+      refinePayment.value = {
+        payment_intent_id: payload.payment_intent_id || null,
+        client_secret: payload.client_secret || null,
+        mock: !!payload.mock,
+        publishable_key: payload.publishable_key || null,
+      }
+      return refinePayment.value
+    }
+
+    const confirmCodeRefine = async () => {
+      if (!diagnosisSessionId.value || !refineObdCode.value.trim()) return
+      refiningCode.value = true
+      refineError.value = ''
+      try {
+        let payment = refinePayment.value
+        if (!payment.payment_intent_id) {
+          payment = await prepareCodeRefinePayment()
+        }
+        let paymentIntentId = payment?.payment_intent_id
+        if (!paymentIntentId) {
+          throw new Error('Could not start code verification payment.')
+        }
+
+        // Live Stripe: reuse card element from unlock when still mounted
+        if (!payment.mock && payment.client_secret) {
+          if (!stripeInstance || !stripeCardElement) {
+            throw new Error('Open the unlock card form once, or use local mock payments.')
+          }
+          const { error, paymentIntent } = await stripeInstance.confirmCardPayment(payment.client_secret, {
+            payment_method: { card: stripeCardElement },
+          })
+          if (error) throw new Error(error.message || 'Card payment failed.')
+          paymentIntentId = paymentIntent?.id || paymentIntentId
+          if (paymentIntent?.status !== 'succeeded') {
+            throw new Error('Payment was not completed.')
+          }
+        }
+
+        const response = await api.post(
+          `/diagnosis/result/${diagnosisSessionId.value}/refine-code`,
+          {
+            obd_code: refineObdCode.value.trim().toUpperCase(),
+            payment_intent_id: paymentIntentId,
+          },
+          { timeout: 180000 }
+        )
+        diagnosisResult.value = response.data?.data?.result || diagnosisResult.value
+        if (window.$notify) {
+          window.$notify.success('Code verified', 'Diagnosis was re-run against your live fault code.')
+        }
+      } catch (error) {
+        refineError.value = error.message || error.response?.data?.message || 'Code verification failed.'
+        try {
+          await prepareCodeRefinePayment()
+        } catch (_) {
+          /* ignore */
+        }
+      } finally {
+        refiningCode.value = false
+      }
+    }
+
+    watch(continuationPaid, async (paid) => {
+      if (paid && diagnosisSessionId.value && !diagnosisResult.value?.code_refined) {
+        try {
+          await prepareCodeRefinePayment()
+        } catch (_) {
+          /* ignore */
+        }
+      }
+    })
 
     const confirmContinuation = async () => {
       payError.value = ''
@@ -2527,6 +2795,12 @@ export default {
       payMethod,
       diagnosisSessionId,
       confirmContinuation,
+      refineObdCode,
+      refineAmount,
+      refiningCode,
+      refineError,
+      prepareCodeRefinePayment,
+      confirmCodeRefine,
       fileInput,
       photoInput,
       videoInput,

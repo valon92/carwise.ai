@@ -4,68 +4,77 @@
     <meta charset="UTF-8">
     <title>{{ $title }}</title>
     <style>
+        @page {
+            margin: 22mm 16mm 20mm 16mm;
+        }
         body {
             font-family: DejaVu Sans, sans-serif;
-            line-height: 1.55;
             color: #0f172a;
+            font-size: 11px;
+            line-height: 1.55;
             margin: 0;
-            padding: 28px;
-            font-size: 12px;
+            padding: 0;
         }
-        .header {
-            border-bottom: 2px solid #0f172a;
-            padding-bottom: 16px;
-            margin-bottom: 22px;
+        .doc-header {
+            border-bottom: 2.5px solid #0f172a;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
         }
         .brand {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
-            letter-spacing: 0.04em;
-            color: #0f172a;
+            letter-spacing: 0.02em;
         }
+        .brand span { color: #64748b; font-weight: normal; }
         .subtitle {
             color: #64748b;
-            font-size: 11px;
-            margin-top: 4px;
+            font-size: 10px;
+            margin-top: 2px;
         }
-        .meta-grid {
+        .meta-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 14px;
-            font-size: 10px;
+            margin-top: 12px;
+            font-size: 9px;
         }
-        .meta-grid td {
-            padding: 6px 8px;
+        .meta-table td {
             border: 1px solid #e2e8f0;
+            padding: 5px 7px;
             vertical-align: top;
         }
-        .meta-grid .label {
-            width: 28%;
+        .meta-table .k {
+            width: 24%;
             background: #f8fafc;
             color: #475569;
             font-weight: bold;
         }
         .section {
-            margin-bottom: 20px;
+            margin: 0 0 14px 0;
             page-break-inside: avoid;
         }
+        .section-break {
+            page-break-before: always;
+        }
         .section-title {
-            font-size: 13px;
+            font-size: 10px;
             font-weight: bold;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
             color: #64748b;
-            margin-bottom: 10px;
+            border-bottom: 1px solid #cbd5e1;
             padding-bottom: 4px;
-            border-bottom: 1px solid #e2e8f0;
+            margin: 0 0 8px 0;
         }
-        .vehicle-info { width: 100%; border-collapse: collapse; }
-        .vehicle-info td {
-            padding: 7px 8px;
+        .vehicle-table, .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .vehicle-table td, .info-table td {
             border: 1px solid #e2e8f0;
+            padding: 6px 8px;
         }
-        .vehicle-label {
-            width: 30%;
+        .vehicle-table .k {
+            width: 32%;
             background: #f8fafc;
             font-weight: bold;
             color: #334155;
@@ -74,223 +83,308 @@
             display: inline-block;
             background: #0f172a;
             color: #fff;
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 999px;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-right: 4px;
+            margin-bottom: 6px;
         }
+        .badge-amber { background: #b45309; }
+        .badge-soft { background: #475569; }
         .problem-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
-            margin: 0 0 8px;
+            margin: 4px 0 8px;
         }
         .box {
             border: 1px solid #e2e8f0;
-            padding: 12px;
-            margin: 8px 0;
             background: #f8fafc;
+            padding: 9px 10px;
+            margin: 0 0 8px 0;
+            page-break-inside: avoid;
         }
-        .cause-item { border-left: 3px solid #f59e0b; background: #fffbeb; }
-        .solution-item { border-left: 3px solid #10b981; background: #ecfdf5; }
-        .muted { color: #64748b; }
+        .box-cause {
+            border-left: 3px solid #d97706;
+            background: #fffbeb;
+        }
+        .box-action {
+            border-left: 3px solid #059669;
+            background: #ecfdf5;
+        }
+        .box-note {
+            border-left: 3px solid #475569;
+            background: #f1f5f9;
+        }
+        .muted { color: #64748b; font-size: 9.5px; }
         .illustration {
-            margin: 12px 0;
             text-align: center;
+            margin: 8px 0 12px;
             page-break-inside: avoid;
         }
         .illustration img {
-            max-width: 420px;
-            max-height: 420px;
+            max-width: 340px;
+            max-height: 280px;
             border: 1px solid #e2e8f0;
         }
         .illustration .caption {
-            margin-top: 6px;
-            font-size: 10px;
-            color: #64748b;
-        }
-        .footer {
-            margin-top: 28px;
-            padding-top: 12px;
-            border-top: 1px solid #e2e8f0;
+            margin-top: 4px;
             font-size: 9px;
             color: #64748b;
-            text-align: center;
         }
-        ul { margin: 0; padding-left: 18px; }
-        li { margin-bottom: 4px; }
+        .cause-grid td {
+            width: 50%;
+            vertical-align: top;
+            padding: 0 4px 8px 0;
+        }
+        ul { margin: 4px 0 0 16px; padding: 0; }
+        li { margin: 0 0 3px 0; }
+        .footer {
+            margin-top: 18px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 8.5px;
+            color: #64748b;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+        .keep { page-break-inside: avoid; }
+        h0 { display: none; }
     </style>
 </head>
 <body>
-    @php
-        $diagnosedAt = $evidence['diagnosed_at'] ?? $generated_at ?? null;
-        $unlockedAt = $evidence['unlocked_at'] ?? null;
-        $fmt = function ($value) {
-            if (! $value) {
-                return '—';
-            }
-            try {
-                return \Carbon\Carbon::parse($value)->timezone(config('app.timezone'))->format('d.m.Y H:i:s T');
-            } catch (\Throwable $e) {
-                return (string) $value;
-            }
-        };
-    @endphp
+@php
+    $diagnosedAt = $evidence['diagnosed_at'] ?? $generated_at ?? null;
+    $unlockedAt = $evidence['unlocked_at'] ?? null;
+    $engines = $evidence['diagnostic_engines'] ?? ($result['diagnostic_engines'] ?? []);
+    $engineLabel = is_array($engines) && count($engines)
+        ? implode(' + ', $engines)
+        : (string) ($evidence['ai_provider'] ?? ($result['ai_provider'] ?? 'CarWise Multi-AI'));
+    $glossary = $result['glossary'] ?? \App\Services\DiagnosisTerminology::glossary('sq');
+    $fmt = function ($value) {
+        if (! $value) {
+            return '—';
+        }
+        try {
+            return \Carbon\Carbon::parse($value)->timezone(config('app.timezone'))->format('d.m.Y H:i:s T');
+        } catch (\Throwable $e) {
+            return (string) $value;
+        }
+    };
+@endphp
 
-    <div class="header">
-        <div class="brand">CarWise.ai</div>
-        <div class="subtitle">AI vehicle diagnosis evidence report</div>
+<div class="doc-header keep">
+    <div class="brand">CarWise<span>.ai</span></div>
+    <div class="subtitle">Professional AI vehicle diagnosis · evidence report</div>
+    <table class="meta-table">
+        <tr>
+            <td class="k">Report generated</td>
+            <td>{{ $fmt($generated_at) }}</td>
+            <td class="k">Diagnosis started</td>
+            <td>{{ $fmt($diagnosedAt) }}</td>
+        </tr>
+        <tr>
+            <td class="k">Unlocked / full result</td>
+            <td>{{ $fmt($unlockedAt) }}</td>
+            <td class="k">Report ID</td>
+            <td>{{ $evidence['report_id'] ?? '—' }}</td>
+        </tr>
+        <tr>
+            <td class="k">Session ID</td>
+            <td>{{ $evidence['session_id'] ?? '—' }}</td>
+            <td class="k">Diagnostic engines</td>
+            <td>{{ $engineLabel }}</td>
+        </tr>
+    </table>
+</div>
 
-        <table class="meta-grid">
-            <tr>
-                <td class="label">Report generated</td>
-                <td>{{ $fmt($generated_at) }}</td>
-                <td class="label">Diagnosis started</td>
-                <td>{{ $fmt($diagnosedAt) }}</td>
-            </tr>
-            <tr>
-                <td class="label">Unlocked / full result</td>
-                <td>{{ $fmt($unlockedAt) }}</td>
-                <td class="label">Report ID</td>
-                <td>{{ $evidence['report_id'] ?? '—' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Session ID</td>
-                <td>{{ $evidence['session_id'] ?? '—' }}</td>
-                <td class="label">AI provider</td>
-                <td>{{ strtoupper((string) ($evidence['ai_provider'] ?? ($result['ai_provider'] ?? 'openai'))) }}</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Vehicle</div>
-        <table class="vehicle-info">
-            <tr>
-                <td class="vehicle-label">Make</td>
-                <td>{{ $vehicle['make'] }}</td>
-            </tr>
-            <tr>
-                <td class="vehicle-label">Model</td>
-                <td>{{ $vehicle['model'] }}</td>
-            </tr>
-            <tr>
-                <td class="vehicle-label">Year</td>
-                <td>{{ $vehicle['year'] }}</td>
-            </tr>
-            @if(!empty($vehicle['mileage']))
-            <tr>
-                <td class="vehicle-label">Mileage</td>
-                <td>{{ number_format((int) $vehicle['mileage']) }} km</td>
-            </tr>
-            @endif
-            @if(!empty($vehicle['engine_type']))
-            <tr>
-                <td class="vehicle-label">Engine type</td>
-                <td>{{ $vehicle['engine_type'] }}</td>
-            </tr>
-            @endif
-            @if(!empty($vehicle['engine_size']))
-            <tr>
-                <td class="vehicle-label">Engine size</td>
-                <td>{{ $vehicle['engine_size'] }}</td>
-            </tr>
-            @endif
-        </table>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Reported symptoms</div>
-        @if(!empty($symptoms))
-            <ul>
-                @foreach($symptoms as $symptom)
-                    <li>{{ is_array($symptom) ? ($symptom['label'] ?? json_encode($symptom)) : $symptom }}</li>
-                @endforeach
-            </ul>
-        @else
-            <p class="muted">No checklist symptoms selected.</p>
+<div class="section keep">
+    <div class="section-title">1. Vehicle</div>
+    <table class="vehicle-table">
+        <tr><td class="k">Make</td><td>{{ $vehicle['make'] }}</td></tr>
+        <tr><td class="k">Model</td><td>{{ $vehicle['model'] }}</td></tr>
+        <tr><td class="k">Year</td><td>{{ $vehicle['year'] }}</td></tr>
+        @if(!empty($vehicle['mileage']))
+            <tr><td class="k">Mileage</td><td>{{ number_format((int) $vehicle['mileage']) }} km</td></tr>
         @endif
-        @if(!empty($description))
-            <p style="margin-top:10px;"><strong>Description:</strong> {{ $description }}</p>
+        @if(!empty($vehicle['engine_type']))
+            <tr><td class="k">Engine type</td><td>{{ $vehicle['engine_type'] }}</td></tr>
         @endif
-    </div>
+        @if(!empty($vehicle['engine_size']))
+            <tr><td class="k">Engine size</td><td>{{ $vehicle['engine_size'] }}</td></tr>
+        @endif
+    </table>
+</div>
 
-    <div class="section">
-        <div class="section-title">Diagnosis result</div>
-        @if(isset($result['confidence']) || isset($result['confidence_score']))
-            <div class="badge">{{ $result['confidence'] ?? $result['confidence_score'] }}% match</div>
-        @endif
-        @if(!empty($result['severity']))
-            <div class="badge" style="background:#b45309;">Severity: {{ $result['severity'] }}</div>
-        @endif
-
-        @if(!empty($result['problem_title']))
-            <div class="problem-title">{{ $result['problem_title'] }}</div>
-        @endif
-        @if(!empty($result['problem_description']))
-            <p>{{ $result['problem_description'] }}</p>
-        @endif
-
-        @if(!empty($illustrations))
-            @foreach($illustrations as $image)
-                <div class="illustration">
-                    <img src="{{ $image['src'] }}" alt="{{ $image['caption'] }}">
-                    <div class="caption">{{ $image['caption'] }} — AI technical illustration</div>
-                </div>
+<div class="section keep">
+    <div class="section-title">2. Reported symptoms</div>
+    @if(!empty($symptoms))
+        <ul>
+            @foreach($symptoms as $symptom)
+                <li>{{ is_array($symptom) ? ($symptom['label'] ?? json_encode($symptom)) : $symptom }}</li>
             @endforeach
-        @endif
+        </ul>
+    @else
+        <p class="muted">No checklist symptoms selected.</p>
+    @endif
+    @if(!empty($description))
+        <p style="margin-top:8px;"><strong>Owner description:</strong> {{ $description }}</p>
+    @endif
+    @if(!empty($result['provided_obd_code']))
+        <p><strong>Verified fault code:</strong> {{ $result['provided_obd_code'] }}</p>
+    @endif
+</div>
 
-        @if(!empty($result['likely_causes']))
-            <p><strong>Why this is likely</strong></p>
-            @foreach($result['likely_causes'] as $cause)
-                <div class="box cause-item">
-                    <strong>{{ $cause['cause'] ?? $cause['title'] ?? 'Cause' }}</strong>
-                    <div>{{ $cause['description'] ?? $cause['explanation'] ?? '' }}</div>
-                    @if(isset($cause['probability']))
-                        <div class="muted">{{ $cause['probability'] }}% probability</div>
+<div class="section keep">
+    <div class="section-title">3. Diagnosis summary</div>
+    @if(isset($result['confidence']) || isset($result['confidence_score']))
+        <span class="badge">{{ $result['confidence'] ?? $result['confidence_score'] }}% confidence</span>
+    @endif
+    @if(!empty($result['severity']))
+        <span class="badge badge-amber">Severity: {{ $result['severity'] }}</span>
+    @endif
+    @if(!empty($result['data_quality']))
+        <span class="badge badge-soft">Data quality: {{ $result['data_quality'] }}</span>
+    @endif
+    @if(!empty($result['code_refined']))
+        <span class="badge">Code verified</span>
+    @endif
+
+    @if(!empty($result['problem_title']))
+        <div class="problem-title">{{ $result['problem_title'] }}</div>
+    @endif
+    @if(!empty($result['problem_description']))
+        <p>{{ $result['problem_description'] }}</p>
+    @endif
+
+    @if(!empty($result['hypothesis_disclaimer']))
+        <div class="box box-note">
+            <strong>Professional note</strong>
+            <div>{{ $result['hypothesis_disclaimer'] }}</div>
+        </div>
+    @endif
+</div>
+
+@if(!empty($illustrations))
+<div class="section keep">
+    <div class="section-title">4. Problem visuals</div>
+    @foreach($illustrations as $image)
+        <div class="illustration">
+            <img src="{{ $image['src'] }}" alt="{{ $image['caption'] }}">
+            <div class="caption">{{ $image['caption'] }} — AI technical illustration for owner understanding</div>
+        </div>
+    @endforeach
+</div>
+@endif
+
+<div class="section {{ empty($illustrations) ? '' : 'section-break' }}">
+    <div class="section-title">{{ empty($illustrations) ? '4' : '5' }}. What to do (in order)</div>
+    @forelse(($result['recommended_actions'] ?? []) as $i => $action)
+        <div class="box box-action keep">
+            <strong>{{ $i + 1 }}. {{ $action['action'] ?? $action['title'] ?? 'Action' }}</strong>
+            <div>{{ $action['description'] ?? $action['explanation'] ?? '' }}</div>
+            @if(!empty($action['urgency']))
+                <div class="muted">Timing: {{ $action['urgency'] }}</div>
+            @endif
+        </div>
+    @empty
+        <p class="muted">No actions listed.</p>
+    @endforelse
+</div>
+
+<div class="section section-break">
+    <div class="section-title">Ranked likely causes</div>
+    @forelse(($result['likely_causes'] ?? []) as $cause)
+        <div class="box box-cause keep">
+            <strong>{{ $cause['cause'] ?? $cause['title'] ?? 'Cause' }}</strong>
+            @if(isset($cause['probability']))
+                <span class="muted"> · {{ $cause['probability'] }}% probability</span>
+            @endif
+            <div>{{ $cause['description'] ?? $cause['explanation'] ?? '' }}</div>
+            @if(!empty($cause['typical_dtc_examples']))
+                <div class="muted">
+                    Typical codes:
+                    {{ is_array($cause['typical_dtc_examples']) ? implode(', ', $cause['typical_dtc_examples']) : $cause['typical_dtc_examples'] }}
+                </div>
+            @endif
+        </div>
+    @empty
+        <p class="muted">No causes listed.</p>
+    @endforelse
+</div>
+
+@if(!empty($result['diagnostic_codes_to_check']))
+<div class="section keep">
+    <div class="section-title">Codes to check on OBD / VCDS</div>
+    <ul>
+        @foreach($result['diagnostic_codes_to_check'] as $code)
+            <li>
+                <strong>{{ is_array($code) ? ($code['code'] ?? '') : $code }}</strong>
+                @if(is_array($code))
+                    — {{ $code['meaning'] ?? '' }}
+                    @if(!empty($code['related_cause']))
+                        ({{ $code['related_cause'] }})
                     @endif
-                </div>
-            @endforeach
-        @endif
+                @endif
+            </li>
+        @endforeach
+    </ul>
+</div>
+@endif
 
-        @if(!empty($result['recommended_actions']))
-            <p><strong>What to do</strong></p>
-            @foreach($result['recommended_actions'] as $action)
-                <div class="box solution-item">
-                    <strong>{{ $action['action'] ?? $action['title'] ?? 'Action' }}</strong>
-                    <div>{{ $action['description'] ?? $action['explanation'] ?? '' }}</div>
-                    @if(!empty($action['urgency']))
-                        <div class="muted">{{ $action['urgency'] }}</div>
-                    @endif
-                </div>
-            @endforeach
-        @endif
+@if(!empty($result['estimated_costs']))
+<div class="section keep">
+    <div class="section-title">Guide costs (EUR)</div>
+    <ul>
+        @foreach($result['estimated_costs'] as $cost)
+            <li>
+                {{ $cost['service'] ?? 'Service' }}:
+                €{{ $cost['min'] ?? '?' }} – €{{ $cost['max'] ?? '?' }}
+            </li>
+        @endforeach
+    </ul>
+    <p class="muted">Guide only. Workshop labour and parts can differ by region.</p>
+</div>
+@endif
 
-        @if(!empty($result['estimated_costs']))
-            <p><strong>Guide costs</strong></p>
-            <ul>
-                @foreach($result['estimated_costs'] as $cost)
-                    <li>
-                        {{ $cost['service'] ?? 'Service' }}:
-                        €{{ $cost['min'] ?? '?' }} – €{{ $cost['max'] ?? '?' }}
-                    </li>
-                @endforeach
-            </ul>
-        @endif
+@if(!empty($result['next_workshop_questions']))
+<div class="section keep">
+    <div class="section-title">Bring these answers to the workshop</div>
+    <ul>
+        @foreach($result['next_workshop_questions'] as $question)
+            <li>{{ is_array($question) ? ($question['text'] ?? json_encode($question)) : $question }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
 
-        @if(!empty($result['ai_insights']))
-            <p><strong>Also worth knowing</strong></p>
-            <ul>
-                @foreach($result['ai_insights'] as $insight)
-                    <li>{{ is_array($insight) ? ($insight['text'] ?? json_encode($insight)) : $insight }}</li>
-                @endforeach
-            </ul>
-        @endif
-    </div>
+@if(!empty($result['ai_insights']))
+<div class="section keep">
+    <div class="section-title">Also worth knowing</div>
+    <ul>
+        @foreach($result['ai_insights'] as $insight)
+            <li>{{ is_array($insight) ? ($insight['text'] ?? json_encode($insight)) : $insight }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
 
-    <div class="footer">
-        <p>This document is an AI-assisted diagnosis evidence record from CarWise.ai. It is not a workshop invoice or legal certification.</p>
-        <p>Always confirm repairs with a qualified technician. © {{ date('Y') }} CarWise.ai</p>
-    </div>
+<div class="section section-break keep">
+    <div class="section-title">Glossary (for non-technical owners)</div>
+    <table class="info-table">
+        @foreach($glossary as $abbr => $meaning)
+            <tr>
+                <td class="k" style="width:18%">{{ $abbr }}</td>
+                <td>{{ $meaning }}</td>
+            </tr>
+        @endforeach
+    </table>
+</div>
+
+<div class="footer">
+    <p>This document is an AI-assisted differential diagnosis evidence record from CarWise.ai. It is not a workshop invoice or legal certification.</p>
+    <p>Read live fault codes before replacing parts. Always confirm repairs with a qualified technician.</p>
+    <p>Engines used: {{ $engineLabel }} · © {{ date('Y') }} CarWise.ai</p>
+</div>
 </body>
 </html>

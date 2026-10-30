@@ -58,6 +58,41 @@ class CustomerServicePricing
      * Uses real usage when present; otherwise media-based coins; never returns 0.00.
      * Returns only the customer-facing total (margin already included).
      */
+    /**
+     * Customer total for verifying / refining a diagnosis with a live OBD/VCDS code.
+     */
+    public function quoteCodeRefine(?array $usage = null): array
+    {
+        $seed = (float) config('customer-services.costs.code_refine', 1.49);
+        if (is_array($usage) && $this->usageCost($usage) > 0) {
+            $amount = $this->customerPrice($this->usageCost($usage), $this->margin());
+            $apiCost = $this->usageCost($usage);
+            $source = 'usage';
+        } else {
+            $amount = $this->customerPrice($seed, $this->margin());
+            $apiCost = $seed;
+            $source = 'code_refine_list';
+        }
+
+        $min = (float) config('customer-services.min_customer_amount', 0.99);
+        if ((float) $amount < $min) {
+            $amount = number_format($min, 2, '.', '');
+            $apiCost = $this->apiCostFromCustomerAmount($amount);
+            $source = 'minimum';
+        }
+
+        return [
+            'amount' => $amount,
+            'currency' => strtoupper((string) config('customer-services.currency', 'eur')),
+            '_internal' => [
+                'api_cost' => number_format($apiCost, 6, '.', ''),
+                'margin' => $this->margin(),
+                'source' => $source,
+                'product' => 'code_refine',
+            ],
+        ];
+    }
+
     public function quoteForSession(DiagnosisSession $session): array
     {
         $meta = is_array($session->ai_response) ? $session->ai_response : [];

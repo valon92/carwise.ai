@@ -74,33 +74,39 @@ class AIDiagnosisService
     public function analyzeDiagnosis(array $data): array
     {
         try {
-            // Try primary AI provider first
-            if ($this->aiProvider->isAvailable()) {
-                Log::info('Using AI provider: ' . $this->aiProvider->getProviderName());
-                $result = $this->aiProvider->analyzeDiagnosis($data);
-                
-                // Return result in user's language (AI should already respond in correct language)
-                return $result;
-            }
-            
-            // Fallback to mock response if AI provider is not available
-            if ($this->fallbackEnabled) {
-                Log::warning('AI provider not available, using fallback response');
-                return $this->generateMockAIResponse($data);
-            }
-            
-            throw new \Exception('No AI provider available and fallback is disabled');
-            
+            /** @var DiagnosisEnsembleService $ensemble */
+            $ensemble = app(DiagnosisEnsembleService::class);
+            Log::info('Using CarWise Multi-AI diagnostic ensemble');
+            $result = $ensemble->analyze($data);
+
+            return $result;
         } catch (\Exception $e) {
             Log::error('AI Diagnosis Service Error: ' . $e->getMessage());
-            
-            // Try fallback if primary provider fails
-            if ($this->fallbackEnabled) {
-                Log::warning('Primary AI provider failed, using fallback response');
-                return $this->generateMockAIResponse($data);
+
+            try {
+                if ($this->aiProvider->isAvailable()) {
+                    Log::warning('Ensemble failed, falling back to single provider: '.$this->aiProvider->getProviderName());
+                    $result = $this->aiProvider->analyzeDiagnosis($data);
+                    $lang = $data['user_language'] ?? 'en';
+                    $result = DiagnosisTerminology::expandResult($result, $lang);
+                    $result['ai_provider'] = 'CarWise Multi-AI';
+                    $result['diagnostic_engines'] = [strtoupper($this->aiProvider->getProviderName())];
+
+                    return $result;
+                }
+            } catch (\Exception $inner) {
+                Log::error('Single-provider fallback failed: '.$inner->getMessage());
             }
-            
-            throw new \Exception('AI analysis failed: ' . $e->getMessage());
+
+            if ($this->fallbackEnabled) {
+                Log::warning('AI providers unavailable, using local professional fallback');
+                $fallback = $this->generateMockAIResponse($data);
+                $lang = $data['user_language'] ?? 'en';
+
+                return DiagnosisTerminology::expandResult($fallback, $lang);
+            }
+
+            throw new \Exception('AI analysis failed: '.$e->getMessage());
         }
     }
 
@@ -608,6 +614,161 @@ class AIDiagnosisService
             return $this->translateResponse($response, $userLanguage);
         }
 
+        $mentionsCel = str_contains($normalized, 'check engine')
+            || str_contains($normalized, 'warning light')
+            || str_contains($normalized, 'drita e motorit')
+            || str_contains($normalized, 'drita e verdhe')
+            || str_contains($normalized, 'drita e verdhë')
+            || str_contains($normalized, 'mil')
+            || preg_match('/\bp0\d{3}\b/i', $normalized);
+
+        if ($mentionsCel) {
+            $isDieselTdi = str_contains($normalized, 'tdi')
+                || str_contains($normalized, 'diesel')
+                || str_contains($normalized, 'dizel')
+                || str_contains(strtolower((string) ($data['engine_type'] ?? '')), 'diesel');
+            $isVwFamily = str_contains(strtolower((string) ($data['car_brand'] ?? '')), 'volkswagen')
+                || str_contains(strtolower((string) ($data['car_brand'] ?? '')), 'audi')
+                || str_contains(strtolower((string) ($data['car_brand'] ?? '')), 'skoda')
+                || str_contains(strtolower((string) ($data['car_brand'] ?? '')), 'seat');
+
+            $response = [
+                'problem_title' => 'Check Engine Light — differential diagnosis',
+                'problem_description' => 'A yellow/amber engine light means the ECU stored a fault. Without a live OBD/VCDS code this is a ranked hypothesis, not a final part replacement order.',
+                'severity' => 'medium',
+                'confidence_score' => 48,
+                'data_quality' => 'low',
+                'hypothesis_disclaimer' => 'No live fault code was provided. Scan the car before buying parts.',
+                'likely_causes' => $isDieselTdi && $isVwFamily ? [
+                    [
+                        'title' => 'EGR valve / cooler (clogged or stuck)',
+                        'description' => 'Very common on VW-group 1.6/2.0 TDI at higher mileage; triggers emissions-related CEL.',
+                        'probability' => 28,
+                        'part_name' => 'EGR valve',
+                        'part_category' => 'exhaust',
+                        'typical_dtc_examples' => ['P0401', 'P0403'],
+                    ],
+                    [
+                        'title' => 'DPF / particulate filter loading or pressure sensing',
+                        'description' => 'Soot load or differential pressure faults often illuminate the engine light on TDI platforms.',
+                        'probability' => 24,
+                        'part_name' => 'DPF / pressure sensor',
+                        'part_category' => 'exhaust',
+                        'typical_dtc_examples' => ['P2002', 'P2452'],
+                    ],
+                    [
+                        'title' => 'Exhaust / boost pressure sensor',
+                        'description' => 'False readings can set CEL without dramatic driveability loss.',
+                        'probability' => 18,
+                        'part_name' => 'Exhaust pressure sensor',
+                        'part_category' => 'exhaust',
+                        'typical_dtc_examples' => ['P0471'],
+                    ],
+                    [
+                        'title' => 'MAF sensor contamination or failure',
+                        'description' => 'Possible, but usually not the first guess on high-mileage TDI without a matching code.',
+                        'probability' => 16,
+                        'part_name' => 'MAF sensor',
+                        'part_category' => 'engine',
+                        'typical_dtc_examples' => ['P0101', 'P0102'],
+                    ],
+                    [
+                        'title' => 'Turbo underboost / actuator / hose leak',
+                        'description' => 'More likely if power loss or limp mode is also present.',
+                        'probability' => 14,
+                        'part_name' => 'Turbo / boost control',
+                        'part_category' => 'engine',
+                        'typical_dtc_examples' => ['P0299'],
+                    ],
+                ] : [
+                    [
+                        'title' => 'Emissions / oxygen sensor related fault',
+                        'description' => 'Common CEL family when no code is available yet.',
+                        'probability' => 30,
+                        'part_name' => 'Oxygen / emissions sensor',
+                        'part_category' => 'exhaust',
+                        'typical_dtc_examples' => ['P0171', 'P0420'],
+                    ],
+                    [
+                        'title' => 'Ignition or misfire related fault',
+                        'description' => 'More likely with rough idle or flashing CEL.',
+                        'probability' => 25,
+                        'part_name' => 'Ignition components',
+                        'part_category' => 'engine',
+                        'typical_dtc_examples' => ['P0300'],
+                    ],
+                    [
+                        'title' => 'Air metering / vacuum leak',
+                        'description' => 'MAF or intake leaks can set CEL with mixed driveability.',
+                        'probability' => 25,
+                        'part_name' => 'MAF / intake',
+                        'part_category' => 'engine',
+                        'typical_dtc_examples' => ['P0101'],
+                    ],
+                    [
+                        'title' => 'Other stored ECU fault',
+                        'description' => 'Only a live scan identifies the exact family.',
+                        'probability' => 20,
+                        'part_name' => 'ECU stored DTC',
+                        'part_category' => 'electrical',
+                        'typical_dtc_examples' => [],
+                    ],
+                ],
+                'recommended_actions' => [
+                    [
+                        'title' => 'Read fault codes with OBD-II / VCDS',
+                        'description' => 'Document freeze-frame data and the exact P-code before replacing any part.',
+                        'urgency' => 'Within 24 hours',
+                        'video_url' => '',
+                        'tools_needed' => ['OBD-II scanner or VCDS'],
+                        'difficulty_level' => 'easy',
+                    ],
+                    [
+                        'title' => 'Do not replace parts randomly',
+                        'description' => 'Use the code to choose between EGR/DPF/sensor/turbo paths and avoid wasted spend.',
+                        'urgency' => 'Immediate',
+                        'video_url' => '',
+                        'difficulty_level' => 'easy',
+                    ],
+                    [
+                        'title' => 'If the light flashes or power is severely limited, reduce load and inspect soon',
+                        'description' => 'Flashing CEL or limp mode needs faster attention than a steady amber light with normal drive.',
+                        'urgency' => 'Immediate',
+                        'video_url' => '',
+                        'difficulty_level' => 'easy',
+                    ],
+                ],
+                'estimated_costs' => $this->convertCosts([
+                    ['service' => 'OBD / VCDS scan & interpretation', 'min' => 20, 'max' => 60],
+                    ['service' => 'EGR clean/replace (if coded)', 'min' => 150, 'max' => 650],
+                    ['service' => 'DPF service/replace (if coded)', 'min' => 200, 'max' => 1400],
+                    ['service' => 'MAF / sensor (if coded)', 'min' => 80, 'max' => 320],
+                ], $data['user_currency_id'] ?? null),
+                'diagnostic_codes_to_check' => [
+                    ['code' => 'P0401', 'meaning' => 'EGR flow insufficient', 'related_cause' => 'EGR'],
+                    ['code' => 'P2002', 'meaning' => 'DPF efficiency below threshold', 'related_cause' => 'DPF'],
+                    ['code' => 'P0299', 'meaning' => 'Turbo underboost', 'related_cause' => 'Turbo'],
+                    ['code' => 'P0101', 'meaning' => 'MAF range/performance', 'related_cause' => 'MAF'],
+                ],
+                'next_workshop_questions' => [
+                    'Is the light steady or flashing?',
+                    'Any power loss or limp mode?',
+                    'Did fuel use rise recently?',
+                    'Please provide the stored DTC(s) from the scan.',
+                ],
+                'ai_insights' => [
+                    'A steady amber light with normal driving is usually not an emergency, but ignoring it can worsen emissions components.',
+                    'On VW-group TDI cars, EGR/DPF faults are statistically more common than jumping straight to MAF replacement.',
+                ],
+                'related_issues' => ['Emissions system', 'Boost control', 'Intake metering'],
+                'requires_immediate_attention' => false,
+                'model_version' => 'fallback-cel-differential',
+                'ai_provider' => 'fallback',
+            ];
+
+            return $this->translateResponse($response, $userLanguage);
+        }
+
         if ($mentionsEngine) {
             return $this->getEngineDiagnosis($data, (string) ($data['car_brand'] ?? ''));
         }
@@ -969,32 +1130,60 @@ class AIDiagnosisService
      */
     private function convertCosts(array $costs, $userCurrencyId = null): array
     {
+        // Paid reports are EUR-first. Keep amounts as European guide ranges.
         if (!$userCurrencyId) {
-            return $costs;
+            return array_map(static function (array $cost): array {
+                $cost['currency'] = 'EUR';
+                $cost['formatted_min'] = 'EUR '.($cost['min'] ?? '');
+                $cost['formatted_max'] = 'EUR '.($cost['max'] ?? '');
+
+                return $cost;
+            }, $costs);
         }
 
         $userCurrency = Currency::find($userCurrencyId);
         if (!$userCurrency) {
-            return $costs;
+            return array_map(static function (array $cost): array {
+                $cost['currency'] = 'EUR';
+                $cost['formatted_min'] = 'EUR '.($cost['min'] ?? '');
+                $cost['formatted_max'] = 'EUR '.($cost['max'] ?? '');
+
+                return $cost;
+            }, $costs);
+        }
+
+        // Prefer EUR display even when converting from an internal USD seed table.
+        $targetCode = strtoupper((string) $userCurrency->code);
+        if ($targetCode === 'USD') {
+            $eur = Currency::where('code', 'EUR')->first();
+            if ($eur) {
+                $userCurrency = $eur;
+            }
         }
 
         $usdCurrency = Currency::where('code', 'USD')->first();
         if (!$usdCurrency) {
-            return $costs;
+            return array_map(static function (array $cost) use ($userCurrency): array {
+                $cost['currency'] = $userCurrency->code;
+                $cost['formatted_min'] = $userCurrency->format($cost['min'] ?? 0);
+                $cost['formatted_max'] = $userCurrency->format($cost['max'] ?? 0);
+
+                return $cost;
+            }, $costs);
         }
 
         $convertedCosts = [];
         foreach ($costs as $cost) {
             $convertedMin = $usdCurrency->convertTo($userCurrency, $cost['min']);
             $convertedMax = $usdCurrency->convertTo($userCurrency, $cost['max']);
-            
+
             $convertedCosts[] = [
                 'service' => $cost['service'],
                 'min' => round($convertedMin, 2),
                 'max' => round($convertedMax, 2),
                 'currency' => $userCurrency->code,
                 'formatted_min' => $userCurrency->format($convertedMin),
-                'formatted_max' => $userCurrency->format($convertedMax)
+                'formatted_max' => $userCurrency->format($convertedMax),
             ];
         }
 
