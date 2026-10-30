@@ -1,27 +1,33 @@
 <template>
-  <div id="app" class="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 transition-colors duration-300 flex flex-col">
-    <Navbar />
+  <div
+    id="app"
+    class="flex min-h-screen flex-col transition-colors duration-300"
+    :class="isAuthShell ? 'bg-white' : 'bg-gradient-to-br from-secondary-50 to-primary-50'"
+  >
+    <Navbar v-if="!isAuthShell" />
     <main class="relative flex-1">
       <router-view />
     </main>
-    <Footer />
-    <BackToTop />
-    
-    <!-- Notification System -->
+    <Footer v-if="!isAuthShell" />
+    <BackToTop v-if="!isAuthShell" />
+
     <NotificationSystem />
-    
-    <!-- Modern loading overlay -->
-    <div v-if="isLoading" class="fixed inset-0 bg-white/80 dark:bg-secondary-900/80 backdrop-blur-sm z-50 flex items-center justify-center">
+
+    <div
+      v-if="isLoading"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm"
+    >
       <div class="flex flex-col items-center space-y-4">
-        <div class="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-        <p class="text-secondary-600 dark:text-secondary-400 font-medium">Loading...</p>
+        <div class="h-12 w-12 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
+        <p class="font-medium text-secondary-600">Loading...</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, defineAsyncComponent } from 'vue'
+import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
+import { useRoute } from 'vue-router'
 import { initPerformanceOptimizations } from './utils/performance'
 import BackToTop from './components/BackToTop.vue'
 
@@ -71,7 +77,9 @@ export default {
     BackToTop
   },
   setup() {
+    const route = useRoute()
     const isLoading = ref(false)
+    const isAuthShell = computed(() => ['Login', 'Register'].includes(route.name))
 
     onMounted(() => {
       localStorage.removeItem('darkMode')
@@ -79,7 +87,8 @@ export default {
     })
 
     return {
-      isLoading
+      isLoading,
+      isAuthShell,
     }
   }
 }

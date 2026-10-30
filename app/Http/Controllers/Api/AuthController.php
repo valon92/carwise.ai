@@ -26,10 +26,7 @@ class AuthController extends Controller
             'phone' => 'nullable|string|max:30',
             'location' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
-            'role' => 'required|in:customer,mechanic',
-            'experience_years' => 'nullable|integer|min:0|max:50',
-            'hourly_rate' => 'nullable|numeric|min:0',
-            'expertise' => 'nullable|array',
+            'role' => 'nullable|in:customer',
         ]);
 
         if ($validator->fails()) {
@@ -43,8 +40,6 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $role = $request->role === 'mechanic' ? 'mechanic' : 'customer';
-
         $user = User::create([
             'name' => $request->name,
             'first_name' => $request->first_name,
@@ -54,7 +49,7 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'location' => $request->location,
             'bio' => $request->bio,
-            'role' => $role,
+            'role' => 'customer',
             'status' => 'active',
             'timezone' => $request->timezone ?? 'UTC',
             'language' => $request->language ?? 'en',
