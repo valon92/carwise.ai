@@ -133,13 +133,47 @@
             color: #64748b;
         }
         .cause-visual {
-            margin: 6px 0 4px;
+            margin: 8px 0 6px;
+            text-align: center;
         }
         .cause-visual img {
-            max-width: 220px;
-            max-height: 130px;
-            border: 1px solid #e2e8f0;
+            max-width: 420px;
+            max-height: 280px;
+            width: 100%;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+        }
+        .problem-zone {
+            margin: 6px 0 8px;
+            padding: 8px 10px;
+            border: 1.5px solid #ef4444;
+            background: #fef2f2;
             border-radius: 6px;
+            page-break-inside: avoid;
+        }
+        .problem-zone .tag {
+            display: inline-block;
+            margin: 0 0 4px 0;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: #fee2e2;
+            color: #b91c1c;
+            font-size: 8.5px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .problem-zone .label {
+            font-weight: 700;
+            color: #7f1d1d;
+            font-size: 11px;
+            margin: 0 0 3px 0;
+        }
+        .problem-zone .meaning {
+            color: #7f1d1d;
+            font-size: 10px;
+            line-height: 1.4;
+            margin: 0;
         }
         .cause-grid td {
             width: 50%;
@@ -274,20 +308,8 @@
     @endif
 </div>
 
-@if(!empty($illustrations))
-<div class="section keep">
-    <div class="section-title">4. Problem visuals</div>
-    @foreach($illustrations as $image)
-        <div class="illustration">
-            <img src="{{ $image['src'] }}" alt="{{ $image['caption'] }}">
-            <div class="caption">{{ $image['caption'] }} — AI technical illustration for owner understanding</div>
-        </div>
-    @endforeach
-</div>
-@endif
-
-<div class="section {{ empty($illustrations) ? '' : 'section-break' }}">
-    <div class="section-title">{{ empty($illustrations) ? '4' : '5' }}. What to do (in order)</div>
+<div class="section">
+    <div class="section-title">4. What to do (in order)</div>
     @forelse(($result['recommended_actions'] ?? []) as $i => $action)
         <div class="box box-action keep">
             <strong>{{ $i + 1 }}. {{ $action['action'] ?? $action['title'] ?? 'Action' }}</strong>
@@ -302,18 +324,35 @@
 </div>
 
 <div class="section section-break">
-    <div class="section-title">Ranked likely causes</div>
+    <div class="section-title">5. Ranked likely causes · problem visuals</div>
+    <p class="muted" style="margin-bottom:8px;">
+        Same logic as the unlocked screen: photorealistic vehicle photo, red fault mark, and problem-zone explanation for each cause.
+    </p>
     @forelse(($result['likely_causes'] ?? []) as $cause)
         <div class="box box-cause keep">
             <strong>{{ $cause['cause'] ?? $cause['title'] ?? 'Cause' }}</strong>
             @if(isset($cause['probability']))
                 <span class="muted"> · {{ $cause['probability'] }}% probability</span>
             @endif
+
             @if(!empty($cause['image_src']))
                 <div class="cause-visual">
-                    <img src="{{ $cause['image_src'] }}" alt="{{ $cause['image_caption'] ?? ($cause['title'] ?? 'Cause visual') }}">
+                    <img src="{{ $cause['image_src'] }}" alt="{{ $cause['annotation']['label'] ?? ($cause['image_caption'] ?? ($cause['title'] ?? 'Cause visual')) }}">
                 </div>
             @endif
+
+            @if(!empty($cause['annotation']['meaning']) || !empty($cause['annotation']['label']))
+                <div class="problem-zone">
+                    <div class="tag">Problem zone</div>
+                    @if(!empty($cause['annotation']['label']))
+                        <div class="label">{{ $cause['annotation']['label'] }}</div>
+                    @endif
+                    @if(!empty($cause['annotation']['meaning']))
+                        <p class="meaning">{{ $cause['annotation']['meaning'] }}</p>
+                    @endif
+                </div>
+            @endif
+
             <div>{{ $cause['description'] ?? $cause['explanation'] ?? '' }}</div>
             @if(!empty($cause['typical_dtc_examples']))
                 <div class="muted">

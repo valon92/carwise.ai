@@ -37,6 +37,7 @@ class DiagnosisExportController extends Controller
             if (! empty($data['session_id'])) {
                 $session = DiagnosisSession::where('session_id', $data['session_id'])
                     ->where('user_id', auth()->id())
+                    ->with('result')
                     ->first();
             }
 
@@ -86,26 +87,31 @@ class DiagnosisExportController extends Controller
                 ?? ($evidence['unlocked_at'] ?? null)
                 ?? now()->toIso8601String();
 
-            $illustrations = [];
-            foreach (($data['result']['illustrations'] ?? []) as $row) {
-                if (! is_array($row)) {
-                    continue;
-                }
-                $dataUri = $this->illustrationDataUri($row);
-                if ($dataUri) {
-                    $illustrations[] = [
-                        'src' => $dataUri,
-                        'caption' => $row['caption'] ?? ($data['result']['problem_title'] ?? 'Problem illustration'),
-                    ];
+            $illustrationService = app(\App\Services\DiagnosisIllustrationService::class);
+
+            // Prefer session-stored photorealistic visuals when the client payload is stale.
+            if ($session) {
+                $meta = is_array($session->ai_response) ? $session->ai_response : [];
+                $sessionIllustrations = is_array($meta['illustrations'] ?? null) ? $meta['illustrations'] : [];
+                if ($illustrationService->needsRealisticUpgrade($data['result']['illustrations'] ?? [])) {
+                    if (! $illustrationService->needsRealisticUpgrade($sessionIllustrations)) {
+                        $data['result']['illustrations'] = $sessionIllustrations;
+                    } else {
+                        $data['result']['illustrations'] = $illustrationService->catalogForResult(
+                            $session->result,
+                            5,
+                            $session
+                        );
+                    }
                 }
             }
 
-            // Attach inline cause visuals for the ranked-causes section
+            // Same owner logic as Diagnose UI: image + red problem-zone annotation per cause.
             if (! empty($data['result']['likely_causes']) && is_array($data['result']['likely_causes'])) {
-                $illustrationService = app(\App\Services\DiagnosisIllustrationService::class);
                 $data['result']['likely_causes'] = $illustrationService->enrichCauses(
                     $data['result']['likely_causes'],
-                    is_array($data['result']['illustrations'] ?? null) ? $data['result']['illustrations'] : []
+                    is_array($data['result']['illustrations'] ?? null) ? $data['result']['illustrations'] : [],
+                    $session
                 );
 
                 foreach ($data['result']['likely_causes'] as &$cause) {
@@ -121,6 +127,21 @@ class DiagnosisExportController extends Controller
                     }
                 }
                 unset($cause);
+            }
+
+            // Keep a compact gallery only for causes that have embedded photos (UI parity).
+            $illustrations = [];
+            foreach (($data['result']['likely_causes'] ?? []) as $cause) {
+                if (! is_array($cause) || empty($cause['image_src'])) {
+                    continue;
+                }
+                $illustrations[] = [
+                    'src' => $cause['image_src'],
+                    'caption' => $cause['annotation']['label']
+                        ?? $cause['image_caption']
+                        ?? ($cause['title'] ?? $cause['cause'] ?? 'Problem visual'),
+                    'meaning' => $cause['annotation']['meaning'] ?? null,
+                ];
             }
 
             $viewData = [
