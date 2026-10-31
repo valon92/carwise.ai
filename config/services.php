@@ -82,8 +82,9 @@ return [
     'cohere' => [
         'api_key' => env('COHERE_API_KEY'),
         'api_url' => env('COHERE_API_URL', 'https://api.cohere.ai/v1'),
-        'model' => env('COHERE_MODEL', 'command'),
-        'temperature' => env('COHERE_TEMPERATURE', 0.7),
+        // Legacy "command" / "command-r*" models were removed by Cohere (Sept 2025).
+        'model' => env('COHERE_MODEL', 'command-a-03-2025'),
+        'temperature' => env('COHERE_TEMPERATURE', 0.2),
         'max_tokens' => env('COHERE_MAX_TOKENS', 2000),
     ],
 

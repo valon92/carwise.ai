@@ -25,10 +25,10 @@ class AIProviderManager
     {
         $this->providers = [
             'openai' => new OpenAIProvider(),      // Primary for Diagnose (GPT)
-            'gemini' => new GeminiProvider(),      // Fallback / secondary (current Google key)
+            'gemini' => new GeminiProvider(),      // Secondary cross-check
+            'cohere' => new CohereProvider(),      // Tertiary cross-check (Chat API)
             // 'mistral' => new MistralProvider(),
             // 'claude' => new ClaudeProvider(),
-            // 'cohere' => new CohereProvider(),
         ];
     }
 

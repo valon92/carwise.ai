@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Services\AIProviders\CohereProvider;
 use App\Services\AIProviders\GeminiProvider;
 use App\Services\AIProviders\OpenAIProvider;
 use Illuminate\Support\Facades\Http;
@@ -16,6 +17,7 @@ class DiagnosisEnsembleService
     public function __construct(
         private readonly OpenAIProvider $openAI,
         private readonly GeminiProvider $gemini,
+        private readonly CohereProvider $cohere,
     ) {
     }
 
@@ -62,6 +64,23 @@ class DiagnosisEnsembleService
                 }
             } catch (\Throwable $e) {
                 Log::warning('Gemini ensemble cross-check skipped', ['error' => $e->getMessage()]);
+            }
+        }
+
+        if ($this->cohere->isAvailable()) {
+            try {
+                $cohereCauses = $this->cohere->reviewCauses($data);
+                if ($cohereCauses !== []) {
+                    $secondaryCauses = array_merge($secondaryCauses, $cohereCauses);
+                    $used[] = 'Cohere';
+                    $usage['engines'][] = [
+                        'name' => 'cohere',
+                        'model' => config('services.cohere.model', 'command-a-03-2025'),
+                        'role' => 'cause_cross_check',
+                    ];
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Cohere ensemble cross-check skipped', ['error' => $e->getMessage()]);
             }
         }
 
