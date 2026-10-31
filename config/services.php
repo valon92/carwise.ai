@@ -50,6 +50,8 @@ return [
         'model' => env('OPENAI_MODEL', 'gpt-4o'),
         'temperature' => env('OPENAI_TEMPERATURE', 0.7),
         'max_tokens' => env('OPENAI_MAX_TOKENS', 2000),
+        // Photorealistic cause visuals for the customer's vehicle (OpenAI Images)
+        'image_model' => env('OPENAI_IMAGE_MODEL', 'gpt-image-2'),
     ],
 
     'claude' => [

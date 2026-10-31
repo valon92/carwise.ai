@@ -44,34 +44,57 @@
       <p class="text-sm leading-relaxed text-slate-700">{{ diagnosis.result.problem_description }}</p>
     </div>
 
-    <div v-if="(diagnosis.result?.illustrations || []).length" class="space-y-3">
-      <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400">Problem visual</h4>
-      <figure
-        v-for="(image, index) in diagnosis.result.illustrations"
-        :key="image.path || image.url || index"
-        class="overflow-hidden rounded-xl border border-slate-200"
-      >
-        <img :src="image.url" :alt="image.caption || diagnosis.result.problem_title" class="max-h-72 w-full object-cover" loading="lazy">
-        <figcaption class="px-4 py-3 text-sm text-slate-600">
-          {{ image.caption || diagnosis.result.problem_title }}
-        </figcaption>
-      </figure>
-    </div>
-
     <div v-if="causes.length">
       <h4 class="mb-3 text-sm font-semibold uppercase tracking-[0.14em] text-slate-400">Why this is likely</h4>
-      <div class="divide-y divide-slate-100 rounded-xl border border-slate-200">
-        <div v-for="(cause, index) in causes" :key="index" class="px-4 py-3">
-          <div class="flex items-baseline justify-between gap-3">
-            <p class="font-medium text-slate-900">{{ cause.title || cause.cause }}</p>
-            <span v-if="cause.probability" class="text-xs text-slate-500">{{ cause.probability }}%</span>
+      <div class="space-y-3">
+        <article
+          v-for="(cause, index) in causes"
+          :key="index"
+          class="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+        >
+          <div class="grid gap-0 sm:grid-cols-[minmax(0,11rem)_1fr]">
+            <div
+              v-if="cause.image_url || cause.part_image_url"
+              class="relative min-h-[8.5rem] bg-slate-950 sm:min-h-full"
+            >
+              <CauseVisualThumb
+                :src="cause.image_url || cause.part_image_url"
+                :title="cause.title || cause.cause || 'Cause visual'"
+                :annotation="cause.annotation"
+                @open="openCauseVisual(index)"
+              />
+            </div>
+            <div class="px-4 py-4">
+              <div class="flex items-baseline justify-between gap-3">
+                <p class="font-medium text-slate-900">{{ cause.title || cause.cause }}</p>
+                <span v-if="cause.probability" class="shrink-0 text-xs font-semibold text-slate-500">{{ cause.probability }}%</span>
+              </div>
+              <p v-if="cause.description || cause.explanation" class="mt-1.5 text-sm leading-relaxed text-slate-600">
+                {{ cause.description || cause.explanation }}
+              </p>
+              <p v-if="cause.annotation?.meaning" class="mt-2 text-xs leading-relaxed text-red-700">
+                <span class="font-semibold uppercase tracking-[0.12em]">Problem zone · </span>{{ cause.annotation.meaning }}
+              </p>
+              <p v-else-if="cause.image_caption" class="mt-2 text-[11px] uppercase tracking-[0.12em] text-slate-400">
+                {{ cause.image_caption }}
+              </p>
+            </div>
           </div>
-          <p v-if="cause.description || cause.explanation" class="mt-1 text-sm text-slate-600">
-            {{ cause.description || cause.explanation }}
-          </p>
-        </div>
+        </article>
       </div>
     </div>
+
+    <DiagnosisImageLightbox
+      :open="lightboxOpen"
+      :src="activeVisual?.src || ''"
+      :title="activeVisual?.title || ''"
+      :caption="activeVisual?.caption || ''"
+      :annotation="activeVisual?.annotation || null"
+      :gallery="visualGallery"
+      :index="lightboxIndex"
+      @close="lightboxOpen = false"
+      @update:index="lightboxIndex = $event"
+    />
 
     <div v-if="actions.length">
       <h4 class="mb-3 text-sm font-semibold uppercase tracking-[0.14em] text-slate-400">What to do</h4>
@@ -129,10 +152,16 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import CauseVisualThumb from './CauseVisualThumb.vue'
+import DiagnosisImageLightbox from './DiagnosisImageLightbox.vue'
 
 export default {
   name: 'DiagnosisDetail',
+  components: {
+    CauseVisualThumb,
+    DiagnosisImageLightbox,
+  },
   props: {
     diagnosis: {
       type: Object,
@@ -140,10 +169,40 @@ export default {
     },
   },
   setup(props) {
+    const lightboxOpen = ref(false)
+    const lightboxIndex = ref(0)
+
     const causes = computed(() => {
       const raw = props.diagnosis.result?.likely_causes
       return Array.isArray(raw) ? raw : []
     })
+
+    const visualGallery = computed(() => causes.value
+      .map((cause, index) => {
+        const src = cause?.image_url || cause?.part_image_url
+        if (!src) return null
+        return {
+          index,
+          src,
+          title: cause.title || cause.cause || 'Cause visual',
+          caption: cause.image_caption || '',
+          annotation: cause.annotation || null,
+        }
+      })
+      .filter(Boolean))
+
+    const activeVisual = computed(() => {
+      const gallery = visualGallery.value
+      if (!gallery.length) return null
+      const clamped = Math.min(Math.max(lightboxIndex.value, 0), gallery.length - 1)
+      return gallery[clamped]
+    })
+
+    const openCauseVisual = (causeIndex) => {
+      const galleryIndex = visualGallery.value.findIndex((item) => item.index === causeIndex)
+      lightboxIndex.value = galleryIndex >= 0 ? galleryIndex : 0
+      lightboxOpen.value = true
+    }
 
     const actions = computed(() => {
       const raw = props.diagnosis.result?.recommended_actions
@@ -177,7 +236,18 @@ export default {
       }
     }
 
-    return { causes, actions, costs, insights, formatDate }
+    return {
+      causes,
+      actions,
+      costs,
+      insights,
+      formatDate,
+      lightboxOpen,
+      lightboxIndex,
+      visualGallery,
+      activeVisual,
+      openCauseVisual,
+    }
   },
 }
 </script>

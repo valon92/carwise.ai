@@ -135,11 +135,23 @@
                 {{ diagnosis.result?.problem_description || diagnosis.description }}
               </p>
 
-              <div v-if="(diagnosis.result?.illustrations || []).length" class="mt-4 overflow-hidden rounded-xl border border-slate-200">
+              <div
+                v-if="(diagnosis.result?.likely_causes || []).some((c) => c.image_url) || (diagnosis.result?.illustrations || []).length"
+                class="mt-4 flex gap-2 overflow-x-auto pb-1"
+              >
                 <img
+                  v-for="(cause, idx) in (diagnosis.result?.likely_causes || []).filter((c) => c.image_url).slice(0, 4)"
+                  :key="'c'+idx"
+                  :src="cause.image_url"
+                  :alt="cause.title || cause.cause || 'Cause'"
+                  class="h-20 w-28 shrink-0 rounded-xl border border-slate-200 object-cover"
+                  loading="lazy"
+                >
+                <img
+                  v-if="!(diagnosis.result?.likely_causes || []).some((c) => c.image_url) && diagnosis.result?.illustrations?.[0]"
                   :src="diagnosis.result.illustrations[0].url"
                   :alt="diagnosis.result.illustrations[0].caption || diagnosis.result.problem_title"
-                  class="h-40 w-full object-cover"
+                  class="h-20 w-36 shrink-0 rounded-xl border border-slate-200 object-cover"
                   loading="lazy"
                 >
               </div>

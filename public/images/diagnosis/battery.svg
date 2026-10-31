@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-label="Battery &amp; charging">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="55%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.35"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="480" fill="url(#bg)"/>
+  <rect x="28" y="28" width="744" height="424" rx="28" fill="url(#panel)" opacity="0.96"/>
+  <text x="56" y="78" font-family="ui-sans-serif,system-ui,sans-serif" font-size="28" font-weight="700" fill="#0f172a">Battery &amp; charging</text>
+  <text x="56" y="108" font-family="ui-sans-serif,system-ui,sans-serif" font-size="15" fill="#64748b">12V battery, alternator and cables</text>
+  <g stroke="#0f172a" stroke-width="3" fill="none" stroke-linecap="round"><rect x="220" y="180" width="160" height="120" rx="14" fill="#fff" stroke="#334155"/><rect x="250" y="160" width="40" height="20" rx="4" fill="#22c55e" stroke="#15803d"/><rect x="310" y="160" width="40" height="20" rx="4" fill="#ef4444" stroke="#b91c1c"/><circle cx="520" cy="240" r="60" fill="#f8fafc" stroke="#64748b"/><path d="M490 240h60M520 210v60" stroke="#0ea5e9" stroke-width="6"/><path d="M380 240h80" stroke="#94a3b8" stroke-width="8"/></g><text x="220" y="370" font-family="ui-sans-serif,system-ui,sans-serif" font-size="14" fill="#334155">Low voltage can trigger multiple false ECU warnings</text>
+  <text x="56" y="430" font-family="ui-sans-serif,system-ui,sans-serif" font-size="12" fill="#94a3b8">CarWise.ai · educational diagram · not a substitute for live OBD scan</text>
+</svg>

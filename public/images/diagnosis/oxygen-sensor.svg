@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-label="Oxygen / lambda sensor">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="55%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.35"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="480" fill="url(#bg)"/>
+  <rect x="28" y="28" width="744" height="424" rx="28" fill="url(#panel)" opacity="0.96"/>
+  <text x="56" y="78" font-family="ui-sans-serif,system-ui,sans-serif" font-size="28" font-weight="700" fill="#0f172a">Oxygen / lambda sensor</text>
+  <text x="56" y="108" font-family="ui-sans-serif,system-ui,sans-serif" font-size="15" fill="#64748b">Reads oxygen in exhaust for fuel trim</text>
+  <g stroke="#0f172a" stroke-width="3" fill="none" stroke-linecap="round"><path d="M160 280c80-40 160-40 240-10s160 40 240 10" stroke="#64748b" stroke-width="22"/><rect x="360" y="160" width="80" height="100" rx="12" fill="#a3e635" stroke="#4d7c0f"/><path d="M400 260v20" stroke="#4d7c0f" stroke-width="8"/><circle cx="400" cy="290" r="12" fill="#84cc16" stroke="#3f6212"/></g><text x="230" y="370" font-family="ui-sans-serif,system-ui,sans-serif" font-size="14" fill="#334155">Slow or biased O2 sensor skews mixture and lights CEL</text>
+  <text x="56" y="430" font-family="ui-sans-serif,system-ui,sans-serif" font-size="12" fill="#94a3b8">CarWise.ai · educational diagram · not a substitute for live OBD scan</text>
+</svg>

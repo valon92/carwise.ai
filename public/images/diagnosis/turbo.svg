@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-label="Turbocharger">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="55%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.35"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="480" fill="url(#bg)"/>
+  <rect x="28" y="28" width="744" height="424" rx="28" fill="url(#panel)" opacity="0.96"/>
+  <text x="56" y="78" font-family="ui-sans-serif,system-ui,sans-serif" font-size="28" font-weight="700" fill="#0f172a">Turbocharger</text>
+  <text x="56" y="108" font-family="ui-sans-serif,system-ui,sans-serif" font-size="15" fill="#64748b">Exhaust spins compressor to boost intake air</text>
+  <g stroke="#0f172a" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="300" cy="240" r="70" fill="#fff" stroke="#64748b"/><circle cx="500" cy="240" r="70" fill="#fff" stroke="#f97316"/><path d="M300 240l50-30M300 240l50 10M300 240l20 50M300 240l-45 25M300 240l-40-35" stroke="#0ea5e9"/><path d="M500 240l50-30M500 240l50 10M500 240l20 50M500 240l-45 25M500 240l-40-35" stroke="#ea580c"/><path d="M370 240h60" stroke="#334155" stroke-width="10"/><path d="M180 240h50" stroke="#94a3b8" stroke-width="14"/><path d="M570 240h50" stroke="#fb923c" stroke-width="14"/></g><text x="260" y="360" font-family="ui-sans-serif,system-ui,sans-serif" font-size="14" fill="#334155">Boost leaks / wastegate faults often store P023x / P0299</text>
+  <text x="56" y="430" font-family="ui-sans-serif,system-ui,sans-serif" font-size="12" fill="#94a3b8">CarWise.ai · educational diagram · not a substitute for live OBD scan</text>
+</svg>

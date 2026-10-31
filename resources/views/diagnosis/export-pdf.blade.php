@@ -132,6 +132,15 @@
             font-size: 9px;
             color: #64748b;
         }
+        .cause-visual {
+            margin: 6px 0 4px;
+        }
+        .cause-visual img {
+            max-width: 220px;
+            max-height: 130px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
         .cause-grid td {
             width: 50%;
             vertical-align: top;
@@ -299,6 +308,11 @@
             <strong>{{ $cause['cause'] ?? $cause['title'] ?? 'Cause' }}</strong>
             @if(isset($cause['probability']))
                 <span class="muted"> · {{ $cause['probability'] }}% probability</span>
+            @endif
+            @if(!empty($cause['image_src']))
+                <div class="cause-visual">
+                    <img src="{{ $cause['image_src'] }}" alt="{{ $cause['image_caption'] ?? ($cause['title'] ?? 'Cause visual') }}">
+                </div>
             @endif
             <div>{{ $cause['description'] ?? $cause['explanation'] ?? '' }}</div>
             @if(!empty($cause['typical_dtc_examples']))

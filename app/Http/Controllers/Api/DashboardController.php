@@ -129,24 +129,37 @@ class DashboardController extends Controller
                         'unlocked' => $unlocked,
                         'can_download_pdf' => $unlocked && $result !== null,
                         'created_at' => optional($session->created_at)?->toIso8601String(),
-                        'result' => $result ? [
-                            'problem_title' => $result->problem_title,
-                            'problem_description' => $result->problem_description,
-                            'severity' => $result->severity,
-                            'confidence_score' => $result->confidence_score,
-                            'likely_causes' => $result->likely_causes ?? [],
-                            'recommended_actions' => $result->recommended_actions ?? [],
-                            'estimated_costs' => $result->estimated_costs ?? [],
-                            'ai_insights' => $result->ai_insights ?? [],
-                            'illustrations' => $meta['illustrations'] ?? [],
-                            'evidence' => [
-                                'session_id' => $session->session_id,
-                                'diagnosed_at' => optional($session->created_at)?->toIso8601String(),
-                                'unlocked_at' => $meta['unlocked_at'] ?? null,
-                                'ai_provider' => $meta['provider'] ?? ($result->ai_model_version ?? 'openai'),
-                                'report_id' => substr(hash('sha256', $session->session_id.'|'.($meta['unlocked_at'] ?? '')), 0, 12),
-                            ],
-                        ] : null,
+                        'result' => $result ? (function () use ($session, $result, $meta) {
+                            $illustrationService = app(\App\Services\DiagnosisIllustrationService::class);
+                            $illustrations = is_array($meta['illustrations'] ?? null) ? $meta['illustrations'] : [];
+                            if ($illustrationService->needsRealisticUpgrade($illustrations)) {
+                                $illustrations = $illustrationService->catalogForResult($result, 5, $session);
+                            }
+                            $causes = $illustrationService->enrichCauses(
+                                is_array($result->likely_causes) ? $result->likely_causes : [],
+                                $illustrations,
+                                $session
+                            );
+
+                            return [
+                                'problem_title' => $result->problem_title,
+                                'problem_description' => $result->problem_description,
+                                'severity' => $result->severity,
+                                'confidence_score' => $result->confidence_score,
+                                'likely_causes' => $causes,
+                                'recommended_actions' => $result->recommended_actions ?? [],
+                                'estimated_costs' => $result->estimated_costs ?? [],
+                                'ai_insights' => $result->ai_insights ?? [],
+                                'illustrations' => $illustrations,
+                                'evidence' => [
+                                    'session_id' => $session->session_id,
+                                    'diagnosed_at' => optional($session->created_at)?->toIso8601String(),
+                                    'unlocked_at' => $meta['unlocked_at'] ?? null,
+                                    'ai_provider' => $meta['provider'] ?? ($result->ai_model_version ?? 'openai'),
+                                    'report_id' => substr(hash('sha256', $session->session_id.'|'.($meta['unlocked_at'] ?? '')), 0, 12),
+                                ],
+                            ];
+                        })() : null,
                     ];
                 });
 

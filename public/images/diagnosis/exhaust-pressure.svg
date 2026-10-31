@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-label="Exhaust pressure sensor">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="55%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.35"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="480" fill="url(#bg)"/>
+  <rect x="28" y="28" width="744" height="424" rx="28" fill="url(#panel)" opacity="0.96"/>
+  <text x="56" y="78" font-family="ui-sans-serif,system-ui,sans-serif" font-size="28" font-weight="700" fill="#0f172a">Exhaust pressure sensor</text>
+  <text x="56" y="108" font-family="ui-sans-serif,system-ui,sans-serif" font-size="15" fill="#64748b">Monitors pressure before/after DPF</text>
+  <g stroke="#0f172a" stroke-width="3" fill="none" stroke-linecap="round"><path d="M140 260h520" stroke="#64748b" stroke-width="28"/><rect x="340" y="150" width="120" height="70" rx="14" fill="#38bdf8" stroke="#0369a1"/><path d="M380 220v40M420 220v40" stroke="#0369a1" stroke-width="5"/><circle cx="300" cy="260" r="10" fill="#f97316" stroke="#c2410c"/><circle cx="500" cy="260" r="10" fill="#f97316" stroke="#c2410c"/><path d="M300 250v-40h80M500 250v-40h-80" stroke="#ea580c" stroke-dasharray="6 5"/></g><text x="220" y="360" font-family="ui-sans-serif,system-ui,sans-serif" font-size="14" fill="#334155">Failed sensor → false DPF pressure readings → CEL</text>
+  <text x="56" y="430" font-family="ui-sans-serif,system-ui,sans-serif" font-size="12" fill="#94a3b8">CarWise.ai · educational diagram · not a substitute for live OBD scan</text>
+</svg>

@@ -220,7 +220,7 @@ const journey = [
   },
   {
     title: 'Continue for the full result',
-    body: 'One payment opens what to do, why it’s likely, a cost guide, and an AI technical illustration of the fault area.',
+    body: 'One payment opens what to do, why it’s likely, a cost guide, and realistic AI photos of the fault area on your car.',
     outcome: 'Outcome: a clear plan you can act on or take to a workshop.',
   },
   {
@@ -249,8 +249,8 @@ const methods = [
     body: 'Year, make, model, and mileage sharpen advice so the result fits the car you actually drive.',
   },
   {
-    title: 'AI problem visual',
-    body: 'After unlock, CarWise can generate a technical illustration so the fault area is easier to understand.',
+    title: 'Realistic car photos',
+    body: 'After unlock, CarWise generates realistic reference photos of the likely fault area for your exact vehicle.',
   },
 ]
 

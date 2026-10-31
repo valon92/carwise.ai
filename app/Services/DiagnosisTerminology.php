@@ -61,6 +61,13 @@ class DiagnosisTerminology
 
         $seen = [];
         foreach ($glossary as $abbr => $expanded) {
+            // Already expanded by the model (e.g. "EGR (…)") — keep as-is, don't nest.
+            if (preg_match('/\b'.preg_quote($abbr, '/').'\s*\(/u', $text)) {
+                $seen[$abbr] = true;
+
+                continue;
+            }
+
             $pattern = '/\b'.preg_quote($abbr, '/').'\b/u';
             $text = preg_replace_callback($pattern, function ($m) use ($abbr, $expanded, &$seen) {
                 if (isset($seen[$abbr])) {

@@ -100,6 +100,29 @@ class DiagnosisExportController extends Controller
                 }
             }
 
+            // Attach inline cause visuals for the ranked-causes section
+            if (! empty($data['result']['likely_causes']) && is_array($data['result']['likely_causes'])) {
+                $illustrationService = app(\App\Services\DiagnosisIllustrationService::class);
+                $data['result']['likely_causes'] = $illustrationService->enrichCauses(
+                    $data['result']['likely_causes'],
+                    is_array($data['result']['illustrations'] ?? null) ? $data['result']['illustrations'] : []
+                );
+
+                foreach ($data['result']['likely_causes'] as &$cause) {
+                    if (! is_array($cause)) {
+                        continue;
+                    }
+                    $src = $this->illustrationDataUri([
+                        'url' => $cause['image_url'] ?? null,
+                        'path' => $cause['image_path'] ?? null,
+                    ]);
+                    if ($src) {
+                        $cause['image_src'] = $src;
+                    }
+                }
+                unset($cause);
+            }
+
             $viewData = [
                 'title' => $data['title'] ?? 'CarWise.ai — Diagnosis Report',
                 'vehicle' => $data['vehicle'],
@@ -186,6 +209,24 @@ class DiagnosisExportController extends Controller
         }
 
         $relative = parse_url($url, PHP_URL_PATH) ?: $url;
+
+        // Catalog assets under /images/diagnosis/* — prefer PNG for DomPDF
+        if (is_string($relative) && str_starts_with($relative, '/images/')) {
+            $absolute = public_path(ltrim($relative, '/'));
+            if (str_ends_with(strtolower($absolute), '.svg')) {
+                $pngSibling = preg_replace('/\.svg$/i', '.png', $absolute);
+                if (is_string($pngSibling) && is_file($pngSibling)) {
+                    return 'data:image/png;base64,'.base64_encode((string) file_get_contents($pngSibling));
+                }
+            }
+            if (is_file($absolute)) {
+                $bytes = (string) file_get_contents($absolute);
+                $mime = str_ends_with(strtolower($absolute), '.svg') ? 'image/svg+xml' : 'image/png';
+
+                return 'data:'.$mime.';base64,'.base64_encode($bytes);
+            }
+        }
+
         if (str_starts_with($relative, '/storage/')) {
             $diskPath = substr($relative, strlen('/storage/'));
             if (Storage::disk('public')->exists($diskPath)) {

@@ -502,7 +502,8 @@ class DiagnosisController extends Controller
         }
         $session->update(['ai_response' => $meta]);
 
-        $images = $this->illustrations->forSession($session->fresh(['result']), 3);
+        @set_time_limit(180);
+        $images = $this->illustrations->forSession($session->fresh(['result']), 5, true);
         $session->refresh();
 
         return response()->json([
@@ -569,7 +570,16 @@ class DiagnosisController extends Controller
             $session->refresh();
         }
 
-        $images = $this->illustrations->forSession($session, 3);
+        // Drop stale diagram drawings so unlock always gets photorealistic vehicle photos.
+        $meta = is_array($session->ai_response) ? $session->ai_response : [];
+        if ($this->illustrations->needsRealisticUpgrade($meta['illustrations'] ?? [])) {
+            $meta['illustrations'] = [];
+            $session->update(['ai_response' => $meta]);
+            $session->refresh();
+        }
+
+        @set_time_limit(180);
+        $images = $this->illustrations->forSession($session, 5, true);
         $session->refresh();
 
         return response()->json([
@@ -598,6 +608,17 @@ class DiagnosisController extends Controller
         $data = $result instanceof DiagnosisResult ? $result->toArray() : (array) $result;
         $meta = is_array($session?->ai_response) ? $session->ai_response : [];
         $illustrations = $images ?? ($meta['illustrations'] ?? []);
+        if (! is_array($illustrations)) {
+            $illustrations = [];
+        }
+
+        // History/PDF: use vehicle photo cache only — never SVG drawings.
+        if ($this->illustrations->needsRealisticUpgrade($illustrations) && $result && $session) {
+            $illustrations = $this->illustrations->catalogForResult($result, 5, $session);
+        }
+
+        $causes = is_array($data['likely_causes'] ?? null) ? $data['likely_causes'] : [];
+        $causes = $this->illustrations->enrichCauses($causes, $illustrations, $session);
 
         return [
             'problem_title' => $data['problem_title'] ?? null,
@@ -606,7 +627,7 @@ class DiagnosisController extends Controller
             'confidence_score' => $data['confidence_score'] ?? null,
             'data_quality' => $meta['data_quality'] ?? null,
             'hypothesis_disclaimer' => $meta['hypothesis_disclaimer'] ?? null,
-            'likely_causes' => $data['likely_causes'] ?? [],
+            'likely_causes' => $causes,
             'recommended_actions' => $data['recommended_actions'] ?? [],
             'estimated_costs' => $data['estimated_costs'] ?? [],
             'ai_insights' => $data['ai_insights'] ?? [],

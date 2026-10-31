@@ -937,26 +937,6 @@
               {{ resultSummary }}
             </p>
 
-            <section v-if="(diagnosisResult.illustrations || []).length" class="space-y-3">
-              <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400">Problem visual</h4>
-              <figure
-                v-for="(image, index) in diagnosisResult.illustrations"
-                :key="image.path || image.url || index"
-                class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40"
-              >
-                <img
-                  :src="image.url"
-                  :alt="image.caption || diagnosisResult.problem_title || 'Problem illustration'"
-                  class="w-full max-h-80 object-cover object-center"
-                  loading="lazy"
-                />
-                <figcaption class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">
-                  {{ image.caption || diagnosisResult.problem_title }}
-                  <span class="block text-xs text-slate-400 mt-1">AI technical illustration to clarify the fault area</span>
-                </figcaption>
-              </figure>
-            </section>
-
             <p
               v-if="diagnosisResult.hypothesis_disclaimer"
               class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300"
@@ -1033,19 +1013,58 @@
 
             <section v-if="(diagnosisResult.likely_causes || diagnosisResult.likelyCauses || []).length">
               <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">Ranked likely causes</h4>
-              <div class="divide-y divide-slate-100 dark:divide-slate-800">
-                <div v-for="(cause, index) in (diagnosisResult.likely_causes || diagnosisResult.likelyCauses || [])" :key="index" class="py-3 first:pt-0 last:pb-0">
-                  <div class="flex items-baseline justify-between gap-4">
-                    <p class="font-medium text-slate-900 dark:text-white">{{ cause.title || cause.cause || cause }}</p>
-                    <span v-if="cause.probability" class="shrink-0 text-xs text-slate-500">{{ cause.probability }}%</span>
+              <div class="space-y-3">
+                <article
+                  v-for="(cause, index) in (diagnosisResult.likely_causes || diagnosisResult.likelyCauses || [])"
+                  :key="index"
+                  class="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/40"
+                >
+                  <div class="grid gap-0 sm:grid-cols-[minmax(0,13rem)_1fr]">
+                    <div
+                      v-if="cause.image_url || cause.part_image_url"
+                      class="relative min-h-[9rem] bg-slate-950 sm:min-h-full"
+                    >
+                      <CauseVisualThumb
+                        :src="cause.image_url || cause.part_image_url"
+                        :title="cause.title || cause.cause || 'Cause visual'"
+                        :annotation="cause.annotation"
+                        @open="openCauseVisual(index)"
+                      />
+                    </div>
+                    <div class="px-4 py-4 sm:px-5">
+                      <div class="flex items-baseline justify-between gap-4">
+                        <p class="font-medium text-slate-900 dark:text-white">{{ cause.title || cause.cause || cause }}</p>
+                        <span v-if="cause.probability" class="shrink-0 text-xs font-semibold text-slate-500">{{ cause.probability }}%</span>
+                      </div>
+                      <p v-if="cause.description || cause.explanation" class="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                        {{ cause.description || cause.explanation }}
+                      </p>
+                      <p v-if="cause.typical_dtc_examples?.length" class="mt-2 text-xs text-slate-500">
+                        Typical codes: {{ Array.isArray(cause.typical_dtc_examples) ? cause.typical_dtc_examples.join(', ') : cause.typical_dtc_examples }}
+                      </p>
+                      <p v-if="cause.annotation?.meaning" class="mt-2 text-xs leading-relaxed text-red-700/90 dark:text-red-300/90">
+                        <span class="font-semibold uppercase tracking-[0.12em]">Problem zone · </span>{{ cause.annotation.meaning }}
+                      </p>
+                      <p v-else-if="cause.image_caption" class="mt-2 text-[11px] uppercase tracking-[0.12em] text-slate-400">
+                        {{ cause.image_caption }}
+                      </p>
+                    </div>
                   </div>
-                  <p v-if="cause.description || cause.explanation" class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{{ cause.description || cause.explanation }}</p>
-                  <p v-if="cause.typical_dtc_examples?.length" class="mt-1 text-xs text-slate-500">
-                    Typical codes: {{ Array.isArray(cause.typical_dtc_examples) ? cause.typical_dtc_examples.join(', ') : cause.typical_dtc_examples }}
-                  </p>
-                </div>
+                </article>
               </div>
             </section>
+
+            <DiagnosisImageLightbox
+              :open="causeLightboxOpen"
+              :src="activeCauseVisual?.src || ''"
+              :title="activeCauseVisual?.title || ''"
+              :caption="activeCauseVisual?.caption || ''"
+              :annotation="activeCauseVisual?.annotation || null"
+              :gallery="causeVisualGallery"
+              :index="causeLightboxIndex"
+              @close="causeLightboxOpen = false"
+              @update:index="setCauseLightboxIndex"
+            />
 
             <section v-if="(diagnosisResult.diagnostic_codes_to_check || []).length">
               <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">Codes to check on OBD / VCDS</h4>
@@ -1131,13 +1150,17 @@ import api, { diagnosisAPI, carsAPI } from '../services/api'
 import { useAuth } from '../composables/useAuth'
 import { useAnalytics } from '../composables/useAnalytics'
 import CarModelSelector from '../components/CarModelSelector.vue'
+import CauseVisualThumb from '../components/CauseVisualThumb.vue'
+import DiagnosisImageLightbox from '../components/DiagnosisImageLightbox.vue'
 import axios from 'axios'
 import { features } from '../config/features'
 
 export default {
   name: 'Diagnose',
   components: {
-    CarModelSelector
+    CarModelSelector,
+    CauseVisualThumb,
+    DiagnosisImageLightbox,
   },
   setup() {
     const route = useRoute()
@@ -1152,6 +1175,43 @@ export default {
     const currentStep = ref(0)
     const isLoading = ref(false)
     const diagnosisResult = ref(null)
+    const causeLightboxOpen = ref(false)
+    const causeLightboxIndex = ref(0)
+
+    const causeVisualGallery = computed(() => {
+      const causes = diagnosisResult.value?.likely_causes || diagnosisResult.value?.likelyCauses || []
+      return (Array.isArray(causes) ? causes : [])
+        .map((cause, index) => {
+          const src = cause?.image_url || cause?.part_image_url
+          if (!src) return null
+          return {
+            index,
+            src,
+            title: cause.title || cause.cause || 'Cause visual',
+            caption: cause.image_caption || '',
+            annotation: cause.annotation || null,
+          }
+        })
+        .filter(Boolean)
+    })
+
+    const activeCauseVisual = computed(() => {
+      const gallery = causeVisualGallery.value
+      if (!gallery.length) return null
+      const clamped = Math.min(Math.max(causeLightboxIndex.value, 0), gallery.length - 1)
+      return gallery[clamped]
+    })
+
+    const openCauseVisual = (causeIndex) => {
+      const galleryIndex = causeVisualGallery.value.findIndex((item) => item.index === causeIndex)
+      causeLightboxIndex.value = galleryIndex >= 0 ? galleryIndex : 0
+      causeLightboxOpen.value = true
+    }
+
+    const setCauseLightboxIndex = (nextIndex) => {
+      causeLightboxIndex.value = nextIndex
+    }
+
     const resultSummary = computed(() => {
       const text = diagnosisResult.value?.problem_summary
         || diagnosisResult.value?.problem_description
@@ -2780,6 +2840,12 @@ export default {
       isLoading,
       diagnosisResult,
       resultSummary,
+      causeLightboxOpen,
+      causeLightboxIndex,
+      causeVisualGallery,
+      activeCauseVisual,
+      openCauseVisual,
+      setCauseLightboxIndex,
       continuationPaid,
       continuationAmount,
       continuationCurrency,

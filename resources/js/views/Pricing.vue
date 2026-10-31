@@ -79,7 +79,7 @@
             <li class="flex gap-3"><span class="text-slate-900">✓</span> Recommended actions & urgency</li>
             <li class="flex gap-3"><span class="text-slate-900">✓</span> Likely causes with probabilities</li>
             <li class="flex gap-3"><span class="text-slate-900">✓</span> Cost guide for workshops</li>
-            <li class="flex gap-3"><span class="text-slate-900">✓</span> AI technical illustration of the fault</li>
+            <li class="flex gap-3"><span class="text-slate-900">✓</span> Realistic AI photos of the fault area on your car</li>
             <li class="flex gap-3"><span class="text-slate-900">✓</span> PDF evidence (date, time, report ID)</li>
             <li class="flex gap-3"><span class="text-slate-900">✓</span> Saved with vehicle history</li>
           </ul>
